@@ -15,7 +15,7 @@ void ofApp::setup(){
 	ofEnableDepthTest();
 
 	graph_ = new DataVis::Graph();
-	graph_->setup("JazzNetwork.txt");
+	graph_->Setup("JazzNetwork.txt");
 }
 
 //--------------------------------------------------------------
@@ -30,7 +30,7 @@ void ofApp::draw(){
 	ofBackgroundGradient(ofColor::whiteSmoke, ofColor::antiqueWhite, OF_GRADIENT_CIRCULAR);
 	camera_.begin();
 
-	graph_->draw();
+	graph_->Draw();
 
 	camera_.end();
 
@@ -40,7 +40,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-	graph_->exit();
+	graph_->Exit();
 	delete graph_;
 	
 	// Destory ImPlot
