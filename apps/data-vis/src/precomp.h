@@ -15,7 +15,14 @@ uint RandomUInt(uint& seed);
 float RandomFloat();
 float RandomRange(float range);
 
-// Own headers
+// OF header
 #include "ofMain.h"
+
+// STD headers
+#include <iostream>
+#include <map>
+#include <vector>
+
+// Own headers
 #include "ofApp.h"
 #include "visuals/graph.h"

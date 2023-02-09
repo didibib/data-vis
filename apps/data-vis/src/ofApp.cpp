@@ -8,11 +8,14 @@ void ofApp::setup(){
 	ImGui::StyleColorsClassic();
 	ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ofGetWindowPtr()->getWindowContext(), true);
 	ImGui_ImplOpenGL3_Init("#version 330"); 
-
 	// Init ImPlot
 	ImPlot::CreateContext();
 
-	graph_ = new Graph();
+	// Set OpenGL 
+	ofEnableDepthTest();
+
+	graph_ = new DataVis::Graph();
+	graph_->setup("JazzNetwork.txt");
 }
 
 //--------------------------------------------------------------
@@ -24,9 +27,12 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	ofClear(1, 1, 1);
+	ofBackgroundGradient(ofColor::whiteSmoke, ofColor::antiqueWhite, OF_GRADIENT_CIRCULAR);
+	camera_.begin();
 
 	graph_->draw();
+
+	camera_.end();
 
 	ImGui::Render();	
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -34,6 +40,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
+	graph_->exit();
 	delete graph_;
 	
 	// Destory ImPlot

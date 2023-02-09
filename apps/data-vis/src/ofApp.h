@@ -1,10 +1,11 @@
 #pragma once
 #include "ofMain.h"
-class Graph;
+#include "graph.h"
 
 class ofApp : public ofBaseApp{
 
-	Graph* graph_ = nullptr;
+	DataVis::Graph* graph_ = nullptr;
+	ofEasyCam camera_;
 
 	public:
 		void setup();
