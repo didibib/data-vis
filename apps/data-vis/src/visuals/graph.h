@@ -1,12 +1,26 @@
 #pragma once
+namespace DataVis {
+	class Node {
+	public:
+		Node() = default;
+		uint NeighborCount();
 
-class Graph {
+		ofVec3f position;
+		int stride;
+		std::vector<int> data;
+	};
 
-	int   bar_data[11];
-	float x_data[500];
-	float y_data[500];
+	class Graph {
+		std::vector<string> headers_;
+		std::unordered_map<int, Node> nodes_;
 
-public:
-	Graph();
-	void draw();
-};
+	public:
+		Graph() = default;
+		void setup(std::string filename);
+		void update();
+		void draw();
+		void exit();
+
+		int sphereSize = 3;
+	};
+}
