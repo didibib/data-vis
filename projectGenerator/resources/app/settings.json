@@ -1,10 +1,9 @@
 {
-	"advancedMode": false,
-	"defaultOfPath": "M:\\Dev\\of_v0.11.2_vs2017_release",
+	"advancedMode": true,
+	"defaultOfPath": "C:\\Dev\\GitRepos\\data-vis",
 	"defaultPlatform": "vs",
 	"defaultRelativeProjectPath": "apps/myApps",
 	"showConsole": false,
 	"showDeveloperTools": false,
-	"useDictionaryNameGenerator": true,
-	"verboseOutput": false
+	"useDictionaryNameGenerator": true
 }

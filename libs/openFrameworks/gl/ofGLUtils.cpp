@@ -11,7 +11,9 @@
 #include "ofLog.h"
 #include "ofGraphicsConstants.h"
 
-using namespace std;
+using std::shared_ptr;
+using std::vector;
+using std::string;
 
 //---------------------------------
 // deprecations
@@ -87,7 +89,7 @@ int ofGetGLInternalFormat(const ofShortPixels& pixels) {
 
 //---------------------------------
 int ofGetGLInternalFormat(const ofFloatPixels& pixels) {
-#ifndef TARGET_OPENGLES
+#if not defined TARGET_OPENGLES || defined TARGET_EMSCRIPTEN
 	switch(pixels.getNumChannels()) {
 		case 3: return GL_RGB32F;
 		case 4: return GL_RGBA32F;
@@ -150,7 +152,7 @@ string ofGetGLInternalFormatName(int glInternalFormat) {
 int ofGetGLFormatFromInternal(int glInternalFormat){
 	switch(glInternalFormat) {
 			case GL_RGBA:
-	#ifndef TARGET_OPENGLES
+	#if !defined(TARGET_OPENGLES) || defined(TARGET_EMSCRIPTEN)
 			case GL_RGBA8:
 			case GL_RGBA16:
 			case GL_RGBA16F:
@@ -202,7 +204,7 @@ int ofGetGLFormatFromInternal(int glInternalFormat){
 				 return GL_DEPTH_STENCIL;
 
 			case GL_DEPTH_COMPONENT:
-#ifndef TARGET_OPENGLES
+#if !defined(TARGET_OPENGLES) || defined(TARGET_EMSCRIPTEN)
 			case GL_DEPTH_COMPONENT16:
 			case GL_DEPTH_COMPONENT24:
 			case GL_DEPTH_COMPONENT32:
@@ -273,7 +275,7 @@ int ofGetGLTypeFromInternal(int glInternalFormat){
 		break;
 #endif
 
-#ifndef TARGET_OPENGLES
+#if !defined(TARGET_OPENGLES) || defined(TARGET_EMSCRIPTEN)
 		case GL_LUMINANCE32F_ARB:
 		case GL_LUMINANCE_ALPHA32F_ARB:
 		case GL_R32F:
@@ -407,7 +409,7 @@ ofImageType ofGetImageTypeFromGLType(int glType){
 
 
 	case GL_RGBA:
-#ifndef TARGET_OPENGLES
+#if !defined(TARGET_OPENGLES) || defined(TARGET_EMSCRIPTEN)
 	case GL_RGBA8:
 	case GL_RGBA16:
 	case GL_RGBA16F:
@@ -423,7 +425,7 @@ ofImageType ofGetImageTypeFromGLType(int glType){
 }
 
 GLuint ofGetGLPolyMode(ofPolyRenderMode mode){
-#ifndef TARGET_OPENGLES
+#if !defined(TARGET_OPENGLES) || defined(TARGET_EMSCRIPTEN)
 	switch(mode){
 		case(OF_MESH_POINTS):
 			return GL_POINT;
@@ -445,7 +447,7 @@ GLuint ofGetGLPolyMode(ofPolyRenderMode mode){
 }
 
 ofPolyRenderMode ofGetOFPolyMode(GLuint mode){
-#ifndef TARGET_OPENGLES
+#if !defined(TARGET_OPENGLES) || defined(TARGET_EMSCRIPTEN)
 	switch(mode){
 		case(GL_POINT):
 			return OF_MESH_POINTS;
@@ -727,7 +729,7 @@ int ofGetBytesPerChannelFromGLType(int glType){
 			return 2;
 #endif
 
-#ifndef TARGET_OPENGLES
+#if !defined(TARGET_OPENGLES) || defined(TARGET_EMSCRIPTEN)
 		case GL_FLOAT:
 			return 4;
 #endif
@@ -797,7 +799,7 @@ vector<string> ofGLSupportedExtensions(){
 bool ofGLCheckExtension(string searchName){
 #if defined( TARGET_OPENGLES )
 	vector<string> extensionsList = ofGLSupportedExtensions();
-	set<string> extensionsSet;
+	std::set<string> extensionsSet;
 	extensionsSet.insert(extensionsList.begin(),extensionsList.end());
 	return extensionsSet.find(searchName)!=extensionsSet.end();
 #else
@@ -813,7 +815,7 @@ bool ofGLSupportsNPOTTextures(){
 	static bool npotSupported = false;
 	if(!npotChecked){
 		vector<string> extensionsList = ofGLSupportedExtensions();
-		set<string> extensionsSet;
+		std::set<string> extensionsSet;
 		extensionsSet.insert(extensionsList.begin(),extensionsList.end());
 
 		npotSupported = extensionsSet.find("GL_OES_texture_npot")!=extensionsSet.end() ||
@@ -832,7 +834,15 @@ bool ofGLSupportsNPOTTextures(){
 
 string ofGLSLVersionFromGL(int major, int minor){
 #ifdef TARGET_OPENGLES
-	return "ES1";
+	#ifdef TARGET_EMSCRIPTEN
+	if( major >= 2 ) { // for emscripten major version refers to WEBGL version
+		return "300 es";
+	} else {
+		return "ES1";
+	}
+	#else
+		return "ES1";
+	#endif
 #else
 	switch(major){
 	case 3:
@@ -878,7 +888,7 @@ shared_ptr<ofBaseGLRenderer> ofGetGLRenderer(){
 #ifndef TARGET_OPENGLES
 namespace{
 	void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void * user){
-		ostringstream oss;
+		std::ostringstream oss;
 		oss << "GL Debug: ";
 
 		ofLogLevel level;

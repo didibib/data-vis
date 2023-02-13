@@ -1,4 +1,4 @@
-#include "precomp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
