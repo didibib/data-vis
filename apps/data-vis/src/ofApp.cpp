@@ -8,14 +8,12 @@ void ofApp::setup(){
 	ImGui::StyleColorsClassic();
 	ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ofGetWindowPtr()->getWindowContext(), true);
 	ImGui_ImplOpenGL3_Init("#version 330"); 
-	// Init ImPlot
-	ImPlot::CreateContext();
 
 	// Set OpenGL 
 	ofEnableDepthTest();
 
 	graph_ = new DataVis::Graph();
-	graph_->Setup("JazzNetwork.txt");
+	graph_->Setup("LesMiserables.dot");
 }
 
 //--------------------------------------------------------------
@@ -43,8 +41,6 @@ void ofApp::exit() {
 	graph_->Exit();
 	delete graph_;
 	
-	// Destory ImPlot
-	ImPlot::DestroyContext();
 	// Destory ImGui
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
