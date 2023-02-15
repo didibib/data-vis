@@ -18,14 +18,20 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
+	const ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+		camera_.disableMouseInput();
+	else camera_.enableMouseInput();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	ofBackgroundGradient(ofColor::whiteSmoke, ofColor::antiqueWhite, OF_GRADIENT_CIRCULAR);
+	ofBackgroundGradient(palettePurple_3, palettePurple_2, OF_GRADIENT_CIRCULAR);
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
 	camera_.begin();
 
 	graph_->Draw();
