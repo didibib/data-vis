@@ -1,213 +1,111 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<ItemGroup>
-		<ClCompile Include="src\ofApp.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\main.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\util.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\external\imgui\imgui.cpp">
-			<Filter>src\external\imgui</Filter>
-		</ClCompile>
-		<ClCompile Include="src\external\imgui\imgui_demo.cpp">
-			<Filter>src\external\imgui</Filter>
-		</ClCompile>
-		<ClCompile Include="src\external\imgui\imgui_draw.cpp">
-			<Filter>src\external\imgui</Filter>
-		</ClCompile>
-		<ClCompile Include="src\external\imgui\imgui_impl_glfw.cpp">
-			<Filter>src\external\imgui</Filter>
-		</ClCompile>
-		<ClCompile Include="src\external\imgui\imgui_impl_opengl3.cpp">
-			<Filter>src\external\imgui</Filter>
-		</ClCompile>
-		<ClCompile Include="src\external\imgui\imgui_tables.cpp">
-			<Filter>src\external\imgui</Filter>
-		</ClCompile>
-		<ClCompile Include="src\external\imgui\imgui_widgets.cpp">
-			<Filter>src\external\imgui</Filter>
-		</ClCompile>
-		<ClCompile Include="src\main.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\ofApp.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\util.cpp">
-			<Filter>src</Filter>
-		</ClCompile>
-		<ClCompile Include="src\visuals\graph.cpp">
-			<Filter>src\visuals</Filter>
-		</ClCompile>
-	</ItemGroup>
-	<ItemGroup>
-		<Filter Include="src">
-			<UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="src\external">
-			<UniqueIdentifier>{BA448882-5D04-04CD-5B7A-5EE3}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="src\external\dotparse">
-			<UniqueIdentifier>{CF6F4F5C-0949-3C1F-8254-FB7D}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="src\external\dotparse\include">
-			<UniqueIdentifier>{F765CF03-6EBC-7BF3-C100-AC41}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="src\external\hlx">
-			<UniqueIdentifier>{E87A0845-1FA9-891C-3FBE-0C2B}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="src\external\hlx\include">
-			<UniqueIdentifier>{0DAEE49C-9C9B-0D0A-6669-E6FC}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="src\external\imgui">
-			<UniqueIdentifier>{3F7BCBFA-2B02-1184-6010-E660}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="src\visuals">
-			<UniqueIdentifier>{42A7CE83-41D0-5147-82D8-F18B}</UniqueIdentifier>
-		</Filter>
-	</ItemGroup>
-	<ItemGroup>
-		<ClInclude Include="src\ofApp.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\precomp.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\dotparse\include\DotGraph.h">
-			<Filter>src\external\dotparse\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\dotparse\include\DotNode.h">
-			<Filter>src\external\dotparse\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\dotparse\include\DotParser.h">
-			<Filter>src\external\dotparse\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\dotparse\include\DotWriter.h">
-			<Filter>src\external\dotparse\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\Bytes.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\ByteStream.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\CheckedArrayIterator.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\CompileTimeString.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\CRC32.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\EnumOps.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\FileStream.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\Flag.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\FunctionalUtils.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\GetStructMember.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\HashUtils.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\IPlugin.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\IteratorRange.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\Logger.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\PluginLoader.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\Profiler.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\Singleton.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\StandardDefines.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\StopWatch.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\StringHelpers.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\StringTypes.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\TextToken.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\Timer.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\TimerWin32.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\UniqueAssociationID.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\UniqueID.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\hlx\include\Vector.h">
-			<Filter>src\external\hlx\include</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imconfig.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imgui.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imgui_impl_glfw.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imgui_impl_opengl3.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imgui_impl_opengl3_loader.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imgui_internal.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imstb_rectpack.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imstb_textedit.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\external\imgui\imstb_truetype.h">
-			<Filter>src\external\imgui</Filter>
-		</ClInclude>
-		<ClInclude Include="src\ofApp.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\precomp.h">
-			<Filter>src</Filter>
-		</ClInclude>
-		<ClInclude Include="src\visuals\graph.h">
-			<Filter>src\visuals</Filter>
-		</ClInclude>
-	</ItemGroup>
-	<ItemGroup>
-		<ResourceCompile Include="icon.rc" />
-	</ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ofApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ofApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\visuals\graph.cpp">
+      <Filter>src\visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_demo.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_draw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_impl_glfw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_impl_opengl3.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_tables.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_widgets.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\read_graphviz_new.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\visuals">
+      <UniqueIdentifier>{42A7CE83-41D0-5147-82D8-F18B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{fff0afd3-c5c9-408c-bd45-ceda6f9d02d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui">
+      <UniqueIdentifier>{de34471f-37eb-4fc7-88b9-1023b6c8277e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ofApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\precomp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ofApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\precomp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\visuals\graph.h">
+      <Filter>src\visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui_impl_glfw.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui_impl_opengl3.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui_impl_opengl3_loader.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui_internal.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imstb_rectpack.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imstb_textedit.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imstb_truetype.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imconfig.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
 </Project>
