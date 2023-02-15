@@ -1,10 +1,11 @@
 #include "precomp.h"
 
 // Graph parsing
+// https://stackoverflow.com/questions/29496182/read-graphviz-in-boostgraph-pass-to-constructor/29501850#29501850
 #include "read_graphviz_new.cpp"
 
 namespace DataVis {
-	void Graph::Setup(std::string _filename) {
+	void Graph::Load(std::string _filename) {
 		std::string filepath = ofToDataPath(_filename, false);
 		std::ifstream file( filepath );
 		
@@ -13,15 +14,15 @@ namespace DataVis {
 			return;
 		}
 
-		graph_u graph( 0 );
+		graph_.clear( );
 		boost::dynamic_properties dp( boost::ignore_other_properties );
-		dp.property( "node_id", get( &Vertex::name, graph ) );
-		dp.property( "label", get( &Vertex::label, graph ) );
-		dp.property( "shape", get( &Vertex::shape, graph ) );
-		dp.property( "label", get( &Edge::label, graph ) );
-		dp.property( "weight", get( &Edge::weight, graph ) );
+		dp.property( "node_id", get( &Vertex::name, graph_ ) );
+		dp.property( "label", get( &Vertex::label, graph_ ) );
+		dp.property( "shape", get( &Vertex::shape, graph_ ) );
+		dp.property( "label", get( &Edge::label, graph_ ) );
+		dp.property( "weight", get( &Edge::weight, graph_ ) );
 
-		boost::read_graphviz( file, graph, dp );
+		boost::read_graphviz( file, graph_, dp );
 	}
 
 	void Graph::Update() {
