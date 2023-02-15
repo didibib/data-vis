@@ -13,7 +13,7 @@ void ofApp::setup(){
 	ofEnableDepthTest();
 
 	graph_ = new DataVis::Graph();
-	graph_->Setup("LesMiserables.dot");
+	graph_->Load("LesMiserables.dot");
 }
 
 //--------------------------------------------------------------

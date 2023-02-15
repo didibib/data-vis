@@ -22,11 +22,15 @@ namespace DataVis {
 
 	class Graph {
 
+	private:
+		graph_u graph_;
+
 	public:
 		Graph() = default;
-		void Setup(std::string filename);
+		void Load(std::string filename);
 		void Update();
 		void Draw();
 		void Exit();
+		const graph_u& Get( ) { return graph_; }
 	};
 }
