@@ -20,6 +20,7 @@ void ofApp::setup(){
 
 	// Load graph
 	m_graph.Load("LesMiserables.dot");
+	DataVis::Optimizer::LocalSearchSimple(m_graph, 10000);
 }
 
 //--------------------------------------------------------------

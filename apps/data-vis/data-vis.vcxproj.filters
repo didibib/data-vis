@@ -19,9 +19,6 @@
     <ClCompile Include="src\util.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\visuals\graph.cpp">
-      <Filter>src\visuals</Filter>
-    </ClCompile>
     <ClCompile Include="external\imgui\imgui_demo.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
@@ -46,13 +43,16 @@
     <ClCompile Include="src\read_graphviz_new.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\graph\graph.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\optimizer.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
       <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\visuals">
-      <UniqueIdentifier>{42A7CE83-41D0-5147-82D8-F18B}</UniqueIdentifier>
     </Filter>
     <Filter Include="external">
       <UniqueIdentifier>{fff0afd3-c5c9-408c-bd45-ceda6f9d02d9}</UniqueIdentifier>
@@ -60,6 +60,9 @@
     <Filter Include="external\imgui">
       <UniqueIdentifier>{de34471f-37eb-4fc7-88b9-1023b6c8277e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\graph">
+      <UniqueIdentifier>{42A7CE83-41D0-5147-82D8-F18B}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ofApp.h">
@@ -73,9 +76,6 @@
     </ClInclude>
     <ClInclude Include="src\precomp.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\visuals\graph.h">
-      <Filter>src\visuals</Filter>
     </ClInclude>
     <ClInclude Include="external\imgui\imgui_impl_glfw.h">
       <Filter>external\imgui</Filter>
@@ -103,6 +103,12 @@
     </ClInclude>
     <ClInclude Include="external\imgui\imgui.h">
       <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\graph.h">
+      <Filter>src\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\optimizer.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
