@@ -4,8 +4,8 @@
 
 class ofApp : public ofBaseApp{
 
-	DataVis::Graph* graph_ = nullptr;
-	ofEasyCam camera_;
+	DataVis::Graph* m_graph = nullptr;
+	ofEasyCam m_camera;
 
 	public:
 		void setup();

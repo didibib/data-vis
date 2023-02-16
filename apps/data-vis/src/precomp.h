@@ -33,4 +33,4 @@ const ofColor palettePurple_3(24, 18, 43);
 
 // Own headers
 #include "ofApp.h"
-#include "visuals/graph.h"
+#include "graph.h"
