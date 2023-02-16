@@ -12,16 +12,16 @@ void ofApp::setup(){
 	// Set OpenGL 
 	ofEnableDepthTest();
 
-	graph_ = new DataVis::Graph();
-	graph_->Load("LesMiserables.dot");
+	m_graph = new DataVis::Graph();
+	m_graph->Load("LesMiserables.dot");
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 	const ImGuiIO& io = ImGui::GetIO();
 	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
-		camera_.disableMouseInput();
-	else camera_.enableMouseInput();
+		m_camera.disableMouseInput();
+	else m_camera.enableMouseInput();
 }
 
 //--------------------------------------------------------------
@@ -32,11 +32,11 @@ void ofApp::draw(){
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	camera_.begin();
+	m_camera.begin();
 
-	graph_->Draw();
+	m_graph->Draw();
 
-	camera_.end();
+	m_camera.end();
 
 	ImGui::Render();	
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -44,8 +44,8 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-	graph_->Exit();
-	delete graph_;
+	m_graph->Exit();
+	delete m_graph;
 	
 	// Destory ImGui
 	ImGui_ImplOpenGL3_Shutdown();
