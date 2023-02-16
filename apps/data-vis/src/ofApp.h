@@ -1,6 +1,4 @@
 #pragma once
-#include "ofMain.h"
-#include "visuals/graph.h"
 
 class ofApp : public ofBaseApp{
 

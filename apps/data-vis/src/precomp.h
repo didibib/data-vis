@@ -5,17 +5,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+// Dot parser
 #include "boost/graph/graphviz.hpp"
-
-// ==============================================
-typedef unsigned int uint;
-
-uint RandomUInt();
-uint RandomUInt(uint& seed);
-float RandomFloat();
-float RandomRange(float range);
-
-// ==============================================
 
 // OF header
 #include "ofMain.h"
@@ -30,7 +21,26 @@ const ofColor palettePurple_3(24, 18, 43);
 #include <iostream>
 #include <map>
 #include <vector>
+#include <random>
+
+// ==============================================
+
+std::random_device rand_dev;
+std::mt19937 random(rand_dev());
+
+
+typedef unsigned int uint;
+
+uint RandomUInt();
+uint RandomUInt(uint& seed);
+uint RandomRange(uint, uint);
+uint RandomRange(uint);
+float RandomFloat();
+float RandomRangeF(float range);
+
+// ==============================================
 
 // Own headers
-#include "ofApp.h"
 #include "graph.h"
+#include "optimizer.h"
+#include "ofApp.h"

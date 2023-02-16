@@ -1,7 +1,6 @@
 #pragma once
 
 namespace DataVis {
-
 	struct Node
 	{
 		std::string name, label, shape;
@@ -29,6 +28,10 @@ namespace DataVis {
 		void Update();
 		void Draw();
 		void Exit();
+
+		auto& Edges() { return m_graph.m_edges; }
+		auto& Nodes() { return m_graph.m_vertices; }
+
 		float radius = 10;
 	};
 }

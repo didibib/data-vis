@@ -17,5 +17,16 @@ uint RandomUInt(uint& _seed)
 	return _seed;
 }
 
+
+uint RandomRange(uint min, uint max) {
+	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
+	return dist(random);
+}
+
+
+uint RandomRange(uint max) {
+	return RandomRange(0, max);
+}
+
 float RandomFloat() { return RandomUInt() * 2.3283064365387e-10f; }
-float RandomRange(float _range) { return RandomFloat() * _range; }
+float RandomRangeF(float _range) { return RandomFloat() * _range; }
