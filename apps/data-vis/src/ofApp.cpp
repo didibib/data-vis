@@ -12,8 +12,14 @@ void ofApp::setup(){
 	// Set OpenGL 
 	ofEnableDepthTest();
 
-	m_graph = new DataVis::Graph();
-	m_graph->Load("LesMiserables.dot");
+	// Setup 2D camera https://gist.github.com/roymacdonald/cd92c6d5adfa2c8aeffb22fc6c293bcc
+	m_camera.removeAllInteractions();
+	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_XY, OF_MOUSE_BUTTON_MIDDLE);
+	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
+	m_camera.setVFlip(true);
+
+	// Load graph
+	m_graph.Load("LesMiserables.dot");
 }
 
 //--------------------------------------------------------------
@@ -34,7 +40,7 @@ void ofApp::draw(){
 
 	m_camera.begin();
 
-	m_graph->Draw();
+	m_graph.Draw();
 
 	m_camera.end();
 
@@ -44,8 +50,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-	m_graph->Exit();
-	delete m_graph;
+	m_graph.Exit();
 	
 	// Destory ImGui
 	ImGui_ImplOpenGL3_Shutdown();
