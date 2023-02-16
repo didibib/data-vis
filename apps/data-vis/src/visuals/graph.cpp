@@ -44,21 +44,27 @@ namespace DataVis {
 	void Graph::Draw()
 	{
 		ofFill();
-		
 		ofSetColor(123);
 		for (const auto& edge : m_graph.m_edges) {
 			int startIdx = edge.m_source;
 			int endIdx = edge.m_target;
 			glm::vec3 start = m_graph.m_vertices[startIdx].m_property.position;
 			glm::vec3 end = m_graph.m_vertices[endIdx].m_property.position;
+			// draw edge behind nodes
+			start -= 1;
+			end -= 1;
 			ofDrawLine(start, end);
 		}
 
 		ofSetColor(255);
+		ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 		for (size_t i = 0; i < m_graph.m_vertices.size(); i++)
 		{
-			glm::vec3 pos = m_graph.m_vertices[i].m_property.position;
-			ofDrawCircle(pos.x, pos.y, radius);
+			auto& property = m_graph.m_vertices[i].m_property;
+			glm::vec3 pos = property.position;
+			ofDrawCircle(pos, radius);
+			std::string text = property.name;
+			//ofDrawBitmapStringHighlight(text, pos);
 		}
 	}
 
