@@ -19,6 +19,8 @@ const ofColor palettePurple_3(24, 18, 43);
 
 // STD headers
 #include <iostream>
+#include <string>
+#include <filesystem>
 #include <map>
 #include <vector>
 #include <random>

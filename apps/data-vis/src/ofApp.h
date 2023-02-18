@@ -1,15 +1,26 @@
 #pragma once
 
+struct ImGuiData
+{
+	int combo_graph_file_index = 3;
+	int input_optimize_iterations = 10000;
+};
+
 class ofApp : public ofBaseApp{
+	ImGuiData imgui_data;
 
 	DataVis::Graph m_graph;
 	ofEasyCam m_camera;
+
+	std::vector<string> graph_file_names;
+	string current_graph_file;
 
 	public:
 		void setup();
 		void update();
 		void draw();
 		void exit();
+		void gui();
 
 		void keyPressed(int key);
 		void keyReleased(int key);
