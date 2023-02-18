@@ -1,13 +1,13 @@
 #include "precomp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup() {
 	// Init ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsClassic();
 	ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ofGetWindowPtr()->getWindowContext(), true);
-	ImGui_ImplOpenGL3_Init("#version 330"); 
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Set OpenGL 
 	ofEnableDepthTest();
@@ -18,22 +18,25 @@ void ofApp::setup(){
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setVFlip(true);
 
-	// Load graph files
-	string data_path = ofToDataPath( "", false );
-	for ( const auto& entry : filesystem::directory_iterator( data_path ) )
+	// Load
+	LoadGraphFiles();
+	m_graph.Load(m_current_graph_file);
+	DataVis::Layout::Random(m_graph, "--w 800 --h 600");
+}
+
+void ofApp::LoadGraphFiles() {
+	string data_path = ofToDataPath("", false);
+	for (const auto& entry : filesystem::directory_iterator(data_path))
 	{
 		string path = entry.path().string();
-		path.replace( 0, data_path.length(), "" );
-		graph_file_names.push_back( path );
+		path.replace(0, data_path.length(), "");
+		m_graph_file_names.push_back(path);
 	}
-	current_graph_file = graph_file_names[imgui_data.combo_graph_file_index];
-
-	m_graph.Load(current_graph_file);
-	//DataVis::Optimizer::LocalSearchSimple(m_graph, 10000);
+	m_current_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
+void ofApp::update() {
 	const ImGuiIO& io = ImGui::GetIO();
 	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
 		m_camera.disableMouseInput();
@@ -41,7 +44,7 @@ void ofApp::update(){
 }
 
 //--------------------------------------------------------------
-void ofApp::draw(){
+void ofApp::draw() {
 	ofBackgroundGradient(palettePurple_3, palettePurple_2, OF_GRADIENT_CIRCULAR);
 
 	ImGui_ImplOpenGL3_NewFrame();
@@ -54,112 +57,136 @@ void ofApp::draw(){
 
 	m_camera.end();
 
-	gui();
-	ImGui::Render();	
+	Gui();
+	//ImGui::ShowDemoWindow();
+	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-	m_graph.Exit();
-	
 	// Destroy ImGui
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 }
 
-void ofApp::gui()
+void ofApp::Gui()
 {
-	// File selecting dropdown box
-	static int item_current_idx = 3;
-	const char* combo_preview_value = graph_file_names[imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
-	if ( ImGui::BeginCombo( "Select File", combo_preview_value ) )
+	// Loading Graph ============================================
+	const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
+	if (ImGui::BeginCombo("Select File", select_file_preview))
 	{
-		for ( int n = 0; n < graph_file_names.size(); n++ )
+		for (int n = 0; n < m_graph_file_names.size(); n++)
 		{
-			const bool is_selected = (imgui_data.combo_graph_file_index == n);
-			if ( ImGui::Selectable( graph_file_names[n].c_str(), is_selected ) )
-			{
-				imgui_data.combo_graph_file_index = n;
-				
-				//printf( "Selected %s \n", graph_file_names[imgui_data.combo_graph_file_index].c_str() );
-			}
-
-			if ( is_selected )
+			const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
+			if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
+				m_imgui_data.combo_graph_file_index = n;
+			if (is_selected)
 				ImGui::SetItemDefaultFocus();
 		}
 		ImGui::EndCombo();
 	}
 
-	if ( ImGui::Button( "Load Graph" ) )
+	if (ImGui::Button("Load Graph"))
 	{
-		string new_graph_file = graph_file_names[imgui_data.combo_graph_file_index];
-		if(new_graph_file != current_graph_file )
+		string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
+		if (new_graph_file != m_current_graph_file)
 		{
-			current_graph_file = new_graph_file;
-			m_graph.Load( current_graph_file );
+			m_current_graph_file = new_graph_file;
+			m_graph.Load(m_current_graph_file);
 		}
 	}
 
-	ImGui::InputInt( "# of iterations", &(imgui_data.input_optimize_iterations) );
-	if ( ImGui::Button( "Optimize Graph" ) )
+	// Select Layout ============================================
+	auto& layout_functions = DataVis::Layout::LayoutFunctions();
+	std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
+	const char* layout_preview = layout_chosen.c_str();
+	if (ImGui::BeginCombo("Select Layout", layout_preview))
 	{
-		DataVis::Optimizer::LocalSearchSimple( m_graph, imgui_data.input_optimize_iterations );
+		for (int n = 0; n < layout_functions.size(); n++)
+		{
+			const bool is_selected = (m_imgui_data.combo_layout_function_index == n);
+			if (ImGui::Selectable(layout_functions[n].first.c_str(), is_selected)) {
+				m_imgui_data.combo_layout_function_index = n;
+				layout_chosen = layout_functions[n].first;
+			}
+			if (is_selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+
+	auto& layout_descriptions = DataVis::Layout::LayoutDescriptions();
+	ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
+
+		static char options[256] = "";
+	ImGui::InputText("Options", options, IM_ARRAYSIZE(options));
+	if (ImGui::Button("Apply Layout"))
+	{
+		auto function = layout_functions[m_imgui_data.combo_layout_function_index].second;
+		function(m_graph, options);
+	}
+
+	// Optimizer
+	ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
+	if (ImGui::Button("Optimize Graph"))
+	{
+		DataVis::Optimizer::LocalSearch(m_graph, m_imgui_data.input_optimize_iterations);
 	}
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
+void ofApp::keyPressed(int key) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
+void ofApp::keyReleased(int key) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
+void ofApp::mouseMoved(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
+void ofApp::mouseDragged(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
+void ofApp::mousePressed(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
+void ofApp::mouseReleased(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
+void ofApp::mouseEntered(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
+void ofApp::mouseExited(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
+void ofApp::windowResized(int w, int h) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
+void ofApp::gotMessage(ofMessage msg) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 }

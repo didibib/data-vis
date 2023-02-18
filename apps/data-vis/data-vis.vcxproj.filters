@@ -49,6 +49,9 @@
     <ClCompile Include="src\graph\optimizer.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
+    <ClCompile Include="src\graph\layout.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -108,6 +111,9 @@
       <Filter>src\graph</Filter>
     </ClInclude>
     <ClInclude Include="src\graph\optimizer.h">
+      <Filter>src\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\layout.h">
       <Filter>src\graph</Filter>
     </ClInclude>
   </ItemGroup>

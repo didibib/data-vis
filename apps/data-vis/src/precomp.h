@@ -24,12 +24,14 @@ const ofColor palettePurple_3(24, 18, 43);
 #include <map>
 #include <vector>
 #include <random>
+#include <functional>
+#include <map>
+#include <boost/program_options.hpp>
 
 // ==============================================
 
 std::random_device rand_dev;
 std::mt19937 random(rand_dev());
-
 
 typedef unsigned int uint;
 
@@ -44,5 +46,6 @@ float RandomRangeF(float range);
 
 // Own headers
 #include "graph.h"
+#include "layout.h"
 #include "optimizer.h"
 #include "ofApp.h"

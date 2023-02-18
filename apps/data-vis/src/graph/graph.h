@@ -3,13 +3,12 @@
 namespace DataVis {
 	struct Node
 	{
-		std::string name, label, shape;
+		std::string name, shape;
 		glm::vec3 position;
 	};
 
 	struct Edge
 	{
-		std::string label;
 		float weight = 1.f;
 	};
 
@@ -19,15 +18,12 @@ namespace DataVis {
 
 	class Graph {
 	private:
-		void RandomPos();
 		graph_u m_graph;
 
 	public:
 		Graph() = default;
 		void Load(std::string filename);
-		void Update();
 		void Draw();
-		void Exit();
 
 		auto& Edges() { return m_graph.m_edges; }
 		auto& Nodes() { return m_graph.m_vertices; }
