@@ -3,7 +3,7 @@
 namespace DataVis {
 	class Optimizer {
 	public:
-		static float LocalSearchSimple(Graph&, int iterations);
+		static float LocalSearch(Graph&, int iterations);
 	private:
 		static float CalculateCost(Graph&);
 		static float CalculateIncrementalCost( Graph&, uint idx0, uint idx1 );

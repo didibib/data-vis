@@ -10,36 +10,18 @@ namespace DataVis {
 		std::ifstream file(filepath);
 
 		if (!std::filesystem::exists(filepath)) {
-			std::cout << "W/Graph::Setup: File doesn't exists: " << filepath << std::endl;
+			std::cout << "W/Graph::Load: File doesn't exists: " << filepath << std::endl;
 			return;
 		}
 
 		m_graph.clear();
 		boost::dynamic_properties dp(boost::ignore_other_properties);
 		dp.property("node_id", get(&Node::name, m_graph));
-		dp.property("label", get(&Node::label, m_graph));
 		dp.property("shape", get(&Node::shape, m_graph));
-		dp.property("label", get(&Edge::label, m_graph));
 		dp.property("weight", get(&Edge::weight, m_graph));
 
 		boost::read_graphviz(file, m_graph, dp);
 		printf( "-- Finished loading %s \n", _filename.c_str());
-		RandomPos();
-	}
-
-	void Graph::RandomPos() {
-		for (size_t i = 0; i < m_graph.m_vertices.size(); i++)
-		{
-			auto& position = m_graph.m_vertices[i].m_property.position;
-			float x = ofRandomWidth();
-			float y = ofRandomHeight();
-			float z = -1;
-			position = glm::vec3(x, y, z);
-		}
-	}
-
-	void Graph::Update() {
-
 	}
 
 	void Graph::Draw()
@@ -65,12 +47,8 @@ namespace DataVis {
 			auto& property = m_graph.m_vertices[i].m_property;
 			glm::vec3 pos = property.position;
 			ofDrawCircle(pos, radius);
-			std::string text = property.name;
+			//std::string text = property.name;
 			//ofDrawBitmapStringHighlight(text, pos);
 		}
-	}
-
-	void Graph::Exit() {
-
 	}
 }

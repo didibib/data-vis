@@ -1,7 +1,7 @@
 #include "precomp.h"
 
 namespace DataVis {
-	float Optimizer::LocalSearchSimple(Graph& _graph, int _iterations)
+	float Optimizer::LocalSearch(Graph& _graph, int _iterations)
 	{		
 		float cost = CalculateCost(_graph);
 		for (size_t i = 0; i < _iterations; i++)
@@ -24,32 +24,32 @@ namespace DataVis {
 		return cost;
 	}
 
-	float Optimizer::CalculateIncrementalCost( Graph& _graph, uint idx0, uint idx1 )
+	float Optimizer::CalculateIncrementalCost( Graph& _graph, uint _idx0, uint _idx1 )
 	{
 		float cost = 0;
 		// Subtract cost of all edges before swap at both indices
-		cost -= CalculateNodeCost( _graph, idx0 );
-		cost -= CalculateNodeCost( _graph, idx1 );
+		cost -= CalculateNodeCost( _graph, _idx0 );
+		cost -= CalculateNodeCost( _graph, _idx1 );
 		// Temporarily swap the positions of the two nodes
 		auto& nodes = _graph.Nodes();
-		auto& pos0 = nodes[idx0].m_property.position;
-		auto& pos1 = nodes[idx1].m_property.position;
+		auto& pos0 = nodes[_idx0].m_property.position;
+		auto& pos1 = nodes[_idx1].m_property.position;
 		auto temp = pos0;
 		pos0 = pos1;
 		pos1 = temp;
 		// Add cost of all edges after swap at both indices
-		cost += CalculateNodeCost( _graph, idx0 );
-		cost += CalculateNodeCost( _graph, idx1 );
+		cost += CalculateNodeCost( _graph, _idx0 );
+		cost += CalculateNodeCost( _graph, _idx1 );
 		// Swap back
 		pos1 = pos0;
 		pos0 = temp;
 		return cost;
 	}
 
-	float Optimizer::CalculateNodeCost( Graph& _graph, uint idx )
+	float Optimizer::CalculateNodeCost( Graph& _graph, uint _idx )
 	{
 		float cost = 0;
-		auto& node = _graph.Nodes()[idx];
+		auto& node = _graph.Nodes()[_idx];
 		for ( auto& edge : node.m_out_edges )
 		{
 			int targetIdx = edge.m_target;
@@ -60,7 +60,6 @@ namespace DataVis {
 		return cost;
 	}
 
-#if 1
 	void Optimizer::SwapPos( Graph& _graph, float& _currCost )
 	{
 		auto& nodes = _graph.Nodes();
@@ -80,26 +79,4 @@ namespace DataVis {
 			_currCost += costDif;
 		}
 	}
-#else
-	void Optimizer::SwapPos( Graph& _graph, float& _currCost )
-	{
-		auto& nodes = _graph.Nodes();
-		int range = nodes.size() - 1;
-		uint idx0 = RandomRange( range );
-		uint idx1 = RandomRange( range );
-		while ( idx0 == idx1 ) idx1 = RandomRange( range );
-		auto& pos0 = nodes[idx0].m_property.position;
-		auto& pos1 = nodes[idx1].m_property.position;
-		auto temp = pos0;
-		pos0 = pos1;
-		pos1 = temp;
-		float newCost = CalculateCost( _graph );
-		if ( newCost >= _currCost )
-		{
-			pos1 = pos0;
-			pos0 = temp;
-		}
-		else _currCost = newCost;
-	}
-#endif
 }
