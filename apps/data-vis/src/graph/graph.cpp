@@ -23,6 +23,7 @@ namespace DataVis {
 		dp.property("weight", get(&Edge::weight, m_graph));
 
 		boost::read_graphviz(file, m_graph, dp);
+		printf( "-- Finished loading %s \n", _filename.c_str());
 		RandomPos();
 	}
 
@@ -53,6 +54,7 @@ namespace DataVis {
 			// draw edge behind nodes
 			start -= 1;
 			end -= 1;
+			ofSetLineWidth( edge.m_property.weight );
 			ofDrawLine(start, end);
 		}
 
