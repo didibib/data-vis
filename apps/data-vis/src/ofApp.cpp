@@ -21,7 +21,7 @@ void ofApp::setup() {
 	// Load
 	LoadGraphFiles();
 	m_graph.Load(m_current_graph_file);
-	DataVis::Layout::Random(m_graph, "--w 800 --h 600");
+	DataVis::Layout::RandomCmdline(m_graph, "--w 800 --h 600");
 }
 
 void ofApp::LoadGraphFiles() {
@@ -45,7 +45,7 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	ofBackgroundGradient(palettePurple_3, palettePurple_2, OF_GRADIENT_CIRCULAR);
+	ofBackgroundGradient(Color::palettePurple_3, Color::palettePurple_2, OF_GRADIENT_CIRCULAR);
 
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();

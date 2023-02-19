@@ -6,71 +6,54 @@ namespace DataVis {
 
 	namespace po = boost::program_options;
 
-	void Layout::Random(Graph& _graph, std::string _cmdline_input)
+	//--------------------------------------------------------------
+	void Layout::RandomCmdline(Graph& _graph, std::string _cmdline_input)
 	{
-		int width = 1, height = 1;
-		// Parse input
-		po::options_description desc("Random");
-		desc.add_options()
-			("w", po::value(&width), "Range width")
-			("h", po::value(&height), "Range Height");
-		po::variables_map vm;
-		try {
-			po::store(po::command_line_parser(po::split_unix(_cmdline_input)).options(desc).run(), vm);
-		}
-		catch (std::exception& e) {
-			std::cout << e.what();
-		}
-		po::notify(vm);
-		// Create layout
+		RandomData rd;
+		static auto options = rd.Options();
+		ParseCmdline(options, _cmdline_input);
+		Random(_graph, rd.width, rd.height);
+	}
+
+	void Layout::Random(Graph& _graph, int _width, int _height) {
 		auto& nodes = _graph.Nodes();
 		for (size_t i = 0; i < nodes.size(); i++)
 		{
 			auto& position = nodes[i].m_property.position;
-			float x = RandomRangeF(width);
-			float y = RandomRangeF(height);
+			float x = RandomRangeF(_width);
+			float y = RandomRangeF(_height);
 			float z = 0;
 			position = glm::vec3(x, y, z);
 		}
 	}
 
-	void Layout::Grid(Graph& _graph, std::string _cmdline_input)
+	//--------------------------------------------------------------
+	void Layout::GridCmdline(Graph& _graph, std::string _cmdline_input)
 	{
-		int width = 1, height = 1;
-		float step = 1;
-		// Parse input
-		po::options_description desc("Grid");
-		desc.add_options()
-			("w", po::value(&width), "Width")
-			("h", po::value(&height), "Height")
-			("s", po::value(&step), "Step");
-		po::variables_map vm;
-		try {
-			po::store(po::command_line_parser(po::split_unix(_cmdline_input)).options(desc).run(), vm);
-		}
-		catch (std::exception& e) {
-			std::cout << e.what();
-		}
-		po::notify(vm);
-		// Create layout
+		GridData gd;
+		static auto options = gd.Options();
+		ParseCmdline(options, _cmdline_input);
+		Grid(_graph, gd.width, gd.height, gd.step);
+	}
+
+	void Layout::Grid(Graph& _graph, int _width, int _height, float _step) {
 		auto& nodes = _graph.Nodes();
 		std::vector<glm::vec3> grid;
-		// increment width and height if there are more nodes then positions
-		while (nodes.size() > width * height)
-			width++, height++;
-		grid.reserve(width * height);
-		// generate positions
-		for (size_t j = 0; j < height; j++)
-			for (size_t i = 0; i < width; i++)
+		// Increment width and height if there are more nodes then positions
+		while (nodes.size() > _width * _height) _width++, _height++;
+		grid.reserve(_width * _height);
+		// Generate positions
+		for (size_t j = 0; j < _height; j++)
+			for (size_t i = 0; i < _width; i++)
 			{
-				float x = i * step;
-				float y = j * step;
+				float x = i * _step;
+				float y = j * _step;
 				float z = 0;
 				grid.push_back(glm::vec3(x, y, z));
 			}
-		// shuffle vector
-		std::shuffle(std::begin(grid), std::end(grid), random);
-
+		// Shuffle vector
+		std::shuffle(std::begin(grid), std::end(grid), Random::MT19937);
+		// Assign positions
 		for (size_t i = 0; i < nodes.size(); i++)
 		{
 			auto& position = nodes[i].m_property.position;
