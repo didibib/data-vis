@@ -64,9 +64,9 @@ namespace DataVis {
 	{
 		auto& nodes = _graph.Nodes();
 		int range = nodes.size() - 1;
-		uint idx0 = RandomRange( range );
-		uint idx1 = RandomRange( range );
-		while ( idx0 == idx1 ) idx1 = RandomRange( range );
+		uint idx0 = Random::Range( range );
+		uint idx1 = Random::Range( range );
+		while ( idx0 == idx1 ) idx1 = Random::Range( range );
 		float costDif = CalculateIncrementalCost( _graph, idx0, idx1 );
 		if ( costDif < 0 )
 		{

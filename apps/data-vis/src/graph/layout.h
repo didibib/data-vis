@@ -10,7 +10,7 @@ namespace DataVis {
 		public:
 			int width = 1, height = 1;
 			po::options_description Options() {
-				po::options_description desc("Random");
+				po::options_description desc(RANDOM);
 				desc.add_options()
 					("w", po::value(&width), "Range width")
 					("h", po::value(&height), "Range Height");
@@ -23,7 +23,7 @@ namespace DataVis {
 			int width = 1, height = 1;
 			float step = 1;
 			po::options_description Options() {
-				po::options_description desc("Grid");
+				po::options_description desc(GRID);
 				desc.add_options()
 					("w", po::value(&width), "Width")
 					("h", po::value(&height), "Height")
@@ -32,21 +32,12 @@ namespace DataVis {
 			}
 		};
 
+		static std::unordered_map<std::string, std::string> m_layout_descriptions;
+		static std::unordered_map<std::string, std::string> InitLayoutDescriptions();
+
 	public:
-		static auto& LayoutFunctions() {
-			static std::vector <std::pair<std::string, std::function<void(DataVis::Graph&, std::string)>>> layout_functions = {
-				{ RANDOM, DataVis::Layout::RandomCmdline },
-				{ GRID, DataVis::Layout::GridCmdline }
-			};
-			return layout_functions;
-		}
-		static auto& LayoutDescriptions() {
-			static std::unordered_map<std::string, std::string> layout_descriptions = {
-				{ RANDOM, "--w [range width]\n--h [range height]" },
-				{ GRID, "--w [width]\n--h [height]\n--s [step]"}
-			};
-			return layout_descriptions;
-		}
+		static const std::vector <std::pair<std::string, std::function<void(DataVis::Graph&, std::string)>>>& LayoutFunctions();
+		static std::unordered_map<std::string, std::string>& LayoutDescriptions();
 
 		static void RandomCmdline(Graph&, std::string);
 		static void GridCmdline(Graph&, std::string);

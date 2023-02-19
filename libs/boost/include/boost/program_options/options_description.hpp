@@ -252,7 +252,7 @@ namespace program_options {
         /** Outputs 'desc' to the specified stream, calling 'f' to output each
             option_description element. */
         void print(std::ostream& os, unsigned width = 0) const;
-
+        const std::string& caption() { return m_caption; }
     private:
 #if BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1800))
         // prevent warning C4512: assignment operator could not be generated

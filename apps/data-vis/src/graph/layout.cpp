@@ -3,13 +3,42 @@
 namespace DataVis {
 	const char* Layout::RANDOM = "Random";
 	const char* Layout::GRID = "Grid";
+	std::unordered_map<std::string, std::string> Layout::m_layout_descriptions = Layout::InitLayoutDescriptions();
 
-	namespace po = boost::program_options;
+	//--------------------------------------------------------------
+	std::unordered_map<std::string, std::string> Layout::InitLayoutDescriptions() {
+		std::unordered_map<std::string, std::string> layout_descriptions;
+		RandomData rd;
+		GridData gd;
+		std::vector < po::options_description > descriptions;
+		descriptions.push_back(rd.Options());
+		descriptions.push_back(gd.Options());
+
+		for (auto &desc : descriptions)
+		{
+			std::stringstream ss;
+			desc.print(ss);
+			layout_descriptions.insert({ desc.caption(), ss.str()});
+		}
+		return layout_descriptions;
+	}
+
+	const std::vector <std::pair<std::string, std::function<void(DataVis::Graph&, std::string)>>>& Layout::LayoutFunctions() {
+		static std::vector <std::pair<std::string, std::function<void(DataVis::Graph&, std::string)>>> layout_functions = {
+			{ RANDOM, DataVis::Layout::RandomCmdline },
+			{ GRID, DataVis::Layout::GridCmdline }
+		};
+		return layout_functions;
+	}
+
+	std::unordered_map<std::string, std::string>& Layout::LayoutDescriptions() {
+		return m_layout_descriptions;
+	}
 
 	//--------------------------------------------------------------
 	void Layout::RandomCmdline(Graph& _graph, std::string _cmdline_input)
 	{
-		RandomData rd;
+		static RandomData rd;
 		static auto options = rd.Options();
 		ParseCmdline(options, _cmdline_input);
 		Random(_graph, rd.width, rd.height);
@@ -20,8 +49,8 @@ namespace DataVis {
 		for (size_t i = 0; i < nodes.size(); i++)
 		{
 			auto& position = nodes[i].m_property.position;
-			float x = RandomRangeF(_width);
-			float y = RandomRangeF(_height);
+			float x = Random::RangeF(_width);
+			float y = Random::RangeF(_height);
 			float z = 0;
 			position = glm::vec3(x, y, z);
 		}
@@ -30,7 +59,7 @@ namespace DataVis {
 	//--------------------------------------------------------------
 	void Layout::GridCmdline(Graph& _graph, std::string _cmdline_input)
 	{
-		GridData gd;
+		static GridData gd;
 		static auto options = gd.Options();
 		ParseCmdline(options, _cmdline_input);
 		Grid(_graph, gd.width, gd.height, gd.step);

@@ -33,20 +33,20 @@ namespace Color {
 #include <map>
 
 //--------------------------------------------------------------
+typedef unsigned int uint;
 
 namespace Random {
 	std::random_device random_device;
 	std::mt19937 MT19937(random_device());
+
+	uint UInt();
+	uint UInt(uint& seed);
+	uint Range(uint, uint);
+	uint Range(uint);
+	float Float();
+	float RangeF(float range);
 }
 
-typedef unsigned int uint;
-
-uint RandomUInt();
-uint RandomUInt(uint& seed);
-uint RandomRange(uint, uint);
-uint RandomRange(uint);
-float RandomFloat();
-float RandomRangeF(float range);
 void ParseCmdline(const boost::program_options::options_description&, std::string);
 
 //--------------------------------------------------------------
