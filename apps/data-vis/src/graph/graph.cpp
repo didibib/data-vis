@@ -17,7 +17,6 @@ namespace DataVis {
 		m_graph.clear();
 		boost::dynamic_properties dp(boost::ignore_other_properties);
 		dp.property("node_id", get(&Node::name, m_graph));
-		dp.property("shape", get(&Node::shape, m_graph));
 		dp.property("weight", get(&Edge::weight, m_graph));
 
 		boost::read_graphviz(file, m_graph, dp);

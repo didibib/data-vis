@@ -1,5 +1,6 @@
 #include "precomp.h"
 
+//--------------------------------------------------------------
 static uint seed = 0x12345678;
 uint RandomUInt()
 {
@@ -17,12 +18,10 @@ uint RandomUInt(uint& _seed)
 	return _seed;
 }
 
-
 uint RandomRange(uint min, uint max) {
 	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
-	return dist(random);
+	return dist(Random::MT19937);
 }
-
 
 uint RandomRange(uint max) {
 	return RandomRange(0, max);
@@ -30,3 +29,16 @@ uint RandomRange(uint max) {
 
 float RandomFloat() { return RandomUInt() * 2.3283064365387e-10f; }
 float RandomRangeF(float _range) { return RandomFloat() * _range; }
+
+//--------------------------------------------------------------
+void ParseCmdline(const boost::program_options::options_description& _options, std::string _cmdline_input) {
+	namespace po = boost::program_options;
+	po::variables_map vm;
+	try {
+		po::store(po::command_line_parser(po::split_unix(_cmdline_input)).options(_options).run(), vm);
+	}
+	catch (std::exception& e) {
+		std::cout << e.what();
+	}
+	po::notify(vm);
+}
