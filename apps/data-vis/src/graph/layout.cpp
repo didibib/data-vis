@@ -3,6 +3,7 @@
 namespace DataVis {
 	const char* Layout::RANDOM = "Random";
 	const char* Layout::GRID = "Grid";
+	const char* Layout::RADIAL = "Radial";
 	std::unordered_map<std::string, std::string> Layout::m_layout_descriptions = Layout::InitLayoutDescriptions();
 
 	//--------------------------------------------------------------
@@ -10,9 +11,11 @@ namespace DataVis {
 		std::unordered_map<std::string, std::string> layout_descriptions;
 		RandomData rd;
 		GridData gd;
+		RadialData rad;
 		std::vector < po::options_description > descriptions;
 		descriptions.push_back(rd.Options());
 		descriptions.push_back(gd.Options());
+		descriptions.push_back( rad.Options( ) );
 
 		for (auto &desc : descriptions)
 		{
@@ -45,14 +48,14 @@ namespace DataVis {
 	}
 
 	void Layout::Random(Graph& _graph, int _width, int _height) {
-		auto& nodes = _graph.Nodes();
+		auto& nodes = _graph.Vertices();
 		for (size_t i = 0; i < nodes.size(); i++)
 		{
-			auto& position = nodes[i].m_property.position;
+			auto& current_position = nodes[i].m_property.current_position;
 			float x = Random::RangeF(_width);
 			float y = Random::RangeF(_height);
 			float z = 0;
-			position = glm::vec3(x, y, z);
+			current_position = glm::vec3(x, y, z);
 		}
 	}
 
@@ -66,7 +69,7 @@ namespace DataVis {
 	}
 
 	void Layout::Grid(Graph& _graph, int _width, int _height, float _step) {
-		auto& nodes = _graph.Nodes();
+		auto& nodes = _graph.Vertices();
 		std::vector<glm::vec3> grid;
 		// Increment width and height if there are more nodes then positions
 		while (nodes.size() > _width * _height) _width++, _height++;
@@ -85,8 +88,8 @@ namespace DataVis {
 		// Assign positions
 		for (size_t i = 0; i < nodes.size(); i++)
 		{
-			auto& position = nodes[i].m_property.position;
-			position = grid[i];
+			auto& current_position = nodes[i].m_property.current_position;
+			current_position = grid[i];
 		}
 	}
 }

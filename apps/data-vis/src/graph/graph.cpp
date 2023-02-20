@@ -16,7 +16,7 @@ namespace DataVis {
 
 		m_graph.clear();
 		boost::dynamic_properties dp(boost::ignore_other_properties);
-		dp.property("node_id", get(&Node::name, m_graph));
+		dp.property("node_id", get(&Vertex::name, m_graph));
 		dp.property("weight", get(&Edge::weight, m_graph));
 
 		boost::read_graphviz(file, m_graph, dp);
@@ -30,8 +30,8 @@ namespace DataVis {
 		for (const auto& edge : m_graph.m_edges) {
 			int startIdx = edge.m_source;
 			int endIdx = edge.m_target;
-			glm::vec3 start = m_graph.m_vertices[startIdx].m_property.position;
-			glm::vec3 end = m_graph.m_vertices[endIdx].m_property.position;
+			glm::vec3 start = m_graph.m_vertices[startIdx].m_property.current_position;
+			glm::vec3 end = m_graph.m_vertices[endIdx].m_property.current_position;
 			// draw edge behind nodes
 			start -= 1;
 			end -= 1;
@@ -44,7 +44,7 @@ namespace DataVis {
 		for (size_t i = 0; i < m_graph.m_vertices.size(); i++)
 		{
 			auto& property = m_graph.m_vertices[i].m_property;
-			glm::vec3 pos = property.position;
+			glm::vec3 pos = property.current_position;
 			ofDrawCircle(pos, radius);
 			//std::string text = property.name;
 			//ofDrawBitmapStringHighlight(text, pos);

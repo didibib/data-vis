@@ -17,8 +17,8 @@ namespace DataVis {
 		for (auto& edge : _graph.Edges()) {
 			int startIdx = edge.m_source;
 			int endIdx = edge.m_target;
-			glm::vec3 start = _graph.Nodes()[startIdx].m_property.position;
-			glm::vec3 end = _graph.Nodes()[endIdx].m_property.position;
+			glm::vec3 start = _graph.Vertices()[startIdx].m_property.current_position;
+			glm::vec3 end = _graph.Vertices()[endIdx].m_property.current_position;
 			cost += glm::distance(start, end);
 		}
 		return cost;
@@ -31,9 +31,9 @@ namespace DataVis {
 		cost -= CalculateNodeCost( _graph, _idx0 );
 		cost -= CalculateNodeCost( _graph, _idx1 );
 		// Temporarily swap the positions of the two nodes
-		auto& nodes = _graph.Nodes();
-		auto& pos0 = nodes[_idx0].m_property.position;
-		auto& pos1 = nodes[_idx1].m_property.position;
+		auto& nodes = _graph.Vertices();
+		auto& pos0 = nodes[_idx0].m_property.current_position;
+		auto& pos1 = nodes[_idx1].m_property.current_position;
 		auto temp = pos0;
 		pos0 = pos1;
 		pos1 = temp;
@@ -49,12 +49,12 @@ namespace DataVis {
 	float Optimizer::CalculateNodeCost( Graph& _graph, uint _idx )
 	{
 		float cost = 0;
-		auto& node = _graph.Nodes()[_idx];
+		auto& node = _graph.Vertices()[_idx];
 		for ( auto& edge : node.m_out_edges )
 		{
 			int targetIdx = edge.m_target;
-			glm::vec3 start = node.m_property.position;
-			glm::vec3 end = _graph.Nodes()[targetIdx].m_property.position;
+			glm::vec3 start = node.m_property.current_position;
+			glm::vec3 end = _graph.Vertices()[targetIdx].m_property.current_position;
 			cost += glm::distance( start, end );
 		}
 		return cost;
@@ -62,7 +62,7 @@ namespace DataVis {
 
 	void Optimizer::SwapPos( Graph& _graph, float& _currCost )
 	{
-		auto& nodes = _graph.Nodes();
+		auto& nodes = _graph.Vertices();
 		int range = nodes.size() - 1;
 		uint idx0 = Random::Range( range );
 		uint idx1 = Random::Range( range );
@@ -71,8 +71,8 @@ namespace DataVis {
 		if ( costDif < 0 )
 		{
 			// Swap the nodes
-			auto& pos0 = nodes[idx0].m_property.position;
-			auto& pos1 = nodes[idx1].m_property.position;
+			auto& pos0 = nodes[idx0].m_property.current_position;
+			auto& pos1 = nodes[idx1].m_property.current_position;
 			auto temp = pos0;
 			pos0 = pos1;
 			pos1 = temp;
