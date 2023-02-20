@@ -1,47 +1,70 @@
 #pragma once
 
-namespace DataVis {
+namespace DataVis
+{
 	namespace po = boost::program_options;
-	class Layout {
+	class Layout
+	{
 		static const char* RANDOM;
 		static const char* GRID;
+		static const char* RADIAL;
 
-		struct RandomData {
+		struct RandomData
+		{
 		public:
 			int width = 1, height = 1;
-			po::options_description Options() {
-				po::options_description desc(RANDOM);
-				desc.add_options()
-					("w", po::value(&width), "Range width")
-					("h", po::value(&height), "Range Height");
+			po::options_description Options( )
+			{
+				po::options_description desc( RANDOM );
+				desc.add_options( )
+					( "w", po::value( &width ), "Range width" )
+					( "h", po::value( &height ), "Range Height" );
 				return desc;
 			}
 		};
 
-		struct GridData {
+		struct GridData
+		{
 		public:
 			int width = 1, height = 1;
 			float step = 1;
-			po::options_description Options() {
-				po::options_description desc(GRID);
-				desc.add_options()
-					("w", po::value(&width), "Width")
-					("h", po::value(&height), "Height")
-					("s", po::value(&step), "Step");
+			po::options_description Options( )
+			{
+				po::options_description desc( GRID );
+				desc.add_options( )
+					( "w", po::value( &width ), "Width" )
+					( "h", po::value( &height ), "Height" )
+					( "s", po::value( &step ), "Step" );
+				return desc;
+			}
+		};
+
+		struct RadialData
+		{
+		public:
+			float width, height, step;
+			po::options_description Options( )
+			{
+				po::options_description desc( GRID );
+				desc.add_options( )
+					( "w", po::value( &width ), "Width" )
+					( "h", po::value( &height ), "Height" )
+					( "s", po::value( &step ), "Distance between each band" );
 				return desc;
 			}
 		};
 
 		static std::unordered_map<std::string, std::string> m_layout_descriptions;
-		static std::unordered_map<std::string, std::string> InitLayoutDescriptions();
+		static std::unordered_map<std::string, std::string> InitLayoutDescriptions( );
 
 	public:
-		static const std::vector <std::pair<std::string, std::function<void(DataVis::Graph&, std::string)>>>& LayoutFunctions();
-		static std::unordered_map<std::string, std::string>& LayoutDescriptions();
+		static const std::vector <std::pair<std::string, std::function<void( DataVis::Graph&, std::string )>>>& LayoutFunctions( );
+		static std::unordered_map<std::string, std::string>& LayoutDescriptions( );
 
-		static void RandomCmdline(Graph&, std::string);
-		static void GridCmdline(Graph&, std::string);
-		static void Random(Graph&, int width, int height);
-		static void Grid(Graph&, int width, int height, float step);
+		static void RandomCmdline( Graph&, std::string );
+		static void GridCmdline( Graph&, std::string );
+		static void Random( Graph&, int width, int height );
+		static void Grid( Graph&, int width, int height, float step );
+		static void Radial( Graph&, float width, float height, float step );
 	};
 }

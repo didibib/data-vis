@@ -52,6 +52,7 @@ void ParseCmdline(const boost::program_options::options_description&, std::strin
 //--------------------------------------------------------------
 // Own headers
 #include "graph.h"
+#include "tree.h"
 #include "layout.h"
 #include "optimizer.h"
 #include "ofApp.h"
