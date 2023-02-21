@@ -2,9 +2,7 @@
 
 namespace DataVis
 {
-namespace Tree
-{
-	Node& Extractor::MSP( Graph& _graph )
+	Tree Tree::Extractor::MSP( Graph& _graph )
 	{
         // Implement Prim's Algorithm
         // https://www.wikiwand.com/en/Prim%27s_algorithm
@@ -15,8 +13,8 @@ namespace Tree
         costs.resize(vertices.size());
         edges.resize(vertices.size());
 
-        Node n;
+        Tree n;
         return n;
 	}
-} // Tree 
+
 } // DataVis
