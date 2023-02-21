@@ -59,6 +59,7 @@ class Layout
 
 	//--------------------------------------------------------------
 	static std::unordered_map<std::string, std::string> InitLayoutDescriptions();
+	static void RadialSubTree(Tree::Node&, float radius, float angle_start, float angle_end);
 
 public:
 	static std::unordered_map<std::string, std::string>& LayoutDescriptions();

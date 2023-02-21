@@ -41,7 +41,7 @@ const std::vector <std::pair<std::string, std::function<void(Graph&, std::string
 }
 const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& Layout::TreeLayoutFunctions() {
 	static std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>> layout_functions = {
-		{ RADIAL, Layout::RadialCmdline },
+		{ RADIAL, Layout::RadialCmdline }
 	};
 	return layout_functions;
 }
@@ -110,6 +110,34 @@ void Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input) {
 }
 
 void Layout::Radial(Tree& _tree, float _radius) {
-	auto root = _tree.Root();
+	auto node = _tree.Root();
+	int layers = node->subtree_count;
+	float step = _radius / layers;
+
+	// Set root node position
+	node->position = glm::vec3(0);
+
+	// Add children to queue
+	std::queue<std::shared_ptr<Tree::Node>> queue;
+	for (auto& c : node->children) queue.push(c);
+
+	int level = 1;
+	while (queue.empty() == false) {
+		int count = queue.size();
+
+		// Dequeue all nodes of current level
+		while (count > 0) {
+			node = queue.front(); queue.pop();
+			int u = node->subtree_count;
+			int v = node->parent->subtree_count;
+			float ratio = u / (v - 1);
+			float angle = TWO_PI * ratio;
+
+			// Enqueue nodes of next level
+			for (auto& child : node->children) queue.push(child);
+			count--;
+		}
+		level++;
+	}
 }
 } // DataVis
