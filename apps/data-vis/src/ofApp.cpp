@@ -99,7 +99,7 @@ void ofApp::Gui()
 	}
 
 	// Select Layout ============================================
-	auto& layout_functions = DataVis::Layout::LayoutFunctions();
+	auto& layout_functions = DataVis::Layout::GraphLayoutFunctions();
 	std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
 	const char* layout_preview = layout_chosen.c_str();
 	if (ImGui::BeginCombo("Select Layout", layout_preview))

@@ -6,6 +6,7 @@ class Tree
 {
 	class Node
 	{
+	public:
 		int vertex;
 		int subtree_count;
 		std::shared_ptr <Node> parent;
