@@ -92,4 +92,9 @@ namespace DataVis {
 			current_position = grid[i];
 		}
 	}
+
+	//--------------------------------------------------------------
+	void Layout::Radial() {
+
+	}
 }
