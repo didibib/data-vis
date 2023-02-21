@@ -22,7 +22,8 @@ void ofApp::setup() {
 	LoadGraphFiles();
 	m_graph.Load(m_current_graph_file);
 	DataVis::Layout::Random(m_graph, 800, 600);
-	DataVis::Layout::Radial(DataVis::Tree(), 10);
+	//m_tree = DataVis::Tree::Extractor::MSP(m_graph);
+	DataVis::Layout::Radial(m_tree, 100);
 }
 
 void ofApp::LoadGraphFiles() {
@@ -54,7 +55,8 @@ void ofApp::draw() {
 
 	m_camera.begin();
 
-	m_graph.Draw();
+	//m_graph.Draw();
+	m_tree.Draw();
 
 	m_camera.end();
 
