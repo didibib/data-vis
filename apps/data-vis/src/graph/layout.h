@@ -22,8 +22,8 @@ class Layout
 		{
 			po::options_description desc(RANDOM);
 			desc.add_options()
-				("width, w", po::value(&width), "Range width")
-				("height, h", po::value(&height), "Range Height");
+				("w", po::value(&width), "Range width")
+				("h", po::value(&height), "Range Height");
 			return desc;
 		}
 	};
@@ -37,9 +37,9 @@ class Layout
 		{
 			po::options_description desc(GRID);
 			desc.add_options()
-				("width, w", po::value(&width), "Width")
-				("height, h", po::value(&height), "Height")
-				("step, s", po::value(&step), "Step");
+				("w", po::value(&width), "Width")
+				("h", po::value(&height), "Height")
+				("s", po::value(&step), "Step");
 			return desc;
 		}
 	};
@@ -47,19 +47,20 @@ class Layout
 	struct RadialData : Data
 	{
 	public:
-		float radius;
+		float step;
 		po::options_description Options() override
 		{
 			po::options_description desc(GRID);
 			desc.add_options()
-				("radius, r", po::value(&radius), "Radius");
+				("s", po::value(&step), "Radial step size");
 			return desc;
 		}
 	};
 
 	//--------------------------------------------------------------
 	static std::unordered_map<std::string, std::string> InitLayoutDescriptions();
-	static void RadialSubTree(Tree::Node&, float radius, float angle_start, float angle_end);
+	// Algorithm by Eades, 1992 https://treevis.net/scans/Eades1992.pdf
+	static void RadialSubTree(Tree::Node&, float radius, float angle_start, float angle_end, float step);
 
 public:
 	static std::unordered_map<std::string, std::string>& LayoutDescriptions();
@@ -75,6 +76,6 @@ public:
 
 	//--------------------------------------------------------------
 	static void RadialCmdline(Tree&, std::string);
-	static void Radial(Tree&, float radius);
+	static void Radial(Tree&, float step);
 };
 }

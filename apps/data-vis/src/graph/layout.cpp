@@ -106,38 +106,36 @@ void Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input) {
 	static RadialData rd;
 	static auto options = rd.Options();
 	ParseCmdline(options, _cmdline_input);
-	Radial(_tree, rd.radius);
+	Radial(_tree, rd.step);
 }
 
-void Layout::Radial(Tree& _tree, float _radius) {
-	auto node = _tree.Root();
-	int layers = node->subtree_count;
-	float step = _radius / layers;
+void Layout::Radial(Tree& _tree, float _step) {
+	auto& node = _tree.Root();
+	RadialSubTree(node, 0, 0, TWO_PI, _step);
+}
 
-	// Set root node position
-	node->position = glm::vec3(0);
-
-	// Add children to queue
-	std::queue<std::shared_ptr<Tree::Node>> queue;
-	for (auto& c : node->children) queue.push(c);
-
-	int level = 1;
-	while (queue.empty() == false) {
-		int count = queue.size();
-
-		// Dequeue all nodes of current level
-		while (count > 0) {
-			node = queue.front(); queue.pop();
-			int u = node->subtree_count;
-			int v = node->parent->subtree_count;
-			float ratio = u / (v - 1);
-			float angle = TWO_PI * ratio;
-
-			// Enqueue nodes of next level
-			for (auto& child : node->children) queue.push(child);
-			count--;
-		}
-		level++;
+void Layout::RadialSubTree(Tree::Node& _node, float _radius, float _angle_start, float _angle_end, float _step) {
+	float angle_center = (_angle_start + _angle_end) * .5f;
+	float angle_diff = _angle_end - _angle_start;
+	int width = _node.subtree_count;
+	// Set polar position of node
+	_node.position.x = _radius * glm::cos(angle_center);
+	_node.position.y = _radius * glm::sin(angle_center);
+	// Calculate angle of the wedge
+	float angle = 2 * glm::acos(_radius / (_radius + _step));
+	if (_node.parent != nullptr) angle = glm::min(static_cast<float>(width) / (_node.parent->subtree_count - 1), angle);
+	// Calculate new angles
+	float new_angle_end = angle_diff / width * _angle_start;
+	float new_angle_start = _angle_start;
+	if (angle < angle_diff) {
+		new_angle_end = angle / width;
+		new_angle_start = (_angle_start + _angle_end - angle) * .5f;
+	}
+	// Set child positions
+	for (auto& child : _node.children) {
+		float x = new_angle_end * child->subtree_count;
+		RadialSubTree(*child, _radius + _step, new_angle_start, new_angle_start + x, _step);
+		new_angle_start += x;
 	}
 }
 } // DataVis

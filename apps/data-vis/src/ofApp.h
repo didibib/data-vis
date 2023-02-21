@@ -10,7 +10,9 @@ struct ImGuiData
 class ofApp : public ofBaseApp{
 
 	DataVis::Graph m_graph;
+	DataVis::Tree m_tree;
 	ofEasyCam m_camera;
+
 
 	ImGuiData m_imgui_data;
 	std::vector<string> m_graph_file_names;
