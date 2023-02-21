@@ -21,7 +21,8 @@ void ofApp::setup() {
 	// Load
 	LoadGraphFiles();
 	m_graph.Load(m_current_graph_file);
-	DataVis::Layout::RandomCmdline(m_graph, "--w 800 --h 600");
+	DataVis::Layout::Random(m_graph, 800, 600);
+	DataVis::Layout::Radial(DataVis::Tree(), 10);
 }
 
 void ofApp::LoadGraphFiles() {

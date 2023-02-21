@@ -6,6 +6,7 @@ class Tree
 {
 
 public:
+	//--------------------------------------------------------------
 	class Node
 	{
 	public:
@@ -20,10 +21,19 @@ public:
 		static Tree MSP(Graph&);
 	};
 
-	Node& Root() { return m_root; }
+	//--------------------------------------------------------------
+	Tree() {
+		m_root = std::make_shared<Node>();
+		m_root->children.push_back(std::make_shared<Node>());
+		m_root->children.push_back(std::make_shared<Node>());
+		m_root->children.push_back(std::make_shared<Node>());
+	}
+
+	// This way we can iterate over the tree, without making a copy
+	std::shared_ptr<Node> Root() { return m_root; }
 
 private:
-	Node m_root;
+	std::shared_ptr<Node> m_root;
 };
 
 } // DataVis
