@@ -4,6 +4,8 @@ namespace DataVis
 {
 class Tree
 {
+
+public:
 	class Node
 	{
 	public:
@@ -13,15 +15,15 @@ class Tree
 		std::vector<std::shared_ptr<Node>> children;
 	};
 
-	class Extractor 
+	class Extractor
 	{
 		static Tree MSP(Graph&);
 	};
 
-	Node m_root;
-
-public:
 	Node& Root() { return m_root; }
+
+private:
+	Node m_root;
 };
 
 } // DataVis
