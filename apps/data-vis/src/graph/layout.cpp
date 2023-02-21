@@ -94,7 +94,7 @@ namespace DataVis {
 	}
 
 	//--------------------------------------------------------------
-	void Layout::Radial() {
+	void Layout::Radial(Tree&, float radius) {
 
 	}
 }

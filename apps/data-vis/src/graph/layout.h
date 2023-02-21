@@ -69,6 +69,6 @@ namespace DataVis
 		//--------------------------------------------------------------
 		static void Random(Graph&, int width, int height);
 		static void Grid(Graph&, int width, int height, float step);
-		static void Radial(Graph&, float radius);
+		static void Radial(Tree&, float radius);
 	};
 }
