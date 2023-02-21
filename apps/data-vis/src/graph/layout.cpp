@@ -109,7 +109,7 @@ void Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input) {
 	Radial(_tree, rd.radius);
 }
 
-void Layout::Radial(Tree&, float radius) {
-
+void Layout::Radial(Tree& _tree, float _radius) {
+	Tree::Node root = _tree.Root();
 }
 } // DataVis
