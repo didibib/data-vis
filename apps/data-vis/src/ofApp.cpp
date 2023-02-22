@@ -140,6 +140,16 @@ void ofApp::Gui()
 	}
 }
 
+glm::vec3 ofApp::screenToWorld( glm::vec2 pos )
+{
+	glm::vec3 cam = m_camera.getGlobalPosition();
+	auto world = m_camera.screenToWorld( glm::vec3( pos.x, pos.y, 0 ) ) - cam;
+	auto world_z0 = glm::vec3( world.x * cam.z, world.y * cam.z, 0 ) / 10.f;
+	world_z0.x += cam.x;
+	world_z0.y += cam.y;
+	return world_z0;
+}
+
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 
@@ -162,7 +172,19 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-	printf( "Mouse press at %i %i\n", x, y );
+	if (button == OF_MOUSE_BUTTON_LEFT)
+	{
+		glm::vec3 world_pos = screenToWorld( { x, y } );
+		printf( "Clicking at %f, %f\n", world_pos.x, world_pos.y );
+		auto selected = m_tree.Select( world_pos );
+		if (selected != nullptr)
+		{
+			printf( "Selected vertex %i\n", selected->vertex );
+			m_tree = DataVis::Tree::Extractor::MSP( m_graph, selected->vertex );
+			DataVis::Layout::Radial( m_tree, 100 );
+		}
+			
+	}
 }
 
 //--------------------------------------------------------------
