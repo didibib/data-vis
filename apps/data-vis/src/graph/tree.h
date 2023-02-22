@@ -22,6 +22,7 @@ public:
 	{
 	public:
 		static Tree MSP(Graph&, int _root);
+		static int CountSubtree( std::shared_ptr<Node> n );
 	};
 
 	//--------------------------------------------------------------
@@ -57,6 +58,7 @@ public:
 
 	void Draw();
 	Node& Root() { return *m_root; }
+	std::shared_ptr<Node> Select( glm::vec3 pos );
 
 	float radius = 5;
 

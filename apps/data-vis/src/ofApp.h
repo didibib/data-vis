@@ -19,6 +19,7 @@ class ofApp : public ofBaseApp{
 	std::string m_current_graph_file = "";
 
 	void LoadGraphFiles();
+	glm::vec3 screenToWorld( glm::vec2 );
 
 	public:
 		// Our methods

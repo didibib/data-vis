@@ -72,7 +72,7 @@ namespace DataVis
 				if (parents[i] == n->vertex)
 				{
 					// Add node to n.children
-					auto child = std::make_shared<Node>( Node{ i, 0, n, {}, vertices[i].m_property.current_position });
+					auto child = std::make_shared<Node>( Node{ i, 0, n, {}, vertices[i].m_property.current_position } );
 					n->children.push_back( child );
 					make_tree( child );
 				}
@@ -80,27 +80,63 @@ namespace DataVis
 		make_tree( t.m_root );
 
 		// Construct recursive lambda to count all children in subtree and update node.subtree_count of each node in the tree
-		std::function<int( std::shared_ptr<Node> )> count_subtree;
-		count_subtree = [&]( std::shared_ptr<Node> n)
-		{
-			int count = 1;
-			for (auto child : n->children)
-				count += count_subtree( child );
-			n->subtree_count = count;
-			return count;
-		};
-		count_subtree( t.m_root );
+		//std::function<int( std::shared_ptr<Node> )> count_subtree;
+		//count_subtree = [&]( std::shared_ptr<Node> n)
+		//{
+		//	int count = 1;
+		//	for (auto child : n->children)
+		//		count += count_subtree( child );
+		//	n->subtree_count = count;
+		//	return count;
+		//};
+		CountSubtree( t.m_root );
 
 		return t;
+	}
+
+	int Tree::Extractor::CountSubtree( std::shared_ptr<Node> n )
+	{
+		int count = 1;
+		for (auto child : n->children)
+			count += CountSubtree( child );
+		n->subtree_count = count;
+		return count;
+	}
+
+	std::shared_ptr<Tree::Node> Tree::Select( glm::vec3 pos )
+	{
+		// Loop through all nodes and find one within radius of pos
+		std::function<std::shared_ptr<Node>( std::shared_ptr<Node> )> select_in_tree;
+		select_in_tree = [&]( std::shared_ptr<Node> n )
+		{
+			//printf( "Checking vertex %i\n", n->vertex );
+			if (glm::length( n->position - pos) < radius)
+			{
+				//printf( "vertex pos: %f %f, mouse pos: %f %f\n", n->position.x, n->position.y, pos.x, pos.y );
+				//printf( "FOUND AT VERTEX %i\n", n->vertex );
+				return n;
+			}
+			//printf( "Looking through children\n" );
+			for (auto& child : n->children)
+			{
+				//printf( "sub check child %i\n", child->vertex );
+				std::shared_ptr<Node> selected = select_in_tree(child);
+				if (selected != nullptr) return selected;
+			}
+			std::shared_ptr<Node> temp = nullptr;
+			return temp;
+		};
+		return select_in_tree( m_root );
 	}
 
 	void Tree::Draw()
 	{
 		ofFill();
-		ofSetColor( 255 );
 		ofSetDrawBitmapMode( OF_BITMAPMODE_SIMPLE );
+		ofSetColor( 255, 0, 0 );
 		ofDrawCircle( m_root->position, radius );
-		ofDrawBitmapStringHighlight( ofToString( m_root->subtree_count ), m_root->position + glm::vec3( 10, 10, -1 ) );
+		ofDrawBitmapStringHighlight( ofToString( m_root->vertex ), m_root->position + glm::vec3( 10, 10, -1 ) );
+		ofSetColor( 255 );
 		std::stack<std::shared_ptr<Node>> stack;
 		for (auto& child : m_root->children) stack.push( child );
 
@@ -114,7 +150,8 @@ namespace DataVis
 
 			ofSetColor( 255 );
 			ofDrawCircle( node->position, radius );
-			ofDrawBitmapStringHighlight( ofToString( node->subtree_count ), node->position + glm::vec3( 10, 10, -1 ) );
+			//ofDrawBitmapStringHighlight( ofToString( node->subtree_count ), node->position + glm::vec3( 10, 10, -1 ) );
+			ofDrawBitmapStringHighlight( ofToString( node->vertex ), node->position + glm::vec3( 10, 10, -1 ) );
 
 			for (auto& child : node->children) stack.push( child );
 		}
