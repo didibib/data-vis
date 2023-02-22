@@ -22,7 +22,8 @@ void ofApp::setup() {
 	LoadGraphFiles();
 	m_graph.Load(m_current_graph_file);
 	DataVis::Layout::Random(m_graph, 800, 600);
-	//m_tree = DataVis::Tree::Extractor::MSP(m_graph);
+	DataVis::Optimizer::LocalSearch( m_graph, 50000 );
+	m_tree = DataVis::Tree::Extractor::MSP(m_graph, 0);
 	DataVis::Layout::Radial(m_tree, 100);
 }
 
@@ -131,7 +132,7 @@ void ofApp::Gui()
 		function(m_graph, options);
 	}
 
-	// Optimizer
+	// Optimize Layout w Local Search ============================================
 	ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
 	if (ImGui::Button("Optimize Graph"))
 	{
@@ -161,7 +162,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-
+	printf( "Mouse press at %i %i\n", x, y );
 }
 
 //--------------------------------------------------------------
