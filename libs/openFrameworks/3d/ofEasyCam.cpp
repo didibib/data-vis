@@ -142,6 +142,11 @@ char ofEasyCam::getTranslationKey() const{
 }
 
 //----------------------------------------
+void ofEasyCam::setScrollSensitivity(float _sensitivity) {
+	sensitivityScroll = _sensitivity;
+}
+
+//----------------------------------------
 void ofEasyCam::enableMouseInput(){
 	if(!bMouseInputEnabled && events){
 		listeners.push(events->update.newListener(this, &ofEasyCam::update));

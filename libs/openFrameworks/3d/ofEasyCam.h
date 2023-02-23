@@ -105,6 +105,8 @@ public:
     /// \name Mouse Input
     /// \{
 
+	void setScrollSensitivity(float sensitivity);
+
     /// \brief Enable mouse camera control.
 	void enableMouseInput();
 
