@@ -25,7 +25,7 @@ void ofApp::setup() {
 	DataVis::Layout::Random(m_graph, 800, 600);
 	DataVis::Optimizer::LocalSearch( m_graph, 50000 );
 	//m_tree = DataVis::Tree::Extractor::MSP(m_graph, 0);
-	DataVis::Layout::Radial(m_tree, 100);
+	DataVis::Layout::Radial(m_tree, 100, 150);
 }
 
 void ofApp::LoadGraphFiles() {
@@ -203,8 +203,8 @@ void ofApp::mousePressed(int x, int y, int button) {
 		if (selected != nullptr)
 		{
 			printf( "Selected vertex %i\n", selected->vertex );
-			m_tree = DataVis::Tree::Extractor::MSP( m_graph, selected->vertex );
-			DataVis::Layout::Radial( m_tree, 100 );
+			m_tree = DataVis::Tree::Extract::MSP( m_graph, selected->vertex );
+			//DataVis::Layout::Radial( m_tree, 100 );
 		}
 			
 	}
