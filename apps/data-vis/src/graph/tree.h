@@ -57,7 +57,7 @@ public:
 	}
 
 	void Draw();
-	Node& Root() { return *m_root; }
+	std::shared_ptr<Node> Root() { return m_root; }
 	std::shared_ptr<Node> Select( glm::vec3 pos );
 
 	float radius = 5;

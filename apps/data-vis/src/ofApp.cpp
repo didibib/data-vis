@@ -24,7 +24,7 @@ void ofApp::setup() {
 	m_graph.Load(m_current_graph_file);
 	DataVis::Layout::Random(m_graph, 800, 600);
 	DataVis::Optimizer::LocalSearch( m_graph, 50000 );
-	//m_tree = DataVis::Tree::Extractor::MSP(m_graph, 0);
+	m_tree = DataVis::Tree::Extractor::MSP(m_graph, 0);
 	DataVis::Layout::Radial(m_tree, 100);
 }
 
