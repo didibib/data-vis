@@ -17,6 +17,7 @@ void ofApp::setup() {
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_XY, OF_MOUSE_BUTTON_MIDDLE);
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setVFlip(true);
+	m_camera.setScrollSensitivity(20);
 
 	// Load
 	LoadGraphFiles();
@@ -77,67 +78,89 @@ void ofApp::exit() {
 
 void ofApp::Gui()
 {
-	// Loading Graph ============================================
-	const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
-	if (ImGui::BeginCombo("Select File", select_file_preview))
-	{
-		for (int n = 0; n < m_graph_file_names.size(); n++)
-		{
-			const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
-			if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
-				m_imgui_data.combo_graph_file_index = n;
-			if (is_selected)
-				ImGui::SetItemDefaultFocus();
-		}
-		ImGui::EndCombo();
-	}
 
-	if (ImGui::Button("Load Graph"))
-	{
-		string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
-		if (new_graph_file != m_current_graph_file)
+	//--------------------------------------------------------------
+	// Loading Graph 
+	//--------------------------------------------------------------
+	if (ImGui::TreeNode("Loading Graph")) {
+		const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
+		if (ImGui::BeginCombo("Select File", select_file_preview))
 		{
-			m_current_graph_file = new_graph_file;
-			m_graph.Load(m_current_graph_file);
-		}
-	}
-
-	// Select Layout ============================================
-	auto& layout_functions = DataVis::Layout::GraphLayoutFunctions();
-	std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
-	const char* layout_preview = layout_chosen.c_str();
-	if (ImGui::BeginCombo("Select Layout", layout_preview))
-	{
-		for (int n = 0; n < layout_functions.size(); n++)
-		{
-			const bool is_selected = (m_imgui_data.combo_layout_function_index == n);
-			if (ImGui::Selectable(layout_functions[n].first.c_str(), is_selected)) {
-				m_imgui_data.combo_layout_function_index = n;
-				layout_chosen = layout_functions[n].first;
+			for (int n = 0; n < m_graph_file_names.size(); n++)
+			{
+				const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
+				if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
+					m_imgui_data.combo_graph_file_index = n;
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
 			}
-			if (is_selected)
-				ImGui::SetItemDefaultFocus();
+			ImGui::EndCombo();
 		}
-		ImGui::EndCombo();
+
+		if (ImGui::Button("Load Graph"))
+		{
+			string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
+			if (new_graph_file != m_current_graph_file)
+			{
+				m_current_graph_file = new_graph_file;
+				m_graph.Load(m_current_graph_file);
+			}
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
 	}
 
-	auto& layout_descriptions = DataVis::Layout::LayoutDescriptions();
-	ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
+	//--------------------------------------------------------------
+	// Select Layout
+	//--------------------------------------------------------------
+	if (ImGui::TreeNode("Layout")) {
+		auto& layout_functions = DataVis::Layout::GraphLayoutFunctions();
+		std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
+		const char* layout_preview = layout_chosen.c_str();
+		if (ImGui::BeginCombo("Select Layout", layout_preview))
+		{
+			for (int n = 0; n < layout_functions.size(); n++)
+			{
+				const bool is_selected = (m_imgui_data.combo_layout_function_index == n);
+				if (ImGui::Selectable(layout_functions[n].first.c_str(), is_selected)) {
+					m_imgui_data.combo_layout_function_index = n;
+					layout_chosen = layout_functions[n].first;
+				}
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		auto& layout_descriptions = DataVis::Layout::LayoutDescriptions();
+		ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
 
 		static char options[256] = "";
-	ImGui::InputText("Options", options, IM_ARRAYSIZE(options));
-	if (ImGui::Button("Apply Layout"))
-	{
-		auto function = layout_functions[m_imgui_data.combo_layout_function_index].second;
-		function(m_graph, options);
+		ImGui::InputText("Options", options, IM_ARRAYSIZE(options));
+		if (ImGui::Button("Apply Layout"))
+		{
+			auto function = layout_functions[m_imgui_data.combo_layout_function_index].second;
+			function(m_graph, options);
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+	//--------------------------------------------------------------
+	// Optimize Layout
+	//--------------------------------------------------------------
+	if (ImGui::TreeNode("Optimizer")) {
+		ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
+		if (ImGui::Button("Optimize Graph"))
+		{
+			DataVis::Optimizer::LocalSearch(m_graph, m_imgui_data.input_optimize_iterations);
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
 	}
 
-	// Optimize Layout w Local Search ============================================
-	ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
-	if (ImGui::Button("Optimize Graph"))
-	{
-		DataVis::Optimizer::LocalSearch(m_graph, m_imgui_data.input_optimize_iterations);
-	}
 }
 
 glm::vec3 ofApp::screenToWorld( glm::vec2 pos )
