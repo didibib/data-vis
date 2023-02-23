@@ -59,8 +59,9 @@ class Layout
 
 	//--------------------------------------------------------------
 	static std::unordered_map<std::string, std::string> InitLayoutDescriptions();
-	// Algorithm by Eades, 1992 https://treevis.net/scans/Eades1992.pdf
-	static void RadialSubTree(Tree::Node&, float radius, float angle_start, float angle_end, float step);
+	// Eades, 1992 https://treevis.net/scans/Eades1992.pdf
+	// Pavlo, 2006 https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1355&context=theses
+	static void RadialSubTree(Tree::Node&, float angle_start, float angle_end, int depth, float step);
 
 public:
 	static std::unordered_map<std::string, std::string>& LayoutDescriptions();
