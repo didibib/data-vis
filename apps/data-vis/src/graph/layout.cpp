@@ -111,8 +111,8 @@ void Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input) {
 
 void Layout::Radial(Tree& _tree, float _step) {
 	auto& node = _tree.Root();
-	node.position.x = 0; node.position.y = 0;
-	RadialSubTree(node, 0, TWO_PI, 0, 100);
+	node->position.x = 0; node->position.y = 0;
+	RadialSubTree(*node, 0, TWO_PI, 0, 100);
 }
 
 void Layout::RadialSubTree(Tree::Node& _node, float _alpha, float _beta, int _depth, float _step) {
@@ -136,19 +136,19 @@ void Layout::RadialSubTree(Tree::Node& _node, float _alpha, float _beta, int _de
 	};
 
 	float theta = _alpha;
-	float radius = _step + (TWO_PI * _depth);
-	int leaves = BFS(std::make_shared<Tree::Node>(_node));
+	float radius = _step + (100 * _depth);
+	float kappa = BFS(std::make_shared<Tree::Node>(_node));
 	for (auto& child : _node.children) {
-		int lambda = BFS(child);
+		float lambda = BFS(child);
 
-		float mi = theta + (lambda / leaves * (_beta - _alpha));
-		float angle = (theta + mi) * .5f;
+		float mu = theta + (lambda / kappa * (_beta - _alpha));
+		float angle = (theta + mu) * .5f;
 		child->position.x = radius * glm::cos(angle);
 		child->position.y = radius * glm::sin(angle);
 
-		for (auto& subchild : child->children)
-			RadialSubTree(*subchild, theta, mi, _depth + 1, _step);
-		theta = mi;
+		if(child->children.size() > 0)
+			RadialSubTree(*child, theta, mu, _depth + 1, _step);
+		theta = mu;
 	}
 }
 } // DataVis
