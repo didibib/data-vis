@@ -64,8 +64,7 @@ namespace DataVis
 		t.m_root = std::make_shared<Node>( Node{ _root, 0, nullptr, {}, vertices[_root].m_property.current_position } );
 
 		// Construct recursive lambda to create the tree
-		std::function<void( std::shared_ptr<Node> )> make_tree;
-		make_tree = [&]( std::shared_ptr<Node> n )
+		std::function<void( std::shared_ptr<Node> )> make_tree = [&]( std::shared_ptr<Node> n )
 		{
 			// Look through all vertices which have parent == n.vertex
 			for (int i = 0; i < vertices.size(); i++)
@@ -135,7 +134,7 @@ namespace DataVis
 		ofSetDrawBitmapMode( OF_BITMAPMODE_SIMPLE );
 		ofSetColor( 255, 0, 0 );
 		ofDrawCircle( m_root->position, radius );
-		ofDrawBitmapStringHighlight( ofToString( m_root->vertex ), m_root->position + glm::vec3( 10, 10, -1 ) );
+		ofDrawBitmapStringHighlight( ofToString( m_root->subtree_count), m_root->position + glm::vec3( 10, 10, -1 ) );
 		ofSetColor( 255 );
 		std::stack<std::shared_ptr<Node>> stack;
 		for (auto& child : m_root->children) stack.push( child );
@@ -151,7 +150,7 @@ namespace DataVis
 			ofSetColor( 255 );
 			ofDrawCircle( node->position, radius );
 			//ofDrawBitmapStringHighlight( ofToString( node->subtree_count ), node->position + glm::vec3( 10, 10, -1 ) );
-			ofDrawBitmapStringHighlight( ofToString( node->vertex ), node->position + glm::vec3( 10, 10, -1 ) );
+			ofDrawBitmapStringHighlight( ofToString( node->subtree_count), node->position + glm::vec3( 10, 10, -1 ) );
 
 			for (auto& child : node->children) stack.push( child );
 		}

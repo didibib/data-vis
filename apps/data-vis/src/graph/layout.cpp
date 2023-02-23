@@ -111,31 +111,44 @@ void Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input) {
 
 void Layout::Radial(Tree& _tree, float _step) {
 	auto& node = _tree.Root();
-	RadialSubTree(node, 0, 0, TWO_PI, _step);
+	node.position.x = 0; node.position.y = 0;
+	RadialSubTree(node, 0, TWO_PI, 0, 100);
 }
 
-void Layout::RadialSubTree(Tree::Node& _node, float _radius, float _angle_start, float _angle_end, float _step) {
-	float angle_center = (_angle_start + _angle_end) * .5f;
-	float angle_diff = _angle_end - _angle_start;
-	int width = _node.subtree_count;
-	// Set polar position of node
-	_node.position.x = _radius * glm::cos(angle_center);
-	_node.position.y = _radius * glm::sin(angle_center);
-	// Calculate angle of the wedge
-	float angle = 2 * glm::acos(_radius / (_radius + _step));
-	if (_node.parent != nullptr) angle = glm::min(static_cast<float>(width) / (_node.parent->subtree_count - 1), angle);
-	// Calculate new angles
-	float new_angle_end = angle_diff / width * _angle_start;
-	float new_angle_start = _angle_start;
-	if (angle < angle_diff) {
-		new_angle_end = angle / width;
-		new_angle_start = (_angle_start + _angle_end - angle) * .5f;
-	}
-	// Set child positions
+void Layout::RadialSubTree(Tree::Node& _node, float _alpha, float _beta, int _depth, float _step) {
+	std::function<int(std::shared_ptr < Tree::Node>)> BFS = [&](std::shared_ptr < Tree::Node> node) {
+		std::set<int> visited;
+		std::queue<std::shared_ptr<Tree::Node>> queue;
+		visited.insert(node->vertex);
+		queue.push(node);
+		int leaves = 0;
+		while (queue.empty() == false) {
+			auto& node = queue.front(); queue.pop();
+			if (node->children.size() == 0) leaves++;
+			for (auto& child : node->children) {
+				if (visited.find(child->vertex) != visited.end()) {
+					visited.insert(child->vertex);
+					queue.push(child);
+				}
+			}
+		}
+		return leaves;
+	};
+
+	float theta = _alpha;
+	float radius = _step + (TWO_PI * _depth);
+	int leaves = BFS(std::make_shared<Tree::Node>(_node));
 	for (auto& child : _node.children) {
-		float x = new_angle_end * child->subtree_count;
-		RadialSubTree(*child, _radius + _step, new_angle_start, new_angle_start + x, _step);
-		new_angle_start += x;
+		int lambda = BFS(child);
+
+		float mi = theta + (lambda / leaves * (_beta - _alpha));
+		float angle = (theta + mi) * .5f;
+		child->position.x = radius * glm::cos(angle);
+		child->position.y = radius * glm::sin(angle);
+
+		for (auto& subchild : child->children)
+			RadialSubTree(*subchild, theta, mi, _depth + 1, _step);
+		theta = mi;
 	}
 }
 } // DataVis
