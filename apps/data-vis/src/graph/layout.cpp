@@ -110,39 +110,32 @@ void Layout::RadialCmdline( Tree& _tree, std::string _cmdline_input )
 	static RadialData rd;
 	static auto options = rd.Options( );
 	ParseCmdline( options, _cmdline_input );
-	Radial( _tree, rd.step );
+	Radial( _tree, rd.step, rd.delta_angle );
 }
 
-void Layout::Radial( Tree& _tree, float _step )
+void Layout::Radial( Tree& _tree, float _step, float _delta_angle )
 {
 	auto& node = _tree.Root( );
 	node->position.x = 0; node->position.y = 0;
-	RadialSubTree( *node, 0, TWO_PI, 0, 100 );
+	RadialSubTree( *node, 0, TWO_PI, 0, _step, _delta_angle );
 }
 
-void Layout::RadialSubTree( Tree::Node& _node, float _alpha, float _beta, int _depth, float _step )
+void Layout::RadialSubTree( Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _step, float _delta_angle )
 {
-	std::function<int( std::shared_ptr < Tree::Node> )> BFS = [&]( std::shared_ptr < Tree::Node> node ) {
-		int leaves = 0;
-		if ( node->children.size( ) == 0 ) leaves++;
-		for ( auto& child : node->children ) leaves += BFS( child );
-		return leaves;
-	};
-
-	float theta = _alpha;
-	float radius = _step + ( 100 * _depth );
-	float kappa = BFS( std::make_shared<Tree::Node>( _node ) );
+	float new_wedge_start = _wedge_start;
+	float radius = _step + ( _delta_angle * _depth );
+	float parent_leaves = Tree::Extract::Leaves( std::make_shared<Tree::Node>( _node ) );
 	for ( auto& child : _node.children ) {
-		float lambda = BFS( child );
+		float child_leaves = Tree::Extract::Leaves( child );
 
-		float mu = theta + ( lambda / kappa * ( _beta - _alpha ) );
-		float angle = ( theta + mu ) * .5f;
+		float new_wedge_end = new_wedge_start + ( child_leaves / parent_leaves * ( _wedge_end - _wedge_start ) );
+		float angle = ( new_wedge_start + new_wedge_end ) * .5f;
 		child->position.x = radius * glm::cos( angle );
 		child->position.y = radius * glm::sin( angle );
 
 		if ( child->children.size( ) > 0 )
-			RadialSubTree( *child, theta, mu, _depth + 1, _step );
-		theta = mu;
+			RadialSubTree( *child, new_wedge_start, new_wedge_end, _depth + 1, _step, _delta_angle );
+		new_wedge_start = new_wedge_end;
 	}
 }
 } // DataVis

@@ -18,11 +18,12 @@ public:
 		glm::vec3 position;
 	};
 
-	class Extractor
+	class Extract
 	{
 	public:
 		static Tree MSP(Graph&, int _root);
-		static int CountSubtree( std::shared_ptr<Node> n );
+		static int CountSubtree( std::shared_ptr<Node> );
+		static int Leaves( std::shared_ptr<Node> );
 	};
 
 	//--------------------------------------------------------------
