@@ -2,79 +2,80 @@
 
 namespace DataVis
 {
-class Tree
+class Tree : public ILayout
 {
-
-public:
-	//--------------------------------------------------------------
-	struct Node
+	static const char* __RADIAL;
+	struct RadialData : Data
 	{
 	public:
-		int vertex;
-		//int subtree_count;
-		std::shared_ptr <Node> parent;
+		float step = 100;
+		float delta_angle = 100;
+		po::options_description Options() override
+		{
+			po::options_description desc(__RADIAL);
+			desc.add_options()
+				("r", po::value(&step), "Radius of the innermost concentric circle, default = 100")
+				("d", po::value(&delta_angle), "Delta angle (degrees) constant for the drawing’s concentric circles, default = 100");
+			return desc;
+		}
+	};
+	//--------------------------------------------------------------
+public:
+	struct Node : ILayout::Node
+	{
+	public:
+		Node(int _vertex_idx, glm::vec3 _current_position, std::shared_ptr<Node> _parent = nullptr)
+			: ILayout::Node(_vertex_idx, _current_position)
+		{
+			parent = _parent;
+		}
+		std::shared_ptr<Node> parent;
 		std::vector<std::shared_ptr<Node>> children;
-
-		glm::vec3 position;
 		glm::vec3 new_position;
 	};
 
 	class Extract
 	{
 	public:
-		static Tree MSP(Graph&, int _root);
-		//static int CountSubtree( std::shared_ptr<Node> );
+		// Prim's Algorithm https://www.wikiwand.com/en/Prim%27s_algorithm
+		static void MSP(Tree&, Graph&, int _root);
 	};
 
 	//--------------------------------------------------------------
-	Tree() {
-		//m_root = std::make_shared<Node>();
-		//m_root->subtree_count = 10;
-		//for (size_t i = 0; i < 3; i++)
-		//	m_root->children.push_back(std::make_shared<Node>());
-		//for (auto& child : m_root->children) {
-		//	child->parent = m_root;
-		//	child->subtree_count = 1;
-		//}
+	Tree() = default;
+	void HandleInput() override;
+	void Update(float delta_time) override;
+	void Draw() override;
+	void Gui() override;
+	std::vector<std::reference_wrapper<ILayout::Node>> Nodes() override;
 
-		//auto& child1 = m_root->children[0];
-		//child1->subtree_count = 4;
-		//for (size_t i = 0; i < 3; i++)
-		//	child1->children.push_back(std::make_shared<Node>());
-		//for (auto& child : child1->children) {
-		//	child->parent = child1;
-		//	child->subtree_count = 1;
-		//}
-
-		//auto& child2 = m_root->children[1];
-		//child2->subtree_count = 4;
-		//for (size_t i = 0; i < 3; i++)
-		//	child2->children.push_back(std::make_shared<Node>());
-		//for (auto& child : child2->children) {
-		//	child->parent = child2;
-		//	child->subtree_count = 1;
-		//}
-
-	}
-
-	void Update();
-	void Draw();
+	//--------------------------------------------------------------
 	std::shared_ptr<Node> Root() { return m_root; }
-	std::shared_ptr<Node> Select( glm::vec3 _pos );
-	static int Leaves( std::shared_ptr<Node> );
-	static int Depth( std::shared_ptr<Node> );
-	void SwapRoot( std::shared_ptr<Node> );
+	std::shared_ptr<Node> Select(glm::vec3 _pos);
+	static int Leaves(std::shared_ptr<Tree::Node>);
+	static int Depth(std::shared_ptr<Tree::Node>);
+	void SwapRoot(std::shared_ptr<Tree::Node>);
 
 	float radius = 5;
 	float speed = 5;
-	std::shared_ptr<Node> selected_node;
+	std::shared_ptr<Tree::Node> selected_node;
 
 	// Properties
 	int leaves, depth;
 
-private:
-	std::shared_ptr<Node> m_root;
+	class Layout {
+	public:
+		static const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& Functions();
+		static void RadialCmdline(Tree&, std::string);
+		static void Radial(Tree&, float step, float delta_angle);
+	private:
+		// Pavlo, 2006 https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1355&context=theses
+		static void RadialSubTree(Tree::Node&, float angle_start, float angle_end, int depth, float step, float delta_angle);
+	};
 
+	//--------------------------------------------------------------
+private:
+	std::shared_ptr<Tree::Node> m_root;
 	void SetProperties();
 };
 

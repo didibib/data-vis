@@ -17,8 +17,8 @@ namespace DataVis {
 		for (auto& edge : _graph.Edges()) {
 			int startIdx = edge.m_source;
 			int endIdx = edge.m_target;
-			glm::vec3 start = _graph.Vertices()[startIdx].m_property.current_position;
-			glm::vec3 end = _graph.Vertices()[endIdx].m_property.current_position;
+			glm::vec3 start = _graph.Nodes()[startIdx].get().position;
+			glm::vec3 end = _graph.Nodes()[endIdx].get().position;
 			cost += glm::distance(start, end);
 		}
 		return cost;
@@ -31,9 +31,9 @@ namespace DataVis {
 		cost -= CalculateNodeCost( _graph, _idx0 );
 		cost -= CalculateNodeCost( _graph, _idx1 );
 		// Temporarily swap the positions of the two nodes
-		auto& nodes = _graph.Vertices();
-		auto& pos0 = nodes[_idx0].m_property.current_position;
-		auto& pos1 = nodes[_idx1].m_property.current_position;
+		auto& nodes = _graph.Nodes();
+		auto& pos0 = nodes[_idx0].get().position;
+		auto& pos1 = nodes[_idx1].get().position;
 		auto temp = pos0;
 		pos0 = pos1;
 		pos1 = temp;
@@ -53,8 +53,8 @@ namespace DataVis {
 		for ( auto& edge : node.m_out_edges )
 		{
 			int targetIdx = edge.m_target;
-			glm::vec3 start = node.m_property.current_position;
-			glm::vec3 end = _graph.Vertices()[targetIdx].m_property.current_position;
+			glm::vec3 start = _graph.Nodes()[_idx].get().position;
+			glm::vec3 end = _graph.Nodes()[targetIdx].get().position;
 			cost += glm::distance( start, end );
 		}
 		return cost;
@@ -71,8 +71,8 @@ namespace DataVis {
 		if ( costDif < 0 )
 		{
 			// Swap the nodes
-			auto& pos0 = nodes[idx0].m_property.current_position;
-			auto& pos1 = nodes[idx1].m_property.current_position;
+			auto& pos0 = _graph.Nodes()[idx0].get().position;
+			auto& pos1 = _graph.Nodes()[idx1].get().position;
 			auto temp = pos0;
 			pos0 = pos1;
 			pos1 = temp;

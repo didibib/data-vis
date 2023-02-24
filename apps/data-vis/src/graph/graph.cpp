@@ -5,49 +5,72 @@
 #include "read_graphviz_new.cpp"
 
 namespace DataVis {
-	void Graph::Load(std::string _filename) {
-		std::string filepath = ofToDataPath(_filename, false);
-		std::ifstream file(filepath);
+void Graph::Extract::Load(Graph& _graph, std::string _filename) {
+	std::string filepath = ofToDataPath(_filename, false);
+	std::ifstream file(filepath);
 
-		if (!std::filesystem::exists(filepath)) {
-			std::cout << "W/Graph::Load: File doesn't exists: " << filepath << std::endl;
-			return;
-		}
-
-		m_graph.clear();
-		boost::dynamic_properties dp(boost::ignore_other_properties);
-		dp.property("node_id", get(&Vertex::name, m_graph));
-		dp.property("weight", get(&Edge::weight, m_graph));
-
-		boost::read_graphviz(file, m_graph, dp);
-		printf( "-- Finished loading %s \n", _filename.c_str());
+	if (!std::filesystem::exists(filepath)) {
+		std::cout << "W/Graph::Load: File doesn't exists: " << filepath << std::endl;
+		return;
 	}
 
-	void Graph::Draw()
+	_graph.m_graph.clear();
+	boost::dynamic_properties dp(boost::ignore_other_properties);
+	dp.property("node_id", get(&Vertex::name, _graph.m_graph));
+	dp.property("weight", get(&Edge::weight, _graph.m_graph));
+
+	boost::read_graphviz(file, _graph.m_graph, dp);
+	printf("-- Finished loading %s \n", _filename.c_str());
+	for (size_t i = 0; i < _graph.m_graph.m_vertices.size(); i++)
+		_graph.m_nodes.push_back(std::make_unique<ILayout::Node>(i));
+}
+
+void Graph::HandleInput()
+{
+}
+
+void Graph::Update(float delta_time)
+{
+}
+
+void Graph::Draw()
+{
+	ofFill();
+	ofSetColor(123);
+	for (const auto& edge : m_graph.m_edges) {
+		int startIdx = edge.m_source;
+		int endIdx = edge.m_target;
+		glm::vec3 start = m_nodes[startIdx]->position;
+		glm::vec3 end = m_nodes[endIdx]->position;
+		// Draw edge behind nodes
+		start -= 1;
+		end -= 1;
+		ofSetLineWidth(edge.m_property.weight);
+		ofDrawLine(start, end);
+	}
+
+	ofSetColor(255);
+	ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
+	for (size_t i = 0; i < m_nodes.size(); i++)
 	{
-		ofFill();
-		ofSetColor(123);
-		for (const auto& edge : m_graph.m_edges) {
-			int startIdx = edge.m_source;
-			int endIdx = edge.m_target;
-			glm::vec3 start = m_graph.m_vertices[startIdx].m_property.current_position;
-			glm::vec3 end = m_graph.m_vertices[endIdx].m_property.current_position;
-			// draw edge behind nodes
-			start -= 1;
-			end -= 1;
-			ofSetLineWidth( edge.m_property.weight );
-			ofDrawLine(start, end);
-		}
-
-		ofSetColor(255);
-		ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
-		for (size_t i = 0; i < m_graph.m_vertices.size(); i++)
-		{
-			auto& property = m_graph.m_vertices[i].m_property;
-			glm::vec3 pos = property.current_position;
-			ofDrawCircle(pos, radius);
-			//std::string text = property.name;
-			//ofDrawBitmapStringHighlight(text, pos);
-		}
+		glm::vec3 pos = m_nodes[i]->position;
+		ofDrawCircle(pos, radius);
 	}
+}
+void Graph::Gui()
+{
+}
+
+std::vector<std::reference_wrapper<ILayout::Node>> Graph::Nodes()
+{
+	// https://jonasdevlieghere.com/containers-of-unique-pointers/
+	static std::function<std::vector<std::reference_wrapper<ILayout::Node>>(std::vector<std::shared_ptr<ILayout::Node>>)> Wrap
+		= [&](std::vector<shared_ptr<ILayout::Node>> _nodes) {
+		std::vector<std::reference_wrapper<ILayout::Node>> nodes;
+		for (auto& n : _nodes) nodes.push_back(std::ref(*n));
+		return nodes;
+	};
+	static auto nodes = Wrap(m_nodes);
+	return nodes;
+}
 }

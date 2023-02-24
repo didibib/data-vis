@@ -9,16 +9,14 @@ struct ImGuiData
 
 class ofApp : public ofBaseApp{
 
-	DataVis::Graph m_graph;
-	DataVis::Tree m_tree;
 	ofEasyCam m_camera;
-
+	std::vector<std::unique_ptr<DataVis::ILayout>> m_layouts;
 
 	ImGuiData m_imgui_data;
 	std::vector<string> m_graph_file_names;
 	std::string m_current_graph_file = "";
 
-	void LoadGraphFiles();
+	void LoadDotFiles();
 	glm::vec3 screenToWorld( glm::vec2 );
 
 	public:
