@@ -24,7 +24,7 @@ void ofApp::setup() {
 	m_graph.Load(m_current_graph_file);
 	DataVis::Layout::Random(m_graph, 800, 600);
 	DataVis::Optimizer::LocalSearch( m_graph, 50000 );
-	//m_tree = DataVis::Tree::Extractor::MSP(m_graph, 0);
+	m_tree = DataVis::Tree::Extract::MSP(m_graph, 0);
 	DataVis::Layout::Radial(m_tree, 100, 150);
 }
 
@@ -44,7 +44,10 @@ void ofApp::update() {
 	const ImGuiIO& io = ImGui::GetIO();
 	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
 		m_camera.disableMouseInput();
-	else m_camera.enableMouseInput();
+	else m_camera.enableMouseInput();	
+	m_tree.Update();
+
+	//ofResetElapsedTimeCounter();
 }
 
 //--------------------------------------------------------------
@@ -78,7 +81,7 @@ void ofApp::exit() {
 
 void ofApp::Gui()
 {
-
+	ImGui::Begin( "Settings" );
 	//--------------------------------------------------------------
 	// Loading Graph 
 	//--------------------------------------------------------------
@@ -160,7 +163,23 @@ void ofApp::Gui()
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
+	ImGui::End();
 
+	if (m_tree.selected_node != nullptr)
+	{
+		ImGui::Begin( "Selected Node" );
+
+		ImGui::Text( "Vertex: %i", m_tree.selected_node->vertex );
+		ImGui::Text( "Position: (%f.0, %f.0)", m_tree.selected_node->position.x, m_tree.selected_node->position.y );
+
+		if (ImGui::Button( "Make root" ))
+		{
+			//m_tree = DataVis::Tree::Extract::MSP( m_graph, m_tree.selected_node->vertex );
+			m_tree.SwapRoot( m_tree.selected_node );
+			DataVis::Layout::Radial( m_tree, 100, 150 );
+		}
+		ImGui::End();
+	}
 }
 
 glm::vec3 ofApp::screenToWorld( glm::vec2 pos )
@@ -195,6 +214,9 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
+	const ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse) return;
+
 	if (button == OF_MOUSE_BUTTON_LEFT)
 	{
 		glm::vec3 world_pos = screenToWorld( { x, y } );
@@ -203,9 +225,11 @@ void ofApp::mousePressed(int x, int y, int button) {
 		if (selected != nullptr)
 		{
 			printf( "Selected vertex %i\n", selected->vertex );
-			m_tree = DataVis::Tree::Extract::MSP( m_graph, selected->vertex );
-			//DataVis::Layout::Radial( m_tree, 100 );
+			//m_tree = DataVis::Tree::Extract::MSP( m_graph, selected->vertex );
+			//DataVis::Layout::Radial( m_tree, 100, 150 );
 		}
+		m_tree.selected_node = selected;
+
 			
 	}
 }

@@ -116,7 +116,7 @@ void Layout::RadialCmdline( Tree& _tree, std::string _cmdline_input )
 void Layout::Radial( Tree& _tree, float _step, float _delta_angle )
 {
 	auto& node = _tree.Root( );
-	node->position.x = 0; node->position.y = 0;
+	node->new_position.x = 0; node->new_position.y = 0;
 	RadialSubTree( *node, 0, TWO_PI, 0, _step, _delta_angle );
 }
 
@@ -124,14 +124,14 @@ void Layout::RadialSubTree( Tree::Node& _node, float _wedge_start, float _wedge_
 {
 	float new_wedge_start = _wedge_start;
 	float radius = _step + ( _delta_angle * _depth );
-	float parent_leaves = Tree::Extract::Leaves( std::make_shared<Tree::Node>( _node ) );
+	float parent_leaves = Tree::Leaves( std::make_shared<Tree::Node>( _node ) );
 	for ( auto& child : _node.children ) {
-		float child_leaves = Tree::Extract::Leaves( child );
+		float child_leaves = Tree::Leaves( child );
 
 		float new_wedge_end = new_wedge_start + ( child_leaves / parent_leaves * ( _wedge_end - _wedge_start ) );
 		float angle = ( new_wedge_start + new_wedge_end ) * .5f;
-		child->position.x = radius * glm::cos( angle );
-		child->position.y = radius * glm::sin( angle );
+		child->new_position.x = radius * glm::cos( angle );
+		child->new_position.y = radius * glm::sin( angle );
 
 		if ( child->children.size( ) > 0 )
 			RadialSubTree( *child, new_wedge_start, new_wedge_end, _depth + 1, _step, _delta_angle );
