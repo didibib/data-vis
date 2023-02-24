@@ -3,17 +3,17 @@
 namespace DataVis
 {
 namespace po = boost::program_options;
-class Layout
+class ILayout
 {
-	static const char* RANDOM;
-	static const char* GRID;
-	static const char* RADIAL;
-
+	static const char* __RANDOM;
+	static const char* __GRID;
 	//--------------------------------------------------------------
+protected:
 	struct Data {
 		virtual po::options_description Options() = 0;
 		virtual ~Data() {}
 	};
+
 	struct RandomData : Data
 	{
 	public:
@@ -21,7 +21,7 @@ class Layout
 		float height = 600;
 		po::options_description Options() override
 		{
-			po::options_description desc(RANDOM);
+			po::options_description desc(__RANDOM);
 			desc.add_options()
 				("w", po::value(&width), "Range width, default = 800")
 				("h", po::value(&height), "Range Height, default = 600");
@@ -37,7 +37,7 @@ class Layout
 		float step = 100;
 		po::options_description Options() override
 		{
-			po::options_description desc(GRID);
+			po::options_description desc(__GRID);
 			desc.add_options()
 				("w", po::value(&width), "Width, default = 800")
 				("h", po::value(&height), "Height, default = 600")
@@ -46,40 +46,42 @@ class Layout
 		}
 	};
 
-	struct RadialData : Data
-	{
+	//--------------------------------------------------------------
+public:
+	struct Node {
 	public:
-		float step = 100;
-		float delta_angle = 100;
-		po::options_description Options() override
-		{
-			po::options_description desc(GRID);
-			desc.add_options()
-				("r", po::value(&step), "Radius of the innermost concentric circle, default = 100")
-				("d", po::value(&delta_angle), "Delta angle (degrees) constant for the drawing’s concentric circles, default = 100" );
-			return desc;
+		Node(int _vertex_idx, glm::vec3 _position = glm::vec3(0)) {
+			vertex_idx = _vertex_idx;
+			position = _position;
 		}
+		int vertex_idx = -1;
+		glm::vec3 position = glm::vec3(0);
 	};
 
 	//--------------------------------------------------------------
-	static std::unordered_map<std::string, std::string> InitLayoutDescriptions();
-	// Pavlo, 2006 https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1355&context=theses
-	static void RadialSubTree(Tree::Node&, float angle_start, float angle_end, int depth, float step, float delta_angle);
+	ILayout();
+	virtual ~ILayout();
+	const int& Idx();
+	virtual void HandleInput() = 0;
+	virtual void Update(float delta_time) = 0;
+	virtual void Draw() = 0;
+	virtual void Gui() = 0;
+	virtual std::vector<std::reference_wrapper<ILayout::Node>> Nodes() = 0;
 
+private:
+	static int __idx;
+	int m_idx = 0;
+
+	//--------------------------------------------------------------
+private:
+	static std::unordered_map<std::string, std::string> InitLayoutDescriptions();
 public:
 	static std::unordered_map<std::string, std::string>& LayoutDescriptions();
-	static const std::vector <std::pair<std::string, std::function<void(Graph&, std::string)>>>& GraphLayoutFunctions();
-	static const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& TreeLayoutFunctions();
+	static const std::vector <std::pair<std::string, std::function<void(ILayout&, std::string)>>>& LayoutFunctions();
+	static void RandomCmdline(ILayout&, std::string);
+	static void GridCmdline(ILayout&, std::string);
 
-	//--------------------------------------------------------------
-	static void RandomCmdline(Graph&, std::string);
-	static void GridCmdline(Graph&, std::string);
-
-	static void Random(Graph&, int width, int height);
-	static void Grid(Graph&, int width, int height, float step);
-
-	//--------------------------------------------------------------
-	static void RadialCmdline(Tree&, std::string);
-	static void Radial(Tree&, float step, float delta_angle );
+	static void Random(ILayout&, int width, int height);
+	static void Grid(ILayout&, int width, int height, float step);
 };
-}
+} // DataVis

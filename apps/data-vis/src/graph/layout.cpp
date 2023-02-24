@@ -2,18 +2,25 @@
 
 namespace DataVis
 {
-const char* Layout::RANDOM = "Random";
-const char* Layout::GRID = "Grid";
-const char* Layout::RADIAL = "Radial";
+const char* ILayout::__RANDOM = "Random";
+const char* ILayout::__GRID = "Grid";
+int ILayout::__idx = 0;
+
+ILayout::ILayout() {
+	m_idx = __idx++;
+}
+
+ILayout::~ILayout() {
+	__idx--;
+}
 
 //--------------------------------------------------------------
-std::unordered_map<std::string, std::string> Layout::InitLayoutDescriptions( )
+std::unordered_map<std::string, std::string> ILayout::InitLayoutDescriptions( )
 {
 	std::unordered_map<std::string, std::string> layout_descriptions;
 	std::vector<Data*> data = {
 		new RandomData( ),
-		new GridData( ),
-		new RadialData( )
+		new GridData( )
 	};
 	for ( auto& d : data ) {
 		auto& desc = d->Options( );
@@ -28,42 +35,37 @@ std::unordered_map<std::string, std::string> Layout::InitLayoutDescriptions( )
 	return layout_descriptions;
 }
 
-std::unordered_map<std::string, std::string>& Layout::LayoutDescriptions( )
+//--------------------------------------------------------------
+std::unordered_map<std::string, std::string>& ILayout::LayoutDescriptions( )
 {
-	static std::unordered_map<std::string, std::string> layout_descriptions = Layout::InitLayoutDescriptions( );
+	static std::unordered_map<std::string, std::string> layout_descriptions = ILayout::InitLayoutDescriptions( );
 	return layout_descriptions;
 }
 
-const std::vector <std::pair<std::string, std::function<void( Graph&, std::string )>>>& Layout::GraphLayoutFunctions( )
+//--------------------------------------------------------------
+const std::vector <std::pair<std::string, std::function<void(ILayout&, std::string )>>>& ILayout::LayoutFunctions( )
 {
-	static std::vector <std::pair<std::string, std::function<void( Graph&, std::string )>>> layout_functions = {
-		{ RANDOM, Layout::RandomCmdline },
-		{ GRID, Layout::GridCmdline }
-	};
-	return layout_functions;
-}
-const std::vector <std::pair<std::string, std::function<void( Tree&, std::string )>>>& Layout::TreeLayoutFunctions( )
-{
-	static std::vector <std::pair<std::string, std::function<void( Tree&, std::string )>>> layout_functions = {
-		{ RADIAL, Layout::RadialCmdline }
+	static std::vector <std::pair<std::string, std::function<void(ILayout&, std::string )>>> layout_functions = {
+		{ __RANDOM, ILayout::RandomCmdline },
+		{ __GRID, ILayout::GridCmdline }
 	};
 	return layout_functions;
 }
 
 //--------------------------------------------------------------
-void Layout::RandomCmdline( Graph& _graph, std::string _cmdline_input )
+void ILayout::RandomCmdline(ILayout& _layout, std::string _cmdline_input )
 {
 	static RandomData rd;
 	static auto options = rd.Options( );
 	ParseCmdline( options, _cmdline_input );
-	Random( _graph, rd.width, rd.height );
+	Random(_layout, rd.width, rd.height );
 }
 
-void Layout::Random( Graph& _graph, int _width, int _height )
+void ILayout::Random( ILayout& _layout, int _width, int _height )
 {
-	auto& nodes = _graph.Vertices( );
+	auto& nodes = _layout.Nodes( );
 	for ( size_t i = 0; i < nodes.size( ); i++ ) {
-		auto& current_position = nodes[i].m_property.current_position;
+		auto& current_position = nodes[i].get().position;
 		float x = Random::RangeF( _width );
 		float y = Random::RangeF( _height );
 		float z = 0;
@@ -72,17 +74,17 @@ void Layout::Random( Graph& _graph, int _width, int _height )
 }
 
 //--------------------------------------------------------------
-void Layout::GridCmdline( Graph& _graph, std::string _cmdline_input )
+void ILayout::GridCmdline(ILayout& _layout, std::string _cmdline_input )
 {
 	static GridData gd;
 	static auto options = gd.Options( );
 	ParseCmdline( options, _cmdline_input );
-	Grid( _graph, gd.width, gd.height, gd.step );
+	Grid(_layout, gd.width, gd.height, gd.step );
 }
 
-void Layout::Grid( Graph& _graph, int _width, int _height, float _step )
+void ILayout::Grid( ILayout& _layout, int _width, int _height, float _step )
 {
-	auto& nodes = _graph.Vertices( );
+	auto& nodes = _layout.Nodes( );
 	std::vector<glm::vec3> grid;
 	// Increment width and height if there are more nodes then positions
 	while ( nodes.size( ) > _width * _height ) _width++, _height++;
@@ -99,43 +101,7 @@ void Layout::Grid( Graph& _graph, int _width, int _height, float _step )
 	std::shuffle( std::begin( grid ), std::end( grid ), Random::MT19937 );
 	// Assign positions
 	for ( size_t i = 0; i < nodes.size( ); i++ ) {
-		auto& current_position = nodes[i].m_property.current_position;
-		current_position = grid[i];
-	}
-}
-
-//--------------------------------------------------------------
-void Layout::RadialCmdline( Tree& _tree, std::string _cmdline_input )
-{
-	static RadialData rd;
-	static auto options = rd.Options( );
-	ParseCmdline( options, _cmdline_input );
-	Radial( _tree, rd.step, rd.delta_angle );
-}
-
-void Layout::Radial( Tree& _tree, float _step, float _delta_angle )
-{
-	auto& node = _tree.Root( );
-	node->new_position.x = 0; node->new_position.y = 0;
-	RadialSubTree( *node, 0, TWO_PI, 0, _step, _delta_angle );
-}
-
-void Layout::RadialSubTree( Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _step, float _delta_angle )
-{
-	float new_wedge_start = _wedge_start;
-	float radius = _step + ( _delta_angle * _depth );
-	float parent_leaves = Tree::Leaves( std::make_shared<Tree::Node>( _node ) );
-	for ( auto& child : _node.children ) {
-		float child_leaves = Tree::Leaves( child );
-
-		float new_wedge_end = new_wedge_start + ( child_leaves / parent_leaves * ( _wedge_end - _wedge_start ) );
-		float angle = ( new_wedge_start + new_wedge_end ) * .5f;
-		child->new_position.x = radius * glm::cos( angle );
-		child->new_position.y = radius * glm::sin( angle );
-
-		if ( child->children.size( ) > 0 )
-			RadialSubTree( *child, new_wedge_start, new_wedge_end, _depth + 1, _step, _delta_angle );
-		new_wedge_start = new_wedge_end;
+		nodes[i].get().position = grid[i];
 	}
 }
 } // DataVis
