@@ -52,29 +52,80 @@ public:
 	public:
 		Node(int _vertex_idx, glm::vec3 _position = glm::vec3(0)) {
 			vertex_idx = _vertex_idx;
-			position = _position;
+			m_position = _position;
 			m_old_position = _position;
+			m_bounding_box = ofRectangle(_position - glm::vec2(m_radius), m_radius * 2, m_radius * 2);
 		}
 
-		void EaseInEaseOut(float _t, float _speed = .1f) {
-			m_time += _t * _speed;
-			if (m_time < 1) {
+		void EaseInEaseOut(float _t, float _speed = .2f) {
+			if (m_time > 1) {
+				m_animate = false;
+				m_time = 0;
+			}
+			if (m_animate) {
+				m_time += _t * _speed;
 				float p = Curve::Bezier(m_time);
-				position = (1 - p) * m_old_position + p * new_position;
+				SetPosition((1 - p) * m_old_position + p * m_new_position);
 				if (p >= .999f) {
+					m_animate = false;
 					m_time = 0;
-					position = new_position;
-					m_old_position = new_position;
+					SetPosition(m_new_position);
+					m_old_position = m_new_position;
 				}
 			}
 		}
 
+		const glm::vec3& GetPosition() {
+			return m_position;
+		}
+
+		void SetPosition(glm::vec3& _position) {
+			m_position = _position;
+			m_bounding_box.setPosition(_position - glm::vec2(m_radius));
+		}
+
+		void SetNewPosition(glm::vec3& _new_position) {
+			m_new_position = _new_position;
+			m_animate = true;
+		}
+
+		const float& GetRadius() {
+			return m_radius;
+		}
+
+		void SetRadius(float _radius) {
+			m_radius = _radius;
+			m_bounding_box.setSize(_radius * 2, _radius * 2);
+		}
+
+		bool Inside(const ofCamera& _camera, glm::vec3 _position) {
+			glm::vec3 bottom_left = _camera.worldToScreen(m_bounding_box.getBottomLeft());
+			glm::vec3 bottom_right = _camera.worldToScreen(m_bounding_box.getBottomRight());
+			glm::vec3 top_right = _camera.worldToScreen(m_bounding_box.getTopRight());
+			glm::vec3 top_left = _camera.worldToScreen(m_bounding_box.getTopLeft());
+
+			ofPolyline p;
+			p.addVertex(bottom_left);
+			p.addVertex(bottom_right);
+			p.addVertex(top_right);
+			p.addVertex(top_left);
+
+			bool inside = p.inside(_position);
+			if (inside) color = ofColor::green;
+			else color = ofColor::white;
+			return inside;
+		}
+
 		int vertex_idx = -1;
-		glm::vec3 position = glm::vec3(0);
-		glm::vec3 new_position = glm::vec3(0);
+		ofColor color;
+		ofRectangle m_bounding_box;
 	protected:
+		glm::vec3 m_position = glm::vec3(0);
+		glm::vec3 m_new_position = glm::vec3(0);
 		glm::vec3 m_old_position = glm::vec3(0);
+		float m_radius = 10;
 		float m_time = 0;
+		bool m_animate = true;
 	};
 
 	//--------------------------------------------------------------
@@ -82,6 +133,7 @@ public:
 	virtual ~ILayout();
 	const int& Idx();
 	virtual void HandleInput() = 0;
+	virtual void Select(const ofCamera&, const glm::vec3&) = 0;
 	virtual void Update(float delta_time) = 0;
 	virtual void Draw() = 0;
 	virtual void Gui() = 0;

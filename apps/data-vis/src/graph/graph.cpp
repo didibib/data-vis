@@ -34,6 +34,10 @@ void Graph::HandleInput()
 {
 }
 
+void Graph::Select(const ofCamera&, const glm::vec3& _position) {
+	
+}
+
 void Graph::Update(float delta_time)
 {
 }
@@ -45,8 +49,8 @@ void Graph::Draw()
 	for (const auto& edge : m_graph.m_edges) {
 		int startIdx = edge.m_source;
 		int endIdx = edge.m_target;
-		glm::vec3 start = m_nodes[startIdx]->position;
-		glm::vec3 end = m_nodes[endIdx]->position;
+		glm::vec3 start = m_nodes[startIdx]->GetPosition();
+		glm::vec3 end = m_nodes[endIdx]->GetPosition();
 		// Draw edge behind nodes
 		start -= 1;
 		end -= 1;
@@ -58,7 +62,7 @@ void Graph::Draw()
 	ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 	for (size_t i = 0; i < m_nodes.size(); i++)
 	{
-		glm::vec3 pos = m_nodes[i]->position;
+		glm::vec3 pos = m_nodes[i]->GetPosition();
 		ofDrawCircle(pos, radius);
 	}
 }
