@@ -69,7 +69,7 @@ void Tree::Extract::MSP(Tree& _tree, Graph& _graph, int _root)
 			}
 	};
 	MakeTree(_tree.m_root);
-	_tree.SetProperties();
+	_tree.PostBuild();
 }
 
 //--------------------------------------------------------------
@@ -143,14 +143,15 @@ void Tree::SwapRoot(std::shared_ptr<Node> _new_root)
 	}
 
 	m_root = _new_root;
-	SetProperties();
+	PostBuild();
 }
 
 //--------------------------------------------------------------
-void Tree::SetProperties()
+void Tree::PostBuild()
 {
 	leaves = Leaves(m_root);
 	depth = Depth(m_root);
+	CreateReferenceNodes();
 }
 
 //--------------------------------------------------------------
@@ -160,12 +161,12 @@ void Tree::HandleInput()
 
 void Tree::Update(float _delta_time)
 {
-	std::function<void(std::shared_ptr<Node>)> Move = [&](std::shared_ptr<Node> n) {
-		if (glm::length(n->position - n->new_position) < 2 * speed) n->position = n->new_position;
-		else n->position += normalize(n->new_position - n->position) * speed;
-		for (auto child : n->children) Move(child);
+	// TODO: Check if we should animate before traversing
+	std::function<void(std::shared_ptr<Node>)> EaseInEaseOut = [&](std::shared_ptr<Node> n) {
+		n->EaseInEaseOut(_delta_time);
+		for (auto child : n->children) EaseInEaseOut(child);
 	};
-	Move(m_root);
+	EaseInEaseOut(m_root);
 }
 
 //--------------------------------------------------------------
@@ -210,8 +211,7 @@ void Tree::Gui()
 {
 }
 
-std::vector<std::reference_wrapper<ILayout::Node>> Tree::Nodes()
-{
+void Tree::CreateReferenceNodes() {
 	// https://jonasdevlieghere.com/containers-of-unique-pointers/
 	static std::function<std::vector<std::reference_wrapper<ILayout::Node>>(std::shared_ptr<Tree::Node>)> Wrap
 		= [&](shared_ptr<Tree::Node> _root) {
@@ -225,15 +225,17 @@ std::vector<std::reference_wrapper<ILayout::Node>> Tree::Nodes()
 		}
 		return nodes;
 	};
-	static auto nodes = Wrap(m_root);
-	return nodes;
+	m_reference_nodes = Wrap(m_root);
 }
 
+std::vector<std::reference_wrapper<ILayout::Node>> Tree::Nodes()
+{
+	return m_reference_nodes;
+}
 
 //--------------------------------------------------------------
 // Layouts
 //--------------------------------------------------------------
-
 const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& Tree::Layout::Functions()
 {
 	static std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>> layout_functions = {
@@ -263,11 +265,8 @@ void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _w
 	float new_wedge_start = _wedge_start;
 	float radius = _step + (_delta_angle * _depth);
 	float parent_leaves = Tree::Leaves(std::make_shared<Tree::Node>(_node));
-	std::cout << "parent_leaves " << parent_leaves << std::endl;
 	for (auto& child : _node.children) {
 		float child_leaves = Tree::Leaves(child);
-		std::cout << "child_leaves " << child_leaves << std::endl;
-
 		float new_wedge_end = new_wedge_start + (child_leaves / parent_leaves * (_wedge_end - _wedge_start));
 		float angle = (new_wedge_start + new_wedge_end) * .5f;
 		child->new_position.x = radius * glm::cos(angle);
@@ -278,6 +277,4 @@ void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _w
 		new_wedge_start = new_wedge_end;
 	}
 }
-
-
 } // DataVis

@@ -36,9 +36,13 @@ namespace DataVis {
 		auto& Vertices() { return m_graph.m_vertices; }
 
 		float radius = 10;
+	protected:
+		void PostBuild() override;
 
 	private:
-		std::vector<std::shared_ptr<ILayout::Node>> m_nodes;
+		void CreateReferenceNodes();
 		graph_u m_graph;
+		std::vector<std::shared_ptr<ILayout::Node>> m_nodes;
+		std::vector<std::reference_wrapper<ILayout::Node>> m_reference_nodes;
 	};
 }
