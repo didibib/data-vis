@@ -53,9 +53,28 @@ public:
 		Node(int _vertex_idx, glm::vec3 _position = glm::vec3(0)) {
 			vertex_idx = _vertex_idx;
 			position = _position;
+			m_old_position = _position;
 		}
+
+		void EaseInEaseOut(float _t, float _speed = .1f) {
+			m_time += _t * _speed;
+			if (m_time < 1) {
+				float p = Curve::Bezier(m_time);
+				position = (1 - p) * m_old_position + p * new_position;
+				if (p >= .999f) {
+					m_time = 0;
+					position = new_position;
+					m_old_position = new_position;
+				}
+			}
+		}
+
 		int vertex_idx = -1;
 		glm::vec3 position = glm::vec3(0);
+		glm::vec3 new_position = glm::vec3(0);
+	protected:
+		glm::vec3 m_old_position = glm::vec3(0);
+		float m_time = 0;
 	};
 
 	//--------------------------------------------------------------
@@ -67,6 +86,9 @@ public:
 	virtual void Draw() = 0;
 	virtual void Gui() = 0;
 	virtual std::vector<std::reference_wrapper<ILayout::Node>> Nodes() = 0;
+
+protected:
+	virtual void PostBuild() = 0;
 
 private:
 	static int __idx;

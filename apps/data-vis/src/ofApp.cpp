@@ -55,7 +55,8 @@ void ofApp::update() {
 		m_camera.disableMouseInput();
 	else m_camera.enableMouseInput();	
 	for (auto& layout : m_layouts) {
-		layout.get()->Update(ofGetElapsedTimef());
+		float t = ofGetLastFrameTime();
+		layout.get()->Update(t);
 	}
 }
 

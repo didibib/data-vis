@@ -23,6 +23,11 @@ void Graph::Extract::Load(Graph& _graph, std::string _filename) {
 	printf("-- Finished loading %s \n", _filename.c_str());
 	for (size_t i = 0; i < _graph.m_graph.m_vertices.size(); i++)
 		_graph.m_nodes.push_back(std::make_unique<ILayout::Node>(i));
+	_graph.PostBuild();
+}
+
+void Graph::PostBuild() {
+	CreateReferenceNodes();
 }
 
 void Graph::HandleInput()
@@ -57,12 +62,12 @@ void Graph::Draw()
 		ofDrawCircle(pos, radius);
 	}
 }
+
 void Graph::Gui()
 {
 }
 
-std::vector<std::reference_wrapper<ILayout::Node>> Graph::Nodes()
-{
+void Graph::CreateReferenceNodes() {
 	// https://jonasdevlieghere.com/containers-of-unique-pointers/
 	static std::function<std::vector<std::reference_wrapper<ILayout::Node>>(std::vector<std::shared_ptr<ILayout::Node>>)> Wrap
 		= [&](std::vector<shared_ptr<ILayout::Node>> _nodes) {
@@ -70,7 +75,11 @@ std::vector<std::reference_wrapper<ILayout::Node>> Graph::Nodes()
 		for (auto& n : _nodes) nodes.push_back(std::ref(*n));
 		return nodes;
 	};
-	static auto nodes = Wrap(m_nodes);
-	return nodes;
+	m_reference_nodes = Wrap(m_nodes);
+}
+
+std::vector<std::reference_wrapper<ILayout::Node>> Graph::Nodes()
+{
+	return m_reference_nodes;
 }
 }

@@ -33,6 +33,14 @@ namespace Random {
 	float RangeF(float _range) { return Float() * _range; }
 
 }
+
+namespace Curve {
+float Bezier(float _t)
+{
+	return _t * _t * (3.0f - 2.0f * _t);
+}
+}
+
 //--------------------------------------------------------------
 void ParseCmdline(const boost::program_options::options_description& _options, std::string _cmdline_input) {
 	namespace po = boost::program_options;

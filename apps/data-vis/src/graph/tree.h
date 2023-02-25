@@ -31,7 +31,6 @@ public:
 		}
 		std::shared_ptr<Node> parent;
 		std::vector<std::shared_ptr<Node>> children;
-		glm::vec3 new_position;
 	};
 
 	class Extract
@@ -75,8 +74,11 @@ public:
 
 	//--------------------------------------------------------------
 private:
+	void CreateReferenceNodes();
+	void PostBuild();
+
 	std::shared_ptr<Tree::Node> m_root;
-	void SetProperties();
+	std::vector<std::reference_wrapper<ILayout::Node>> m_reference_nodes;
 };
 
 } // DataVis
