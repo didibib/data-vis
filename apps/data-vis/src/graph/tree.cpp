@@ -55,7 +55,7 @@ void Tree::Extract::MSP(Tree& _tree, Graph& _graph, int _root)
 	}
 
 	// Construct a tree
-	_tree.m_root = std::make_shared<Node>(Node(_root, _graph.Nodes()[_root].get().position));
+	_tree.m_root = std::make_shared<Node>(Node(_root, _graph.Nodes()[_root].get().GetPosition()));
 
 	// Construct recursive lambda to create the tree
 	static std::function<void(std::shared_ptr<Node>)> MakeTree = [&](std::shared_ptr<Node> n) {
@@ -63,7 +63,7 @@ void Tree::Extract::MSP(Tree& _tree, Graph& _graph, int _root)
 		for (int i = 0; i < vertices.size(); i++)
 			if (parents[i] == n->vertex_idx) {
 				// Add node to n.children
-				auto child = std::make_shared<Node>(Node(i, _graph.Nodes()[i].get().position, n));
+				auto child = std::make_shared<Node>(Node(i, _graph.Nodes()[i].get().GetPosition(), n));
 				n->children.push_back(child);
 				MakeTree(child);
 			}
@@ -92,23 +92,7 @@ int Tree::Depth(std::shared_ptr<Node> node)
 	return max + 1;
 }
 
-//--------------------------------------------------------------
-std::shared_ptr<Tree::Node> Tree::Select(glm::vec3 _pos)
-{
-	// Loop through all nodes and find one within radius of pos
-	std::function<std::shared_ptr<Node>(std::shared_ptr<Node>)> select_in_tree = [&](std::shared_ptr<Tree::Node> n) {
-		if (glm::length(n->position - _pos) < radius) {
-			return n;
-		}
-		for (auto& child : n->children) {
-			std::shared_ptr<Node> selected = select_in_tree(child);
-			if (selected != nullptr) return selected;
-		}
-		std::shared_ptr<Node> temp = nullptr;
-		return temp;
-	};
-	return select_in_tree(m_root);
-}
+
 
 //--------------------------------------------------------------
 void Tree::SwapRoot(std::shared_ptr<Node> _new_root)
@@ -159,6 +143,22 @@ void Tree::HandleInput()
 {
 }
 
+void Tree::Select(const ofCamera& _camera, const glm::vec3& _position)
+{
+	std::function<std::shared_ptr<Tree::Node>(std::shared_ptr<Tree::Node>)> Select = [&](std::shared_ptr<Tree::Node> _node) {
+		if (_node.get()->Inside(_camera, _position)) return _node;
+		std::stack<std::shared_ptr<Tree::Node>> stack;
+		for (auto& child : _node->children) stack.push(child);
+		while (stack.empty() == false) {
+			auto& node = stack.top(); stack.pop();
+			if (node.get()->Inside(_camera, _position)) return node;
+			for (auto& child : node->children) stack.push(child);
+		}
+		return std::shared_ptr<Tree::Node>();
+	};
+	m_selected_node = Select(m_root);
+}
+
 void Tree::Update(float _delta_time)
 {
 	// TODO: Check if we should animate before traversing
@@ -176,7 +176,8 @@ void Tree::Draw()
 
 	// Draw radial circles
 	ofNoFill();
-	ofSetColor(65);
+	ofSetColor(65); 
+	ofSetCircleResolution(50);
 	for (int i = 0; i < depth - 1; i++)
 	{
 		ofDrawCircle(glm::vec3(0), 100 + i * 150);
@@ -185,9 +186,9 @@ void Tree::Draw()
 	// Draw nodes and edges
 	ofFill();
 	ofSetColor(255, 0, 0);
-	ofDrawCircle(m_root->position, radius);
-	ofDrawBitmapStringHighlight(ofToString(m_root->vertex_idx), m_root->position + glm::vec3(10, 10, -1));
-	ofSetColor(255);
+	ofDrawCircle(m_root->GetPosition(), m_root->GetRadius());
+	ofDrawBitmapStringHighlight(ofToString(m_root->vertex_idx), m_root->GetPosition() + glm::vec3(10, 10, -1));
+
 	std::stack<std::shared_ptr<Node>> stack;
 	for (auto& child : m_root->children) stack.push(child);
 
@@ -195,13 +196,14 @@ void Tree::Draw()
 		auto node = stack.top(); stack.pop();
 		auto parent = node->parent;
 		static glm::vec3 sub = { 0, 0, -1 }; // To draw edge behind nodes
+		ofFill();
 		ofSetColor(123);
-		ofDrawLine(parent->position + sub, node->position + sub);
+		ofDrawLine(parent->GetPosition() + sub, node->GetPosition() + sub);
 
-		ofSetColor(255);
-		ofDrawCircle(node->position, radius);
-		//ofDrawBitmapStringHighlight( ofToString( node->subtree_count ), node->position + glm::vec3( 10, 10, -1 ) );
-		ofDrawBitmapStringHighlight(ofToString(node->vertex_idx), node->position + glm::vec3(10, 10, -1));
+		ofSetColor(node->color);
+		ofDrawCircle(node->GetPosition(), node->GetRadius());
+
+		ofDrawBitmapStringHighlight(ofToString(node->vertex_idx), node->GetPosition() + glm::vec3(10, 10, -1));
 
 		for (auto& child : node->children) stack.push(child);
 	}
@@ -209,6 +211,21 @@ void Tree::Draw()
 
 void Tree::Gui()
 {
+	if (m_selected_node.get() != nullptr)
+	{
+		auto x = m_selected_node.get();
+		ImGui::Begin("Selected Node");
+
+		ImGui::Text("Vertex: %i", m_selected_node->vertex_idx);
+		ImGui::Text("Position: (%f.0, %f.0)", m_selected_node->GetPosition().x, m_selected_node->GetPosition().y);
+
+		if (ImGui::Button("Make root"))
+		{
+			SwapRoot(m_selected_node);
+			Tree::Layout::Radial(*this, 100, 150);
+		}
+		ImGui::End();
+	}
 }
 
 void Tree::CreateReferenceNodes() {
@@ -256,7 +273,7 @@ void Tree::Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input)
 void Tree::Layout::Radial(Tree& _tree, float _step, float _delta_angle)
 {
 	auto& node = _tree.Root();
-	node->new_position.x = 0; node->new_position.y = 0;
+	node->SetNewPosition(glm::vec3(0));
 	RadialSubTree(*node, 0, TWO_PI, 0, _step, _delta_angle);
 }
 
@@ -269,9 +286,7 @@ void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _w
 		float child_leaves = Tree::Leaves(child);
 		float new_wedge_end = new_wedge_start + (child_leaves / parent_leaves * (_wedge_end - _wedge_start));
 		float angle = (new_wedge_start + new_wedge_end) * .5f;
-		child->new_position.x = radius * glm::cos(angle);
-		child->new_position.y = radius * glm::sin(angle);
-
+		child->SetNewPosition(glm::vec3(radius * glm::cos(angle), radius * glm::sin(angle), 0));
 		if (child->children.size() > 0)
 			RadialSubTree(*child, new_wedge_start, new_wedge_end, _depth + 1, _step, _delta_angle);
 		new_wedge_start = new_wedge_end;

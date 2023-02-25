@@ -43,6 +43,7 @@ public:
 	//--------------------------------------------------------------
 	Tree() = default;
 	void HandleInput() override;
+	void Select(const ofCamera&, const glm::vec3&) override;
 	void Update(float delta_time) override;
 	void Draw() override;
 	void Gui() override;
@@ -50,17 +51,15 @@ public:
 
 	//--------------------------------------------------------------
 	std::shared_ptr<Node> Root() { return m_root; }
-	std::shared_ptr<Node> Select(glm::vec3 _pos);
 	static int Leaves(std::shared_ptr<Tree::Node>);
 	static int Depth(std::shared_ptr<Tree::Node>);
 	void SwapRoot(std::shared_ptr<Tree::Node>);
 
-	float radius = 5;
 	float speed = 5;
 	std::shared_ptr<Tree::Node> selected_node;
 
 	// Properties
-	int leaves, depth;
+	int leaves = 0, depth = 0;
 
 	class Layout {
 	public:
@@ -78,6 +77,7 @@ private:
 	void PostBuild();
 
 	std::shared_ptr<Tree::Node> m_root;
+	std::shared_ptr<Tree::Node> m_selected_node;
 	std::vector<std::reference_wrapper<ILayout::Node>> m_reference_nodes;
 };
 

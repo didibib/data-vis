@@ -65,11 +65,10 @@ void ILayout::Random( ILayout& _layout, int _width, int _height )
 {
 	auto& nodes = _layout.Nodes( );
 	for ( size_t i = 0; i < nodes.size( ); i++ ) {
-		auto& current_position = nodes[i].get().position;
 		float x = Random::RangeF( _width );
 		float y = Random::RangeF( _height );
 		float z = 0;
-		current_position = glm::vec3( x, y, z );
+		nodes[i].get().SetPosition(glm::vec3(x, y, z));
 	}
 }
 
@@ -101,7 +100,7 @@ void ILayout::Grid( ILayout& _layout, int _width, int _height, float _step )
 	std::shuffle( std::begin( grid ), std::end( grid ), Random::MT19937 );
 	// Assign positions
 	for ( size_t i = 0; i < nodes.size( ); i++ ) {
-		nodes[i].get().position = grid[i];
+		nodes[i].get().SetPosition(grid[i]);
 	}
 }
 } // DataVis

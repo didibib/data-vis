@@ -17,9 +17,6 @@ void ofApp::setup() {
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_XY, OF_MOUSE_BUTTON_MIDDLE);
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setScrollSensitivity(20);
-	m_camera.enableOrtho();
-	m_camera.setNearClip(-1000000);
-	m_camera.setFarClip(1000000);
 	m_camera.setVFlip(true);
 
 	// Load
@@ -77,7 +74,6 @@ void ofApp::draw() {
 	m_camera.end();
 
 	Gui();
-	//ImGui::ShowDemoWindow();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -92,115 +88,93 @@ void ofApp::exit() {
 
 void ofApp::Gui()
 {
-	//ImGui::Begin( "Settings" );
-	////--------------------------------------------------------------
-	//// Loading Graph 
-	////--------------------------------------------------------------
-	//if (ImGui::TreeNode("Loading Graph")) {
-	//	const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
-	//	if (ImGui::BeginCombo("Select File", select_file_preview))
-	//	{
-	//		for (int n = 0; n < m_graph_file_names.size(); n++)
-	//		{
-	//			const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
-	//			if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
-	//				m_imgui_data.combo_graph_file_index = n;
-	//			if (is_selected)
-	//				ImGui::SetItemDefaultFocus();
-	//		}
-	//		ImGui::EndCombo();
-	//	}
+	ImGui::Begin( "Settings" );
+	//--------------------------------------------------------------
+	// Loading Graph 
+	//--------------------------------------------------------------
+	if (ImGui::TreeNode("Loading Graph")) {
+		const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
+		if (ImGui::BeginCombo("Select File", select_file_preview))
+		{
+			for (int n = 0; n < m_graph_file_names.size(); n++)
+			{
+				const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
+				if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
+					m_imgui_data.combo_graph_file_index = n;
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
 
-	//	if (ImGui::Button("Load Graph"))
-	//	{
-	//		string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
-	//		if (new_graph_file != m_current_graph_file)
-	//		{
-	//			m_current_graph_file = new_graph_file;
-	//			m_graph.Load(m_current_graph_file);
-	//		}
-	//	}
+		if (ImGui::Button("Load Graph"))
+		{
+			string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
+			if (new_graph_file != m_current_graph_file)
+			{
+				m_current_graph_file = new_graph_file;
+				// TODO: m_graph.Load(m_current_graph_file);
+			}
+		}
 
-	//	ImGui::TreePop();
-	//	ImGui::Separator();
-	//}
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
 
-	////--------------------------------------------------------------
-	//// Select Layout
-	////--------------------------------------------------------------
-	//if (ImGui::TreeNode("Layout")) {
-	//	auto& layout_functions = DataVis::Layout::LayoutFunctions();
-	//	std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
-	//	const char* layout_preview = layout_chosen.c_str();
-	//	if (ImGui::BeginCombo("Select Layout", layout_preview))
-	//	{
-	//		for (int n = 0; n < layout_functions.size(); n++)
-	//		{
-	//			const bool is_selected = (m_imgui_data.combo_layout_function_index == n);
-	//			if (ImGui::Selectable(layout_functions[n].first.c_str(), is_selected)) {
-	//				m_imgui_data.combo_layout_function_index = n;
-	//				layout_chosen = layout_functions[n].first;
-	//			}
-	//			if (is_selected)
-	//				ImGui::SetItemDefaultFocus();
-	//		}
-	//		ImGui::EndCombo();
-	//	}
+	//--------------------------------------------------------------
+	// Select Layout
+	//--------------------------------------------------------------
+	if (ImGui::TreeNode("Layout")) {
+		auto& layout_functions = DataVis::ILayout::LayoutFunctions();
+		std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
+		const char* layout_preview = layout_chosen.c_str();
+		if (ImGui::BeginCombo("Select Layout", layout_preview))
+		{
+			for (int n = 0; n < layout_functions.size(); n++)
+			{
+				const bool is_selected = (m_imgui_data.combo_layout_function_index == n);
+				if (ImGui::Selectable(layout_functions[n].first.c_str(), is_selected)) {
+					m_imgui_data.combo_layout_function_index = n;
+					layout_chosen = layout_functions[n].first;
+				}
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
 
-	//	auto& layout_descriptions = DataVis::Layout::LayoutDescriptions();
-	//	ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
+		auto& layout_descriptions = DataVis::ILayout::LayoutDescriptions();
+		ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
 
-	//	static char options[256] = "";
-	//	ImGui::InputText("Options", options, IM_ARRAYSIZE(options));
-	//	if (ImGui::Button("Apply Layout"))
-	//	{
-	//		auto function = layout_functions[m_imgui_data.combo_layout_function_index].second;
-	//		function(m_graph, options);
-	//	}
+		static char options[256] = "";
+		ImGui::InputText("Options", options, IM_ARRAYSIZE(options));
+		if (ImGui::Button("Apply Layout"))
+		{
+			auto function = layout_functions[m_imgui_data.combo_layout_function_index].second;
+			// TODO: function(m_graph, options);
+		}
 
-	//	ImGui::TreePop();
-	//	ImGui::Separator();
-	//}
-	////--------------------------------------------------------------
-	//// Optimize Layout
-	////--------------------------------------------------------------
-	//if (ImGui::TreeNode("Optimizer")) {
-	//	ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
-	//	if (ImGui::Button("Optimize Graph"))
-	//	{
-	//		DataVis::Optimizer::LocalSearch(m_graph, m_imgui_data.input_optimize_iterations);
-	//	}
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+	//--------------------------------------------------------------
+	// Optimize Layout
+	//--------------------------------------------------------------
+	if (ImGui::TreeNode("Optimizer")) {
+		ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
+		if (ImGui::Button("Optimize Graph"))
+		{
+			// TODO: DataVis::Optimizer::LocalSearch(m_graph, m_imgui_data.input_optimize_iterations);
+		}
 
-	//	ImGui::TreePop();
-	//	ImGui::Separator();
-	//}
-	//ImGui::End();
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+	ImGui::End();
 
-	//if (m_tree.selected_node != nullptr)
-	//{
-	//	ImGui::Begin( "Selected Node" );
-
-	//	ImGui::Text( "Vertex: %i", m_tree.selected_node->vertex );
-	//	ImGui::Text( "Position: (%f.0, %f.0)", m_tree.selected_node->position.x, m_tree.selected_node->position.y );
-
-	//	if (ImGui::Button( "Make root" ))
-	//	{
-	//		//m_tree = DataVis::Tree::Extract::MSP( m_graph, m_tree.selected_node->vertex );
-	//		m_tree.SwapRoot( m_tree.selected_node );
-	//		DataVis::Layout::Radial( m_tree, 100, 150 );
-	//	}
-	//	ImGui::End();
-	//}
-}
-
-glm::vec3 ofApp::screenToWorld( glm::vec2 pos )
-{
-	glm::vec3 cam = m_camera.getGlobalPosition();
-	auto world = m_camera.screenToWorld( glm::vec3( pos.x, pos.y, 0 ) ) - cam;
-	auto world_z0 = glm::vec3( world.x * cam.z, world.y * cam.z, 0 ) / 10.f;
-	world_z0.x += cam.x;
-	world_z0.y += cam.y;
-	return world_z0;
+	for (auto& layout : m_layouts) {
+		layout.get()->Gui();
+	}
 }
 
 //--------------------------------------------------------------
@@ -208,7 +182,6 @@ void ofApp::keyPressed(int key) {
 
 }
 
-//--------------------------------------------------------------
 void ofApp::keyReleased(int key) {
 
 }
@@ -225,22 +198,15 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-	//const ImGuiIO& io = ImGui::GetIO();
-	//if (io.WantCaptureMouse) return;
+	const ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse) return;
 
-	//if (button == OF_MOUSE_BUTTON_LEFT)
-	//{
-	//	glm::vec3 world_pos = screenToWorld( { x, y } );
-	//	printf( "Clicking at %f, %f\n", world_pos.x, world_pos.y );
-	//	auto selected = m_tree.Select( world_pos );
-	//	if (selected != nullptr)
-	//	{
-	//		printf( "Selected vertex %i\n", selected->vertex );
-	//		//m_tree = DataVis::Tree::Extract::MSP( m_graph, selected->vertex );
-	//		//DataVis::Layout::Radial( m_tree, 100, 150 );
-	//	}
-	//	m_tree.selected_node = selected;
-	//}
+	if (button == OF_MOUSE_BUTTON_LEFT)
+	{
+		for (auto& layout : m_layouts) {
+			layout.get()->Select(m_camera, glm::vec3(x, y, 0));
+		}
+	}
 }
 
 //--------------------------------------------------------------
