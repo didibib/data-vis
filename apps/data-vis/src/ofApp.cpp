@@ -54,6 +54,9 @@ void ofApp::update() {
 	if (io.WantCaptureMouse || io.WantCaptureKeyboard) 
 		m_camera.disableMouseInput();
 	else m_camera.enableMouseInput();	
+	for (auto& layout : m_layouts) {
+		layout.get()->Update(ofGetElapsedTimef());
+	}
 }
 
 //--------------------------------------------------------------
