@@ -116,6 +116,11 @@ public:
 			return inside;
 		}
 
+		bool Inside( glm::vec3 _position )
+		{
+			return length( m_position - _position ) < m_radius;
+		}
+
 		int vertex_idx = -1;
 		ofColor color;
 		ofRectangle m_bounding_box;
@@ -133,14 +138,24 @@ public:
 	virtual ~ILayout();
 	const int& Idx();
 	virtual void HandleInput() = 0;
-	virtual void Select(const ofCamera&, const glm::vec3&) = 0;
+	virtual void Select( const ofCamera&, const glm::vec3& ) = 0;
+	virtual void Select( const glm::vec3&) = 0;
 	virtual void Update(float delta_time) = 0;
-	virtual void Draw() = 0;
+	void Draw();
+	virtual void DrawLayout() = 0;
 	virtual void Gui() = 0;
 	virtual std::vector<std::reference_wrapper<ILayout::Node>> Nodes() = 0;
 
+	glm::vec3 GetPosition() { return m_pos; };
+	void SetPosition( glm::vec3 new_pos ) { m_pos = new_pos; };
+	ofPolyline GetBounds() { return m_bounds; };
+
 protected:
 	virtual void PostBuild() = 0;
+	glm::vec3 m_pos;
+
+	ofPolyline m_bounds;
+	virtual void SetBounds();
 
 private:
 	static int __idx;

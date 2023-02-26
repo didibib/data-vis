@@ -44,8 +44,10 @@ public:
 	Tree() = default;
 	void HandleInput() override;
 	void Select(const ofCamera&, const glm::vec3&) override;
+	void Select( const glm::vec3& ) override;
+	void SetSelectedNode( std::shared_ptr<Node> );
 	void Update(float delta_time) override;
-	void Draw() override;
+	void DrawLayout() override;
 	void Gui() override;
 	std::vector<std::reference_wrapper<ILayout::Node>> Nodes() override;
 
@@ -70,6 +72,8 @@ public:
 		// Pavlo, 2006 https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1355&context=theses
 		static void RadialSubTree(Tree::Node&, float angle_start, float angle_end, int depth, float step, float delta_angle);
 	};
+protected:
+	void SetBounds() override;
 
 	//--------------------------------------------------------------
 private:

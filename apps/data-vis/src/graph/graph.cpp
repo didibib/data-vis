@@ -38,11 +38,16 @@ void Graph::Select(const ofCamera&, const glm::vec3& _position) {
 	
 }
 
+void Graph::Select( const glm::vec3& _position )
+{
+
+}
+
 void Graph::Update(float delta_time)
 {
 }
 
-void Graph::Draw()
+void Graph::DrawLayout()
 {
 	ofFill();
 	ofSetColor(123);

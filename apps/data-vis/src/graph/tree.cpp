@@ -159,6 +159,46 @@ void Tree::Select(const ofCamera& _camera, const glm::vec3& _position)
 	m_selected_node = Select(m_root);
 }
 
+void Tree::Select( const glm::vec3& _pos )
+{
+	printf( "Selecting a node" );
+	// Loop through all nodes and find one within radius of pos
+	std::function<std::shared_ptr<Node>( std::shared_ptr<Node> )> select_in_tree;
+	select_in_tree = [&]( std::shared_ptr<Node> n )
+	{
+		if (n->Inside( _pos )) return n;
+		for (auto& child : n->children)
+		{
+			std::shared_ptr<Node> selected = select_in_tree( child );
+			if (selected != std::shared_ptr<Node>()) return selected;
+		}
+		return std::shared_ptr<Node>();
+	};
+	SetSelectedNode(select_in_tree( m_root ));
+	
+}
+
+void Tree::SetSelectedNode( std::shared_ptr<Node> n )
+{
+	if (m_selected_node != std::shared_ptr<Node>())
+		m_selected_node->color = ofColor::white;
+	if (n != std::shared_ptr<Node>()) n->color = ofColor::green;
+	m_selected_node = n;
+}
+
+void Tree::SetBounds()
+{
+	// Still uses hardcoded radius and delta_angle
+	m_bounds.clear();
+	int r = (depth - 1) * 150;
+	m_bounds.addVertex( { -r,r,0 } );
+	m_bounds.addVertex( { r, r, 0 } );
+	m_bounds.addVertex( { r, -r, 0 } );
+	m_bounds.addVertex( { -r, -r, 0 } );
+	m_bounds.addVertex( { -r, r, 0 } );
+
+}
+
 void Tree::Update(float _delta_time)
 {
 	// TODO: Check if we should animate before traversing
@@ -170,7 +210,7 @@ void Tree::Update(float _delta_time)
 }
 
 //--------------------------------------------------------------
-void Tree::Draw()
+void Tree::DrawLayout()
 {
 	ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 
@@ -275,6 +315,7 @@ void Tree::Layout::Radial(Tree& _tree, float _step, float _delta_angle)
 	auto& node = _tree.Root();
 	node->SetNewPosition(glm::vec3(0));
 	RadialSubTree(*node, 0, TWO_PI, 0, _step, _delta_angle);
+	_tree.SetBounds();
 }
 
 void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _step, float _delta_angle)
