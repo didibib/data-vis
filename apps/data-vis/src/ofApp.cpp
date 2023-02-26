@@ -18,6 +18,7 @@ void ofApp::setup() {
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setScrollSensitivity(20);
 	m_camera.setVFlip(true);
+	m_camera.setGlobalPosition( glm::vec3( 0, 0, 2500 ) );
 
 	// Load
 	LoadDotFiles();
@@ -29,6 +30,7 @@ void ofApp::setup() {
 	auto tree = std::make_unique<DataVis::Tree>();
 	DataVis::Tree::Extract::MSP(*tree, *graph, 0);
 	DataVis::Tree::Layout::Radial(*tree, 100, 150);
+	tree->UpdateBounds();
 
 	//m_layouts.push_back(std::move(graph));
 	tree->SetPosition( { 100, 50, 0 } );
@@ -111,11 +113,13 @@ void ofApp::Gui()
 		if (ImGui::Button("Load Graph"))
 		{
 			string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
-			if (new_graph_file != m_current_graph_file)
-			{
-				m_current_graph_file = new_graph_file;
-				// TODO: m_graph.Load(m_current_graph_file);
-			}
+
+			auto graph = std::make_unique<DataVis::Graph>();
+			DataVis::Graph::Extract::Load( *graph, new_graph_file );
+			DataVis::ILayout::Random( *graph, 800, 600 );
+			DataVis::Optimizer::LocalSearch( *graph, 50000 );
+			graph->UpdateBounds();
+			m_layouts.push_back( std::move(graph) );
 		}
 
 		ImGui::TreePop();
@@ -206,9 +210,14 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-	if (button == OF_MOUSE_BUTTON_LEFT)
+	if (button == OF_MOUSE_BUTTON_LEFT && m_dragging_layout_idx != -1)
 	{
-		screenToWorld( { x,y } );
+		auto layout = m_layouts[m_dragging_layout_idx].get();
+		auto world = screenToWorld( glm::vec2( x, y ) );
+
+		auto dif = world - m_prev_mouse_drag;
+		layout->Move( dif );
+		m_prev_mouse_drag = world;
 	}
 }
 
@@ -219,9 +228,21 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 	if (button == OF_MOUSE_BUTTON_LEFT)
 	{
+		for (int i = 0; i < m_layouts.size(); i++)
+		{
+			auto& layout = m_layouts[i];
+			auto world = screenToWorld( glm::vec2( x, y ) );
+			auto transformed = world - layout.get()->GetPosition();
+			if (layout.get()->GetMoveBounds().inside( transformed ))
+			{
+				m_dragging_layout_idx = i;
+				m_prev_mouse_drag = world;
+				return;
+			}
+		}
+
 		for (auto& layout : m_layouts) 
 		{
-			//layout.get()->Select(m_camera, glm::vec3(x, y, 0));
 			// Transform it to local coordinate system
 			auto transformed = screenToWorld( glm::vec2( x, y ) ) - layout.get()->GetPosition();
 			if (layout.get()->GetBounds().inside( transformed ))
@@ -232,7 +253,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button) {
-
+	m_dragging_layout_idx = -1;
 }
 
 //--------------------------------------------------------------

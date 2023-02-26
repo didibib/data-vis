@@ -189,13 +189,14 @@ void Tree::SetSelectedNode( std::shared_ptr<Node> n )
 void Tree::SetBounds()
 {
 	// Still uses hardcoded radius and delta_angle
-	m_bounds.clear();
 	int r = (depth - 1) * 150;
-	m_bounds.addVertex( { -r,r,0 } );
-	m_bounds.addVertex( { r, r, 0 } );
-	m_bounds.addVertex( { r, -r, 0 } );
-	m_bounds.addVertex( { -r, -r, 0 } );
-	m_bounds.addVertex( { -r, r, 0 } );
+	m_bounds = { {-r, -r}, {r, r} };
+	//m_bounds.clear();
+	//m_bounds.addVertex( { -r,r,0 } );
+	//m_bounds.addVertex( { r, r, 0 } );
+	//m_bounds.addVertex( { r, -r, 0 } );
+	//m_bounds.addVertex( { -r, -r, 0 } );
+	//m_bounds.addVertex( { -r, r, 0 } );
 
 }
 
@@ -263,6 +264,7 @@ void Tree::Gui()
 		{
 			SwapRoot(m_selected_node);
 			Tree::Layout::Radial(*this, 100, 150);
+			UpdateBounds();
 		}
 		ImGui::End();
 	}
@@ -315,7 +317,6 @@ void Tree::Layout::Radial(Tree& _tree, float _step, float _delta_angle)
 	auto& node = _tree.Root();
 	node->SetNewPosition(glm::vec3(0));
 	RadialSubTree(*node, 0, TWO_PI, 0, _step, _delta_angle);
-	_tree.SetBounds();
 }
 
 void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _step, float _delta_angle)
