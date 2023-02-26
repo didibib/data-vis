@@ -17,6 +17,9 @@ private:
 	std::vector<string> m_graph_file_names;
 	std::string m_current_graph_file = "";
 
+	glm::vec2 m_prev_mouse_drag = glm::vec2(1e30);
+	int m_dragging_layout_idx = -1;
+
 	void LoadDotFiles();
 
 public:

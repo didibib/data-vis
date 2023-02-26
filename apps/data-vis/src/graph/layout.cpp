@@ -119,17 +119,31 @@ void ILayout::SetBounds()
 	}
 	tl.z = 0;
 	br.z = 0;
-	m_bounds.clear();
+	m_bounds = { tl, br };
+	//m_bounds.clear();
+	//// Top left
+	//m_bounds.addVertex( tl );
+	//// Top right
+	//m_bounds.addVertex( glm::vec3( br.x, tl.y, 0 ) );
+	//// Bottom right
+	//m_bounds.addVertex( br );
+	//// Bottom left
+	//m_bounds.addVertex( glm::vec3( tl.x, br.y, 0 ) );
+	//m_bounds.addVertex( tl );
+}
 
-	// Top left
-	m_bounds.addVertex( tl );
-	// Top right
-	m_bounds.addVertex( glm::vec3( br.x, tl.y, 0 ) );
-	// Bottom right
-	m_bounds.addVertex( br );
-	// Bottom left
-	m_bounds.addVertex( glm::vec3( tl.x, br.y, 0 ) );
-	m_bounds.addVertex( tl );
+void ILayout::SetMoveBounds()
+{
+	auto bb_tl = m_bounds.getTopLeft();
+	m_move_bounds = { bb_tl, { bb_tl.x - m_move_bounds_size, bb_tl.y - m_move_bounds_size } };
+	//m_move_bounds.clear();
+	//m_move_bounds.addVertices( {
+	//	{ bb_tl },
+	//	{ bb_tl.x - m_move_bounds_size, bb_tl.y, 0},
+	//	{ bb_tl.x - m_move_bounds_size, bb_tl.y - m_move_bounds_size, 0},
+	//	{ bb_tl.x, bb_tl.y - m_move_bounds_size, 0},
+	//	{ bb_tl }
+	//});
 }
 
 void ILayout::Draw()
@@ -138,9 +152,14 @@ void ILayout::Draw()
 	ofTranslate( m_pos );
 
 	// Draw the bounds
+	ofNoFill();
 	ofSetColor( ofColor::black );
-	m_bounds.draw();
+	ofDrawRectangle( m_bounds );
 
+	ofFill();
+	ofDrawRectangle( m_move_bounds );
+	ofNoFill();
+	
 	// Draw the actual nodes and edges
 	DrawLayout();
 

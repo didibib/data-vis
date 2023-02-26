@@ -148,14 +148,21 @@ public:
 
 	glm::vec3 GetPosition() { return m_pos; };
 	void SetPosition( glm::vec3 new_pos ) { m_pos = new_pos; };
-	ofPolyline GetBounds() { return m_bounds; };
+	void Move( glm::vec3 v ) { m_pos += v; };
+	ofRectangle GetBounds() { return m_bounds; };
+	ofRectangle GetMoveBounds() { return m_move_bounds; };
+	void UpdateBounds() { SetBounds(); SetMoveBounds(); };
 
 protected:
 	virtual void PostBuild() = 0;
 	glm::vec3 m_pos;
 
-	ofPolyline m_bounds;
+	ofRectangle m_bounds;
 	virtual void SetBounds();
+
+	ofRectangle m_move_bounds;
+	int m_move_bounds_size = 50;
+	void SetMoveBounds();
 
 private:
 	static int __idx;
