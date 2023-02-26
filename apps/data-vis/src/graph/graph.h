@@ -26,7 +26,6 @@ namespace DataVis {
 		//--------------------------------------------------------------
 		Graph() = default;
 		void HandleInput() override;
-		void Select( const ofCamera&, const glm::vec3& ) override;
 		void Select( const glm::vec3&) override;
 		void Update(float delta_time) override;
 		void DrawLayout() override;

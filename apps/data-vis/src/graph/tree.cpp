@@ -92,8 +92,6 @@ int Tree::Depth(std::shared_ptr<Node> node)
 	return max + 1;
 }
 
-
-
 //--------------------------------------------------------------
 void Tree::SwapRoot(std::shared_ptr<Node> _new_root)
 {
@@ -143,46 +141,27 @@ void Tree::HandleInput()
 {
 }
 
-void Tree::Select(const ofCamera& _camera, const glm::vec3& _position)
+void Tree::Select(const glm::vec3& _position)
 {
-	std::function<std::shared_ptr<Tree::Node>(std::shared_ptr<Tree::Node>)> Select = [&](std::shared_ptr<Tree::Node> _node) {
-		if (_node.get()->Inside(_camera, _position)) return _node;
-		std::stack<std::shared_ptr<Tree::Node>> stack;
-		for (auto& child : _node->children) stack.push(child);
-		while (stack.empty() == false) {
-			auto& node = stack.top(); stack.pop();
-			if (node.get()->Inside(_camera, _position)) return node;
-			for (auto& child : node->children) stack.push(child);
+	// Loop through all nodes and find one within radius of pos
+	static std::function<std::shared_ptr<Tree::Node>(std::shared_ptr<Node>)> SelectInTree = [&](std::shared_ptr<Tree::Node> n)
+	{
+		if (n->Inside(_position)) return n;
+		for (auto& child : n->children)
+		{
+			std::shared_ptr<Tree::Node> selected = SelectInTree(child);
+			if (selected != nullptr) return selected;
 		}
 		return std::shared_ptr<Tree::Node>();
 	};
-	m_selected_node = Select(m_root);
+	SetSelectedNode(SelectInTree(m_root));
 }
 
-void Tree::Select( const glm::vec3& _pos )
+void Tree::SetSelectedNode(std::shared_ptr<Tree::Node> n)
 {
-	printf( "Selecting a node" );
-	// Loop through all nodes and find one within radius of pos
-	std::function<std::shared_ptr<Node>( std::shared_ptr<Node> )> select_in_tree;
-	select_in_tree = [&]( std::shared_ptr<Node> n )
-	{
-		if (n->Inside( _pos )) return n;
-		for (auto& child : n->children)
-		{
-			std::shared_ptr<Node> selected = select_in_tree( child );
-			if (selected != std::shared_ptr<Node>()) return selected;
-		}
-		return std::shared_ptr<Node>();
-	};
-	SetSelectedNode(select_in_tree( m_root ));
-	
-}
-
-void Tree::SetSelectedNode( std::shared_ptr<Node> n )
-{
-	if (m_selected_node != std::shared_ptr<Node>())
+	if (m_selected_node != nullptr)
 		m_selected_node->color = ofColor::white;
-	if (n != std::shared_ptr<Node>()) n->color = ofColor::green;
+	if (n != nullptr) n->color = ofColor::green;
 	m_selected_node = n;
 }
 
@@ -197,13 +176,12 @@ void Tree::SetBounds()
 	//m_bounds.addVertex( { r, -r, 0 } );
 	//m_bounds.addVertex( { -r, -r, 0 } );
 	//m_bounds.addVertex( { -r, r, 0 } );
-
 }
 
 void Tree::Update(float _delta_time)
 {
 	// TODO: Check if we should animate before traversing
-	std::function<void(std::shared_ptr<Node>)> EaseInEaseOut = [&](std::shared_ptr<Node> n) {
+	static std::function<void(std::shared_ptr<Node>)> EaseInEaseOut = [&](std::shared_ptr<Node> n) {
 		n->EaseInEaseOut(_delta_time);
 		for (auto child : n->children) EaseInEaseOut(child);
 	};
@@ -217,7 +195,7 @@ void Tree::DrawLayout()
 
 	// Draw radial circles
 	ofNoFill();
-	ofSetColor(65); 
+	ofSetColor(65);
 	ofSetCircleResolution(50);
 	for (int i = 0; i < depth - 1; i++)
 	{
@@ -272,19 +250,15 @@ void Tree::Gui()
 
 void Tree::CreateReferenceNodes() {
 	// https://jonasdevlieghere.com/containers-of-unique-pointers/
-	static std::function<std::vector<std::reference_wrapper<ILayout::Node>>(std::shared_ptr<Tree::Node>)> Wrap
-		= [&](shared_ptr<Tree::Node> _root) {
-		std::vector<std::reference_wrapper<ILayout::Node>> nodes;
-		std::stack<std::shared_ptr<Node>> stack;
-		for (auto& child : m_root->children) stack.push(child);
-		while (stack.empty() == false) {
-			auto node = stack.top(); stack.pop();
-			nodes.push_back(std::ref(*node));
-			for (auto& child : node->children) stack.push(child);
-		}
-		return nodes;
-	};
-	m_reference_nodes = Wrap(m_root);
+	
+	m_reference_nodes.clear();
+	std::stack<std::shared_ptr<Node>> stack;
+	for (auto& child : m_root->children) stack.push(child);
+	while (stack.empty() == false) {
+		auto node = stack.top(); stack.pop();
+		m_reference_nodes.push_back(std::ref(*node));
+		for (auto& child : node->children) stack.push(child);
+	}
 }
 
 std::vector<std::reference_wrapper<ILayout::Node>> Tree::Nodes()
