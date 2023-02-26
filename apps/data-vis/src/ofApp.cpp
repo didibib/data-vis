@@ -31,6 +31,7 @@ void ofApp::setup() {
 	DataVis::Tree::Layout::Radial(*tree, 100, 150);
 
 	//m_layouts.push_back(std::move(graph));
+	tree->SetPosition( { 100, 50, 0 } );
 	m_layouts.push_back(std::move(tree));
 }
 
@@ -177,6 +178,18 @@ void ofApp::Gui()
 	}
 }
 
+glm::vec3 ofApp::screenToWorld( glm::vec2 pos )
+{
+	auto cam = m_camera.getGlobalPosition();
+	auto world = m_camera.screenToWorld( glm::vec3( pos.x, pos.y, 0 ) );
+	// Ray from camera origin through mouse click
+	auto dir = world - cam;
+	// Make dir with z-length of 1
+	dir *= -1 / dir.z;
+	// World pos on z=0 plane
+	return cam + cam.z * dir;
+}
+
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 
@@ -193,7 +206,10 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-
+	if (button == OF_MOUSE_BUTTON_LEFT)
+	{
+		screenToWorld( { x,y } );
+	}
 }
 
 //--------------------------------------------------------------
@@ -203,8 +219,13 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 	if (button == OF_MOUSE_BUTTON_LEFT)
 	{
-		for (auto& layout : m_layouts) {
-			layout.get()->Select(m_camera, glm::vec3(x, y, 0));
+		for (auto& layout : m_layouts) 
+		{
+			//layout.get()->Select(m_camera, glm::vec3(x, y, 0));
+			// Transform it to local coordinate system
+			auto transformed = screenToWorld( glm::vec2( x, y ) ) - layout.get()->GetPosition();
+			if (layout.get()->GetBounds().inside( transformed ))
+				layout.get()->Select( transformed );
 		}
 	}
 }

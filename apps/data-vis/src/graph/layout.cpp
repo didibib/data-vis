@@ -103,4 +103,47 @@ void ILayout::Grid( ILayout& _layout, int _width, int _height, float _step )
 		nodes[i].get().SetPosition(grid[i]);
 	}
 }
+
+void ILayout::SetBounds()
+{
+	glm::vec3 tl {1e30};
+	glm::vec3 br{ -1e30 };
+
+	for (auto& wrapper : Nodes())
+	{
+		auto& node = wrapper.get();
+		tl.x = min( node.GetPosition().x - node.GetRadius(), tl.x );
+		tl.y = min( node.GetPosition().y - node.GetRadius(), tl.y );
+		br.x = max( node.GetPosition().x + node.GetRadius(), br.x );
+		br.y = max( node.GetPosition().y + node.GetRadius(), br.y );
+	}
+	tl.z = 0;
+	br.z = 0;
+	m_bounds.clear();
+
+	// Top left
+	m_bounds.addVertex( tl );
+	// Top right
+	m_bounds.addVertex( glm::vec3( br.x, tl.y, 0 ) );
+	// Bottom right
+	m_bounds.addVertex( br );
+	// Bottom left
+	m_bounds.addVertex( glm::vec3( tl.x, br.y, 0 ) );
+	m_bounds.addVertex( tl );
+}
+
+void ILayout::Draw()
+{
+	ofPushMatrix();
+	ofTranslate( m_pos );
+
+	// Draw the bounds
+	ofSetColor( ofColor::black );
+	m_bounds.draw();
+
+	// Draw the actual nodes and edges
+	DrawLayout();
+
+	ofPopMatrix();
+}
 } // DataVis
