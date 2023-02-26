@@ -120,16 +120,6 @@ void ILayout::SetBounds()
 	tl.z = 0;
 	br.z = 0;
 	m_bounds = { tl, br };
-	//m_bounds.clear();
-	//// Top left
-	//m_bounds.addVertex( tl );
-	//// Top right
-	//m_bounds.addVertex( glm::vec3( br.x, tl.y, 0 ) );
-	//// Bottom right
-	//m_bounds.addVertex( br );
-	//// Bottom left
-	//m_bounds.addVertex( glm::vec3( tl.x, br.y, 0 ) );
-	//m_bounds.addVertex( tl );
 }
 
 void ILayout::SetMoveBounds()
@@ -149,7 +139,7 @@ void ILayout::SetMoveBounds()
 void ILayout::Draw()
 {
 	ofPushMatrix();
-	ofTranslate( m_pos );
+	ofTranslate( m_position );
 
 	// Draw the bounds
 	ofNoFill();

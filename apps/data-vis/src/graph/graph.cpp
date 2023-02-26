@@ -34,10 +34,6 @@ void Graph::HandleInput()
 {
 }
 
-void Graph::Select(const ofCamera&, const glm::vec3& _position) {
-	
-}
-
 void Graph::Select( const glm::vec3& _position )
 {
 
@@ -78,13 +74,8 @@ void Graph::Gui()
 
 void Graph::CreateReferenceNodes() {
 	// https://jonasdevlieghere.com/containers-of-unique-pointers/
-	static std::function<std::vector<std::reference_wrapper<ILayout::Node>>(std::vector<std::shared_ptr<ILayout::Node>>)> Wrap
-		= [&](std::vector<shared_ptr<ILayout::Node>> _nodes) {
-		std::vector<std::reference_wrapper<ILayout::Node>> nodes;
-		for (auto& n : _nodes) nodes.push_back(std::ref(*n));
-		return nodes;
-	};
-	m_reference_nodes = Wrap(m_nodes);
+	m_reference_nodes.clear();
+	for (auto& n : m_nodes) m_reference_nodes.push_back(std::ref(*n));
 }
 
 std::vector<std::reference_wrapper<ILayout::Node>> Graph::Nodes()

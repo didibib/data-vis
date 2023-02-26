@@ -98,24 +98,6 @@ public:
 			m_bounding_box.setSize(_radius * 2, _radius * 2);
 		}
 
-		bool Inside(const ofCamera& _camera, glm::vec3 _position) {
-			glm::vec3 bottom_left = _camera.worldToScreen(m_bounding_box.getBottomLeft());
-			glm::vec3 bottom_right = _camera.worldToScreen(m_bounding_box.getBottomRight());
-			glm::vec3 top_right = _camera.worldToScreen(m_bounding_box.getTopRight());
-			glm::vec3 top_left = _camera.worldToScreen(m_bounding_box.getTopLeft());
-
-			ofPolyline p;
-			p.addVertex(bottom_left);
-			p.addVertex(bottom_right);
-			p.addVertex(top_right);
-			p.addVertex(top_left);
-
-			bool inside = p.inside(_position);
-			if (inside) color = ofColor::green;
-			else color = ofColor::white;
-			return inside;
-		}
-
 		bool Inside( glm::vec3 _position )
 		{
 			return length( m_position - _position ) < m_radius;
@@ -138,7 +120,6 @@ public:
 	virtual ~ILayout();
 	const int& Idx();
 	virtual void HandleInput() = 0;
-	virtual void Select( const ofCamera&, const glm::vec3& ) = 0;
 	virtual void Select( const glm::vec3&) = 0;
 	virtual void Update(float delta_time) = 0;
 	void Draw();
@@ -146,16 +127,16 @@ public:
 	virtual void Gui() = 0;
 	virtual std::vector<std::reference_wrapper<ILayout::Node>> Nodes() = 0;
 
-	glm::vec3 GetPosition() { return m_pos; };
-	void SetPosition( glm::vec3 new_pos ) { m_pos = new_pos; };
-	void Move( glm::vec3 v ) { m_pos += v; };
-	ofRectangle GetBounds() { return m_bounds; };
-	ofRectangle GetMoveBounds() { return m_move_bounds; };
+	glm::vec3 GetPosition() { return m_position; };
+	void SetPosition( glm::vec3 new_position ) { m_position = new_position; };
+	void Move( glm::vec3 v ) { m_position += v; };
+	const ofRectangle& GetBounds() { return m_bounds; };
+	const ofRectangle& GetMoveBounds() { return m_move_bounds; };
 	void UpdateBounds() { SetBounds(); SetMoveBounds(); };
 
 protected:
 	virtual void PostBuild() = 0;
-	glm::vec3 m_pos;
+	glm::vec3 m_position;
 
 	ofRectangle m_bounds;
 	virtual void SetBounds();
