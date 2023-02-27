@@ -21,6 +21,7 @@ private:
 	int m_dragging_layout_idx = -1;
 
 	void LoadDotFiles();
+	glm::vec3 ScreenToWorld(const glm::vec2& pos);
 
 public:
 	// Our methods
@@ -43,6 +44,4 @@ public:
 	void windowResized(int w, int h);
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
-
-	glm::vec3 screenToWorld( glm::vec2 pos );
 };
