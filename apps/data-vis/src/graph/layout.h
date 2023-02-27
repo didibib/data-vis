@@ -129,7 +129,7 @@ public:
 
 	glm::vec3 GetPosition() { return m_position; };
 	void SetPosition( glm::vec3 new_position ) { m_position = new_position; };
-	void Move( glm::vec3 v ) { m_position += v; };
+	void Move( glm::vec3 _offset ) { m_position += _offset; };
 	const ofRectangle& GetBounds() { return m_bounds; };
 	const ofRectangle& GetMoveBounds() { return m_move_bounds; };
 	void UpdateBounds() { SetBounds(); SetMoveBounds(); };

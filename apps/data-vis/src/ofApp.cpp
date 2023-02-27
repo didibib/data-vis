@@ -182,10 +182,10 @@ void ofApp::Gui()
 	}
 }
 
-glm::vec3 ofApp::screenToWorld( glm::vec2 pos )
+glm::vec3 ofApp::ScreenToWorld(const glm::vec2& _position )
 {
 	auto cam = m_camera.getGlobalPosition();
-	auto world = m_camera.screenToWorld( glm::vec3( pos.x, pos.y, 0 ) );
+	auto world = m_camera.screenToWorld( glm::vec3(_position.x, _position.y, 0 ) );
 	// Ray from camera origin through mouse click
 	auto dir = world - cam;
 	// Make dir with z-length of 1
@@ -213,7 +213,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 	if (button == OF_MOUSE_BUTTON_LEFT && m_dragging_layout_idx != -1)
 	{
 		auto layout = m_layouts[m_dragging_layout_idx].get();
-		auto world = screenToWorld( glm::vec2( x, y ) );
+		auto world = ScreenToWorld( glm::vec2( x, y ) );
 
 		auto dif = world - m_prev_mouse_drag;
 		layout->Move( dif );
@@ -231,7 +231,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 		for (int i = 0; i < m_layouts.size(); i++)
 		{
 			auto& layout = m_layouts[i];
-			auto world = screenToWorld( glm::vec2( x, y ) );
+			auto world = ScreenToWorld( glm::vec2( x, y ) );
 			auto transformed = world - layout.get()->GetPosition();
 			if (layout.get()->GetMoveBounds().inside( transformed ))
 			{
@@ -244,7 +244,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 		for (auto& layout : m_layouts) 
 		{
 			// Transform it to local coordinate system
-			auto transformed = screenToWorld( glm::vec2( x, y ) ) - layout.get()->GetPosition();
+			auto transformed = ScreenToWorld( glm::vec2( x, y ) ) - layout.get()->GetPosition();
 			if (layout.get()->GetBounds().inside( transformed ))
 				layout.get()->Select( transformed );
 		}
