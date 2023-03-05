@@ -89,6 +89,14 @@ public:
 			m_animate = true;
 		}
 
+		void SetDisplacement( glm::vec3& _displacement ) {
+			m_displacement = _displacement;
+		}
+
+		const glm::vec3 GetDisplacement() {
+			return m_displacement;
+		}
+
 		const float& GetRadius() {
 			return m_radius;
 		}
@@ -110,6 +118,7 @@ public:
 		glm::vec3 m_position = glm::vec3(0);
 		glm::vec3 m_new_position = glm::vec3(0);
 		glm::vec3 m_old_position = glm::vec3(0);
+		glm::vec3 m_displacement = glm::vec3(0);
 		float m_radius = 10;
 		float m_time = 0;
 		bool m_animate = true;

@@ -25,16 +25,19 @@ void ofApp::setup() {
 	auto graph = std::make_unique<DataVis::Graph>();
 	DataVis::Graph::Extract::Load(*graph, m_current_graph_file);
 	DataVis::ILayout::Random(*graph, 800, 600);
-	DataVis::Optimizer::LocalSearch(*graph, 50000 );
+	graph->UpdateBounds();
+	//DataVis::Graph::Layout::Force( *graph, 0.1f, 100 );
+	m_layouts.push_back( std::move( graph ) );
+	//DataVis::Optimizer::LocalSearch(*graph, 50000 );
 
-	auto tree = std::make_unique<DataVis::Tree>();
-	DataVis::Tree::Extract::MSP(*tree, *graph, 0);
-	DataVis::Tree::Layout::Radial(*tree, 100, 150);
-	tree->UpdateBounds();
+	//auto tree = std::make_unique<DataVis::Tree>();
+	//DataVis::Tree::Extract::MSP(*tree, *graph, 0);
+	//DataVis::Tree::Layout::Radial(*tree, 100, 150);
+	//tree->UpdateBounds();
 
-	//m_layouts.push_back(std::move(graph));
-	tree->SetPosition( { 100, 50, 0 } );
-	m_layouts.push_back(std::move(tree));
+	////m_layouts.push_back(std::move(graph));
+	//tree->SetPosition( { 100, 50, 0 } );
+	//m_layouts.push_back(std::move(tree));
 }
 
 void ofApp::LoadDotFiles() {

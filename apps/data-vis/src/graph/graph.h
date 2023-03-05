@@ -37,6 +37,12 @@ namespace DataVis {
 		auto& Vertices() { return m_graph.m_vertices; }
 
 		float radius = 10;
+
+		class Layout
+		{
+		public:
+			static void Force( Graph&, float C, int iterations );
+		};
 	protected:
 		void PostBuild() override;
 
