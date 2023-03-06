@@ -119,13 +119,15 @@ void ILayout::SetBounds()
 	}
 	tl.z = 0;
 	br.z = 0;
-	m_bounds = { tl, br };
+	m_bounds = ofRectangle(tl, br);
 }
 
 void ILayout::SetMoveBounds()
 {
 	auto bb_tl = m_bounds.getTopLeft();
-	m_move_bounds = { bb_tl, { bb_tl.x - m_move_bounds_size, bb_tl.y - m_move_bounds_size } };
+	m_move_bounds = ofRectangle( bb_tl, glm::vec2( bb_tl.x - m_move_bounds_size, bb_tl.y - m_move_bounds_size ) );
+	
+
 	//m_move_bounds.clear();
 	//m_move_bounds.addVertices( {
 	//	{ bb_tl },
