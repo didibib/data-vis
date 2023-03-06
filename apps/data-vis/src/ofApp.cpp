@@ -18,6 +18,7 @@ void ofApp::setup() {
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setScrollSensitivity(20);
 	m_camera.setVFlip(true);
+	m_camera.setFarClip( 1e30 );
 	m_camera.setGlobalPosition( glm::vec3( 0, 0, 2500 ) );
 
 	// Load
@@ -26,7 +27,7 @@ void ofApp::setup() {
 	DataVis::Graph::Extract::Load(*graph, m_current_graph_file);
 	DataVis::ILayout::Random(*graph, 800, 600);
 	graph->UpdateBounds();
-	//DataVis::Graph::Layout::Force( *graph, 0.1f, 100 );
+	//DataVis::Graph::Layout::Force( *graph, .0001f, 100 );
 	m_layouts.push_back( std::move( graph ) );
 	//DataVis::Optimizer::LocalSearch(*graph, 50000 );
 
@@ -65,7 +66,7 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	ofBackgroundGradient(Color::palettePurple_3, Color::palettePurple_2, OF_GRADIENT_CIRCULAR);
+	ofBackgroundGradient(Color::paletteCold_0, Color::paletteCold_0, OF_GRADIENT_CIRCULAR);
 
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();

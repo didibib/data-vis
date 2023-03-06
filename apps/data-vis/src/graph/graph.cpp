@@ -41,7 +41,8 @@ void Graph::Select( const glm::vec3& _position )
 
 void Graph::Update(float delta_time)
 {
-	Graph::Layout::Force( *this, 1, 1 );
+
+	Graph::Layout::Force( *this, .5f, 10 );
 }
 
 void Graph::DrawLayout()
@@ -60,7 +61,7 @@ void Graph::DrawLayout()
 		ofDrawLine(start, end);
 	}
 
-	ofSetColor(255);
+	ofSetColor(10);
 	ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 	for (size_t i = 0; i < m_nodes.size(); i++)
 	{
@@ -93,6 +94,7 @@ void Graph::Layout::Force( Graph& _graph, float _C, int _iterations )
 	
 	for (int i = 0; i < _iterations; i++)
 	{
+		// Repulsion
 		for (int j = 0; j < _graph.Nodes().size(); j++)
 		{
 			auto& v = _graph.m_nodes[j];
@@ -108,6 +110,7 @@ void Graph::Layout::Force( Graph& _graph, float _C, int _iterations )
 			}
 		}
 
+		// Attraction
 		for (auto& e : _graph.Edges())
 		{
 			auto& v = _graph.m_nodes[e.m_source];
@@ -137,7 +140,8 @@ void Graph::Layout::Force( Graph& _graph, float _C, int _iterations )
 			auto& node = v.get();
 			node.SetPosition( node.GetPosition() + node.GetDisplacement() * t);
 		}
-		t *= 0.999f;
+		t *= 0.9999f;
 	}
+	//_graph.UpdateBounds( );
 }
 }
