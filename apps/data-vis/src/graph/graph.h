@@ -3,24 +3,11 @@
 namespace DataVis {
 	class Graph : public ILayout {
 	public:
-		struct Vertex
-		{
-			std::string name;
-		};
-
-		struct Edge
-		{
-			float weight = 1.f;
-		};
-
-		typedef boost::property<boost::graph_name_t, std::string> graph_p;
-		typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Vertex, Edge, graph_p> graph_u;
-		typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Vertex, Edge, graph_p> graph_d;
 
 		//--------------------------------------------------------------
 		class Extract {
 		public:
-			static void Load(Graph&, std::string filename);
+			static bool Load(Graph&, std::string filename);
 		};
 
 		//--------------------------------------------------------------
@@ -33,8 +20,8 @@ namespace DataVis {
 		std::vector<std::reference_wrapper<ILayout::Node>> Nodes() override;
 
 		//--------------------------------------------------------------
-		auto& Edges() { return m_graph.m_edges; }
-		auto& Vertices() { return m_graph.m_vertices; }
+		auto& Edges() { return m_graph.all_edges; }
+		auto& Vertices() { return m_graph.all_nodes; }
 
 		float radius = 10;
 	protected:
@@ -42,7 +29,7 @@ namespace DataVis {
 
 	private:
 		void CreateReferenceNodes();
-		graph_u m_graph;
+		Model::MainGraph m_graph;
 		std::vector<std::shared_ptr<ILayout::Node>> m_nodes;
 		std::vector<std::reference_wrapper<ILayout::Node>> m_reference_nodes;
 	};

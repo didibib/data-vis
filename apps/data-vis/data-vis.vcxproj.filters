@@ -40,9 +40,6 @@
     <ClCompile Include="external\imgui\imgui.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\read_graphviz_new.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\graph\graph.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
@@ -68,6 +65,9 @@
     </Filter>
     <Filter Include="src\graph">
       <UniqueIdentifier>{42A7CE83-41D0-5147-82D8-F18B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\external">
+      <UniqueIdentifier>{78cdd33e-4b28-4648-b55e-1ee7f55fa104}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="src\graph\tree.h">
       <Filter>src\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\external\spirit-graphviz.hpp">
+      <Filter>src\graph\external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
