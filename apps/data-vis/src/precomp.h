@@ -8,6 +8,9 @@
 // Boost
 #include <boost/graph/graphviz.hpp>
 #include <boost/program_options.hpp>
+#include <boost/exception/exception.hpp>
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/lexical_cast.hpp>
 
 //--------------------------------------------------------------
 // OF header
@@ -31,6 +34,9 @@ const ofColor palettePurple_3(24, 18, 43);
 #include <random>
 #include <functional>
 #include <map>
+#include <fstream>
+#include <iostream>
+#include <deque>
 
 //--------------------------------------------------------------
 typedef unsigned int uint;
@@ -47,7 +53,7 @@ float Float();
 float RangeF(float range);
 }
 
-namespace Curve {
+namespace Curves {
 /// <summary>
 /// Gives a value in the range [0,1]
 /// </summary>
@@ -56,7 +62,13 @@ namespace Curve {
 float Bezier(float time);
 }
 
-void ParseCmdline(const boost::program_options::options_description&, std::string);
+namespace Parser {
+	void Cmdline(const boost::program_options::options_description&, std::string);
+}
+
+//--------------------------------------------------------------
+// External
+#include "external/spirit-graphviz.hpp"
 
 //--------------------------------------------------------------
 // Own headers
@@ -64,4 +76,3 @@ void ParseCmdline(const boost::program_options::options_description&, std::strin
 #include "graph.h"
 #include "tree.h"
 #include "optimizer.h"
-#include "ofApp.h"

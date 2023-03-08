@@ -34,15 +34,16 @@ namespace Random {
 
 }
 
-namespace Curve {
+namespace Curves {
 float Bezier(float _t)
 {
 	return _t * _t * (3.0f - 2.0f * _t);
 }
-}
+} // Curves
 
 //--------------------------------------------------------------
-void ParseCmdline(const boost::program_options::options_description& _options, std::string _cmdline_input) {
+namespace Parser {
+void Cmdline(const boost::program_options::options_description& _options, std::string _cmdline_input) {
 	namespace po = boost::program_options;
 	po::variables_map vm;
 	try {
@@ -53,3 +54,4 @@ void ParseCmdline(const boost::program_options::options_description& _options, s
 	}
 	po::notify(vm);
 }
+} // Parser

@@ -1,32 +1,54 @@
 #include "precomp.h"
 
-// Graph parsing
-// https://stackoverflow.com/questions/29496182/read-graphviz-in-boostgraph-pass-to-constructor/29501850#29501850
-#include "read_graphviz_new.cpp"
-
 namespace DataVis {
-void Graph::Extract::Load(Graph& _graph, std::string _filename) {
+bool Graph::Extract::Load(Graph& _graph, std::string _filename) {
 	std::string filepath = ofToDataPath(_filename, false);
 	std::ifstream file(filepath);
 
 	if (!std::filesystem::exists(filepath)) {
 		std::cout << "W/Graph::Load: File doesn't exists: " << filepath << std::endl;
-		return;
+		return false;
 	}
 
-	_graph.m_graph.clear();
-	boost::dynamic_properties dp(boost::ignore_other_properties);
-	dp.property("node_id", get(&Vertex::name, _graph.m_graph));
-	dp.property("weight", get(&Edge::weight, _graph.m_graph));
+	using It = boost::spirit::istream_iterator;
+	Parser::GraphViz<It> parser;
+		
+	It f{ file >> std::noskipws }, l;
 
-	boost::read_graphviz(file, _graph.m_graph, dp);
-	printf("-- Finished loading %s \n", _filename.c_str());
-	for (size_t i = 0; i < _graph.m_graph.m_vertices.size(); i++)
-		_graph.m_nodes.push_back(std::make_unique<ILayout::Node>(i));
-	_graph.PostBuild();
+	Ast::GraphViz into;
+	bool ok = false;
+	try {
+		ok = parse(f, l, parser, into);
+
+		if (ok) {
+			std::cerr << "Parse success\n";
+			_graph.m_graph = buildModel(into);
+
+			for (auto& it = _graph.m_graph.all_nodes.begin(); it != _graph.m_graph.all_nodes.end(); it++) {
+				it->
+			}
+			_graph.PostBuild();
+		}
+		else {
+			std::cerr << "Parse failed\n";
+		}
+		if (f != l)
+			std::cerr << "Remaining unparsed input: '" << std::string(f, l) << "'\n";
+	}
+	catch (Parser::qi::expectation_failure<It> const& e) {
+		std::cerr << e.what() << ": " << e.what_ << " at " << std::string(e.first, e.last) << "\n";
+	}
+
+	return ok;
 }
 
 void Graph::PostBuild() {
+	m_nodes.clear();
+	m_nodes.reserve(m_graph.all_nodes.size());
+	for (auto& it = m_graph.all_nodes.begin(); it != m_graph.all_nodes.end(); it++)
+	{
+		m_nodes.push_back(std::make_unique<ILayout::Node>(it->id()));
+	}
 	CreateReferenceNodes();
 }
 
@@ -34,7 +56,7 @@ void Graph::HandleInput()
 {
 }
 
-void Graph::Select( const glm::vec3& _position )
+void Graph::Select(const glm::vec3& _position)
 {
 
 }
@@ -47,16 +69,15 @@ void Graph::DrawLayout()
 {
 	ofFill();
 	ofSetColor(123);
-	for (const auto& edge : m_graph.m_edges) {
-		int startIdx = edge.m_source;
-		int endIdx = edge.m_target;
-		glm::vec3 start = m_nodes[startIdx]->GetPosition();
-		glm::vec3 end = m_nodes[endIdx]->GetPosition();
-		// Draw edge behind nodes
-		start -= 1;
-		end -= 1;
-		ofSetLineWidth(edge.m_property.weight);
-		ofDrawLine(start, end);
+	for (const auto& edge : m_graph.all_edges) {
+		auto const& startIdx = edge.from.id;
+		auto const& endIdx = edge.to;
+		//glm::vec3 start = m_nodes[startIdx]->GetPosition();
+		//glm::vec3 end = m_nodes[endIdx]->GetPosition();
+		//// Draw edge behind nodes
+		//start -= 1;
+		//end -= 1;
+		//ofDrawLine(start, end);
 	}
 
 	ofSetColor(255);
