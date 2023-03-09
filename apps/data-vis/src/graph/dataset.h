@@ -5,36 +5,46 @@ namespace DataVis
 //--------------------------------------------------------------
 using AnyType = std::variant<float, std::string>;
 
+struct VisitFloat
+{
+	VisitFloat(float _f) : default_value(_f) {}
+	float operator()(float& _f) { return CheckParam(_f, default_value); }
+	float operator()(std::string& _s) { return CheckParam(_s, default_value); }
+	float CheckParam(const float& _f, float _default) { return _f; }
+	float CheckParam(const std::string&, float _default) { return _default; }
+	float default_value = 0;
+};
+
+struct VisitString
+{
+	std::string operator()(float& _f) { return std::to_string(_f); }
+	std::string operator()(std::string& _s) { return _s; }
+};
+
+//--------------------------------------------------------------
 class Attributes
 {
 public:
 	Attributes() = default;
-	void Init(Model::Attributes& _attributes)
-	{
-		for (auto& it = _attributes.begin(); it != _attributes.end(); it++) {
-			try {
-				float value = std::stof(it->second);
-				m_attributes.insert({ it->first, value });
-			}
-			catch (std::exception& e) {
-				m_attributes.insert({ it->first, it->second });
-			}
-		}
-	}
+	void Init(Model::Attributes& _attributes);
+	const std::unordered_map<Model::Id, AnyType>& Get() { return m_attributes; }
 
-	float Find(std::string _key, float _default)
-	{
-		auto& it = m_attributes.find(_key);
-		if (it != m_attributes.end()) {
-			return _default;
-			/*return std::visit(DataVis::overload{
-				[](const float& f, float) {return f; },
-				[](const std::string& s, float _default) { return _default; }
-				}, it->second, _default);*/
-		}
-		m_attributes[_key] = _default;
-		return _default;
-	}
+	/// <summary>
+	/// Find the float value for the given key. 
+	/// If the key is not present it will be inserted with the default value
+	/// </summary>
+	/// <param name="_key"></param>
+	/// <param name="_default">: The default value if the key is not present.</param>
+	/// <returns></returns>
+	float FindFloat(std::string _key, float _default);
+
+	/// <summary>
+	/// Find any value for the given key. Any value will be returned as string.
+	/// If the key is not present it will return a empty string;
+	/// </summary>
+	/// <param name="_key"></param>
+	/// <returns>Key value or empty string</returns>
+	std::string FindString(std::string _key);
 
 private:
 	std::unordered_map<Model::Id, AnyType> m_attributes;

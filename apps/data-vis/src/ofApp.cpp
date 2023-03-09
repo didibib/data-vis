@@ -2,7 +2,8 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup() {
+void ofApp::setup()
+{
 	// Init ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -19,7 +20,7 @@ void ofApp::setup() {
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setScrollSensitivity(20);
 	m_camera.setVFlip(true);
-	m_camera.setGlobalPosition( glm::vec3( 0, 0, 2500 ) );
+	m_camera.setGlobalPosition(glm::vec3(0, 0, 2500));
 
 	// Load
 	LoadDotFiles();
@@ -31,7 +32,7 @@ void ofApp::setup() {
 	auto graph = std::make_unique<DataVis::Graph>();
 	graph->Init(dataset);
 	DataVis::IStructure::Random(*graph, 800, 600);
-	DataVis::Optimizer::LocalSearch(*graph, 50000 );
+	DataVis::Optimizer::LocalSearch(*graph, 50000);
 
 	auto tree = std::make_unique<DataVis::Tree>();
 	tree->Init(dataset);
@@ -40,27 +41,28 @@ void ofApp::setup() {
 	tree->UpdateAABB();
 
 	//m_layouts.push_back(std::move(graph));
-	tree->SetPosition( { 100, 50, 0 } );
+	tree->SetPosition({ 100, 50, 0 });
 	m_layouts.push_back(std::move(tree));
 }
 
-void ofApp::LoadDotFiles() {
+void ofApp::LoadDotFiles()
+{
 	string data_path = ofToDataPath("", false);
 	for (const auto& entry : filesystem::directory_iterator(data_path))
 	{
-		string path = entry.path().string();
-		path.replace(0, data_path.length(), "");
-		m_graph_file_names.push_back(path);
+		if (entry.path().extension() == ".dot")
+			m_graph_file_names.push_back(entry.path().filename().string());
 	}
 	m_current_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
 }
 
 //--------------------------------------------------------------
-void ofApp::update() {
+void ofApp::update()
+{
 	const ImGuiIO& io = ImGui::GetIO();
-	if (io.WantCaptureMouse || io.WantCaptureKeyboard) 
+	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
 		m_camera.disableMouseInput();
-	else m_camera.enableMouseInput();	
+	else m_camera.enableMouseInput();
 	for (auto& layout : m_layouts) {
 		float t = ofGetLastFrameTime();
 		layout.get()->Update(t);
@@ -68,7 +70,8 @@ void ofApp::update() {
 }
 
 //--------------------------------------------------------------
-void ofApp::draw() {
+void ofApp::draw()
+{
 	ofBackgroundGradient(Color::palettePurple_3, Color::palettePurple_2, OF_GRADIENT_CIRCULAR);
 
 	ImGui_ImplOpenGL3_NewFrame();
@@ -89,7 +92,8 @@ void ofApp::draw() {
 }
 
 //--------------------------------------------------------------
-void ofApp::exit() {
+void ofApp::exit()
+{
 	// Destroy ImGui
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -98,7 +102,7 @@ void ofApp::exit() {
 
 void ofApp::Gui()
 {
-	ImGui::Begin( "Settings" );
+	ImGui::Begin("Settings");
 	//--------------------------------------------------------------
 	// Loading Graph 
 	//--------------------------------------------------------------
@@ -123,10 +127,10 @@ void ofApp::Gui()
 
 			auto graph = std::make_unique<DataVis::Graph>();
 			//DataVis::Graph::Extract::Load( *graph, new_graph_file );
-			DataVis::IStructure::Random( *graph, 800, 600 );
-			DataVis::Optimizer::LocalSearch( *graph, 50000 );
+			DataVis::IStructure::Random(*graph, 800, 600);
+			DataVis::Optimizer::LocalSearch(*graph, 50000);
 			graph->UpdateAABB();
-			m_layouts.push_back( std::move(graph) );
+			m_layouts.push_back(std::move(graph));
 		}
 
 		ImGui::TreePop();
@@ -189,10 +193,10 @@ void ofApp::Gui()
 	}
 }
 
-glm::vec3 ofApp::ScreenToWorld(const glm::vec2& _position )
+glm::vec3 ofApp::ScreenToWorld(const glm::vec2& _position)
 {
 	auto cam = m_camera.getGlobalPosition();
-	auto world = m_camera.screenToWorld( glm::vec3(_position.x, _position.y, 0 ) );
+	auto world = m_camera.screenToWorld(glm::vec3(_position.x, _position.y, 0));
 	// Ray from camera origin through mouse click
 	auto dir = world - cam;
 	// Make dir with z-length of 1
@@ -202,34 +206,39 @@ glm::vec3 ofApp::ScreenToWorld(const glm::vec2& _position )
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key) {
+void ofApp::keyPressed(int key)
+{
 
 }
 
-void ofApp::keyReleased(int key) {
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y) {
+void ofApp::keyReleased(int key)
+{
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button) {
+void ofApp::mouseMoved(int x, int y)
+{
+
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseDragged(int x, int y, int button)
+{
 	if (button == OF_MOUSE_BUTTON_LEFT && m_dragging_layout_idx != -1)
 	{
 		auto layout = m_layouts[m_dragging_layout_idx].get();
-		auto world = ScreenToWorld( glm::vec2( x, y ) );
+		auto world = ScreenToWorld(glm::vec2(x, y));
 
 		auto dif = world - m_prev_mouse_drag;
-		layout->Move( dif );
+		layout->Move(dif);
 		m_prev_mouse_drag = world;
 	}
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button) {
+void ofApp::mousePressed(int x, int y, int button)
+{
 	const ImGuiIO& io = ImGui::GetIO();
 	if (io.WantCaptureMouse) return;
 
@@ -238,9 +247,9 @@ void ofApp::mousePressed(int x, int y, int button) {
 		for (int i = 0; i < m_layouts.size(); i++)
 		{
 			auto& layout = m_layouts[i];
-			auto world = ScreenToWorld( glm::vec2( x, y ) );
+			auto world = ScreenToWorld(glm::vec2(x, y));
 			auto transformed = world - layout.get()->GetPosition();
-			if (layout.get()->GetMoveAABB().inside( transformed ))
+			if (layout.get()->GetMoveAABB().inside(transformed))
 			{
 				m_dragging_layout_idx = i;
 				m_prev_mouse_drag = world;
@@ -248,42 +257,48 @@ void ofApp::mousePressed(int x, int y, int button) {
 			}
 		}
 
-		for (auto& layout : m_layouts) 
+		for (auto& layout : m_layouts)
 		{
 			// Transform it to local coordinate system
-			auto transformed = ScreenToWorld( glm::vec2( x, y ) ) - layout.get()->GetPosition();
-			if (layout.get()->GetAABB().inside( transformed ))
-				layout.get()->Select( transformed );
+			auto transformed = ScreenToWorld(glm::vec2(x, y)) - layout.get()->GetPosition();
+			if (layout.get()->GetAABB().inside(transformed))
+				layout.get()->Select(transformed);
 		}
 	}
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button) {
+void ofApp::mouseReleased(int x, int y, int button)
+{
 	m_dragging_layout_idx = -1;
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y) {
+void ofApp::mouseEntered(int x, int y)
+{
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y) {
+void ofApp::mouseExited(int x, int y)
+{
 
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h) {
+void ofApp::windowResized(int w, int h)
+{
 
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg) {
+void ofApp::gotMessage(ofMessage msg)
+{
 
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo) {
+void ofApp::dragEvent(ofDragInfo dragInfo)
+{
 
 }
