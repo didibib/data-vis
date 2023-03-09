@@ -20,7 +20,8 @@ void ofApp::setup()
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setScrollSensitivity(20);
 	m_camera.setVFlip(true);
-	m_camera.setGlobalPosition(glm::vec3(0, 0, 2500));
+	m_camera.setFarClip( 1e30 );
+	m_camera.setGlobalPosition( glm::vec3( 0, 0, 2500 ) );
 
 	// Load
 	LoadDotFiles();
@@ -70,9 +71,8 @@ void ofApp::update()
 }
 
 //--------------------------------------------------------------
-void ofApp::draw()
-{
-	ofBackgroundGradient(Color::palettePurple_3, Color::palettePurple_2, OF_GRADIENT_CIRCULAR);
+void ofApp::draw() {
+	ofBackgroundGradient(Color::paletteCold_0, Color::paletteCold_0, OF_GRADIENT_CIRCULAR);
 
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
