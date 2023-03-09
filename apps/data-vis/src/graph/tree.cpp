@@ -4,72 +4,10 @@ namespace DataVis
 {
 const char* Tree::__RADIAL = "Radial";
 
-void Tree::Extract::MSP(Tree& _tree, Graph& _graph, int _root)
+//--------------------------------------------------------------
+void Tree::Init(const std::shared_ptr<Dataset> _dataset)
 {
-	auto& vertices = _graph.Vertices();
-
-	// Keep track of the parent of each vertex so we can construct a tree after
-	std::vector<int> parents;
-	// Keep track of which vertex are already processed
-	std::vector<bool> included;
-	// Keep track of the minimum edge cost of a vertex
-	std::vector<float> costs;
-	// Keep track of the actual minimum edge associated with the cost
-	std::vector<Graph::Edge*> edges;
-	parents.resize(vertices.size());
-	included.resize(vertices.size());
-	costs.resize(vertices.size());
-	// Initialize all but the root as infinite, so that the root is picked first
-	// Make parent of root -1
-	for (int i = 0; i < vertices.size(); i++) {
-		if (i != _root) costs[i] = 1e30f;
-		else parents[i] = -1;
-	}
-
-	// Graph will have |vertices| nodes
-	for (int i = 0; i < vertices.size(); i++) {
-		// Argmin for costs
-		float min = 1e30;
-		int idx = -1;
-		for (int v = 0; v < vertices.size(); v++) {
-			if (!included[v] && costs[v] < min) {
-				min = costs[v];
-				idx = v;
-			}
-		}
-
-		// Add lowest vertex
-		assert(idx != -1);
-		included[idx] = true;
-
-		// Update outgoing edges from this vertex
-		auto& out_edges = vertices[idx].m_out_edges;
-		for (int j = 0; j < out_edges.size(); j++) {
-			int v = out_edges[j].m_target;
-			if (!included[v] && out_edges[j].get_property().weight < costs[v]) {
-				// Found a cheaper edge to v
-				parents[v] = idx;
-				costs[v] = out_edges[j].get_property().weight;
-			}
-		}
-	}
-
-	// Construct a tree
-	_tree.m_root = std::make_shared<Node>(Node(_root, _graph.Nodes()[_root].get().GetPosition()));
-
-	// Construct recursive lambda to create the tree
-	static std::function<void(std::shared_ptr<Node>)> MakeTree = [&](std::shared_ptr<Node> n) {
-		// Look through all vertices which have parent == n.vertex
-		for (int i = 0; i < vertices.size(); i++)
-			if (parents[i] == n->vertex_idx) {
-				// Add node to n.children
-				auto child = std::make_shared<Node>(Node(i, _graph.Nodes()[i].get().GetPosition(), n));
-				n->children.push_back(child);
-				MakeTree(child);
-			}
-	};
-	MakeTree(_tree.m_root);
-	_tree.PostBuild();
+	m_dataset = _dataset;
 }
 
 //--------------------------------------------------------------
@@ -81,6 +19,7 @@ int Tree::Leaves(std::shared_ptr<Node> node)
 	return leaves;
 }
 
+//--------------------------------------------------------------
 int Tree::Depth(std::shared_ptr<Node> node)
 {
 	int max = 0;
@@ -133,17 +72,16 @@ void Tree::PostBuild()
 {
 	leaves = Leaves(m_root);
 	depth = Depth(m_root);
-	CreateReferenceNodes();
 }
 
 //--------------------------------------------------------------
 void Tree::HandleInput()
 {
 }
-
+//--------------------------------------------------------------
 void Tree::Select(const glm::vec3& _position)
 {
-	// Loop through all nodes and find one within radius of pos
+	// Loop through all vertices and find one within radius of pos
 	static std::function<std::shared_ptr<Tree::Node>(std::shared_ptr<Node>)> SelectInTree = [&](std::shared_ptr<Tree::Node> n)
 	{
 		if (n->Inside(_position)) return n;
@@ -157,6 +95,7 @@ void Tree::Select(const glm::vec3& _position)
 	SetSelectedNode(SelectInTree(m_root));
 }
 
+//--------------------------------------------------------------
 void Tree::SetSelectedNode(std::shared_ptr<Tree::Node> n)
 {
 	if (m_selected_node != nullptr)
@@ -165,11 +104,12 @@ void Tree::SetSelectedNode(std::shared_ptr<Tree::Node> n)
 	m_selected_node = n;
 }
 
-void Tree::SetBounds()
+//--------------------------------------------------------------
+void Tree::SetAABB()
 {
 	// Still uses hardcoded radius and delta_angle
 	int r = (depth - 1) * 150;
-	m_bounds = { {-r, -r}, {r, r} };
+	m_aabb = { {-r, -r}, {r, r} };
 	//m_bounds.clear();
 	//m_bounds.addVertex( { -r,r,0 } );
 	//m_bounds.addVertex( { r, r, 0 } );
@@ -178,6 +118,7 @@ void Tree::SetBounds()
 	//m_bounds.addVertex( { -r, r, 0 } );
 }
 
+//--------------------------------------------------------------
 void Tree::Update(float _delta_time)
 {
 	// TODO: Check if we should animate before traversing
@@ -202,11 +143,11 @@ void Tree::DrawLayout()
 		ofDrawCircle(glm::vec3(0), 100 + i * 150);
 	}
 
-	// Draw nodes and edges
+	// Draw vertices and edges
 	ofFill();
 	ofSetColor(255, 0, 0);
 	ofDrawCircle(m_root->GetPosition(), m_root->GetRadius());
-	ofDrawBitmapStringHighlight(ofToString(m_root->vertex_idx), m_root->GetPosition() + glm::vec3(10, 10, -1));
+	ofDrawBitmapStringHighlight(ofToString(m_root->GetVertexId()), m_root->GetPosition() + glm::vec3(10, 10, -1));
 
 	std::stack<std::shared_ptr<Node>> stack;
 	for (auto& child : m_root->children) stack.push(child);
@@ -214,7 +155,7 @@ void Tree::DrawLayout()
 	while (stack.empty() == false) {
 		auto node = stack.top(); stack.pop();
 		auto parent = node->parent;
-		static glm::vec3 sub = { 0, 0, -1 }; // To draw edge behind nodes
+		static glm::vec3 sub = { 0, 0, -1 }; // To draw edge behind vertices
 		ofFill();
 		ofSetColor(123);
 		ofDrawLine(parent->GetPosition() + sub, node->GetPosition() + sub);
@@ -222,12 +163,13 @@ void Tree::DrawLayout()
 		ofSetColor(node->color);
 		ofDrawCircle(node->GetPosition(), node->GetRadius());
 
-		ofDrawBitmapStringHighlight(ofToString(node->vertex_idx), node->GetPosition() + glm::vec3(10, 10, -1));
+		ofDrawBitmapStringHighlight(ofToString(node->GetVertexId()), node->GetPosition() + glm::vec3(10, 10, -1));
 
 		for (auto& child : node->children) stack.push(child);
 	}
 }
 
+//--------------------------------------------------------------
 void Tree::Gui()
 {
 	if (m_selected_node.get() != nullptr)
@@ -235,39 +177,85 @@ void Tree::Gui()
 		auto x = m_selected_node.get();
 		ImGui::Begin("Selected Node");
 
-		ImGui::Text("Vertex: %i", m_selected_node->vertex_idx);
+		ImGui::Text("Vertex: %i", m_selected_node->GetVertexId());
 		ImGui::Text("Position: (%f.0, %f.0)", m_selected_node->GetPosition().x, m_selected_node->GetPosition().y);
 
 		if (ImGui::Button("Make root"))
 		{
 			SwapRoot(m_selected_node);
 			Tree::Layout::Radial(*this, 100, 150);
-			UpdateBounds();
+			UpdateAABB();
 		}
 		ImGui::End();
 	}
 }
 
-void Tree::CreateReferenceNodes() {
-	// https://jonasdevlieghere.com/containers-of-unique-pointers/
-	
-	m_reference_nodes.clear();
-	std::stack<std::shared_ptr<Node>> stack;
-	for (auto& child : m_root->children) stack.push(child);
-	while (stack.empty() == false) {
-		auto node = stack.top(); stack.pop();
-		m_reference_nodes.push_back(std::ref(*node));
-		for (auto& child : node->children) stack.push(child);
-	}
-}
-
-std::vector<std::reference_wrapper<ILayout::Node>> Tree::Nodes()
+//--------------------------------------------------------------
+//-------- Extract
+//--------------------------------------------------------------
+void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
 {
-	return m_reference_nodes;
+	auto& vertices = _tree.GetDataset().GetVertices();
+
+	// Keep track of the parent of each vertex so we can construct a tree after
+	std::vector<VertexIdx> parents(vertices.size(), 0);
+	parents[_root] = -1;
+	// Keep track of which vertex are already processed
+	std::vector<bool> included(vertices.size(), 0);
+	// Keep track of the minimum edge cost of a vertex
+	std::vector<float> costs(vertices.size(), 1e30f);
+	costs[_root] = 0;
+	// Keep track of the actual minimum edge associated with the cost
+	std::vector<Edge*> edges;
+
+	// Graph will have |vertices| vertices
+	for (int i = 0; i < vertices.size(); i++) {
+		// Argmin for costs
+		float min = 1e30;
+		int idx = -1;
+		for (int v = 0; v < vertices.size(); v++) {
+			if (!included[v] && costs[v] < min) {
+				min = costs[v];
+				idx = v;
+			}
+		}
+
+		// Add lowest vertex
+		assert(idx not_eq -1);
+		included[idx] = true;
+
+		// Update outgoing edges from this vertex
+		for (auto& neigbor : *vertices[idx].neighbors) {
+			uint v = neigbor.to_idx;
+			int weight = _tree.GetDataset().GetEdges()[neigbor.edge_idx].attributes.Find("weight", 1);
+			if (!included[v] && weight < costs[v]) {
+				// Found a cheaper edge to v
+				parents[v] = idx;
+				costs[v] = weight;
+			}
+		}
+	}
+
+	// Construct a tree
+	_tree.m_root = std::make_shared<Node>(Node( vertices[_root].id, _root));
+
+	// Construct recursive lambda to create the tree
+	static std::function<void(std::shared_ptr<Node>)> MakeTree = [&](std::shared_ptr<Node> n) {
+		// Look through all vertices which have parent == n.vertex
+		for (int i = 0; i < vertices.size(); i++)
+			if (parents[i] == i) {
+				// Add node to n.children
+				auto child = std::make_shared<Node>(vertices[i].id, i, n);
+				n->children.push_back(child);
+				MakeTree(child);
+			}
+	};
+	MakeTree(_tree.m_root);
+	_tree.PostBuild();
 }
 
 //--------------------------------------------------------------
-// Layouts
+//-------- Layouts
 //--------------------------------------------------------------
 const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& Tree::Layout::Functions()
 {
@@ -282,10 +270,11 @@ void Tree::Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input)
 {
 	static RadialData rd;
 	static auto options = rd.Options();
-	ParseCmdline(options, _cmdline_input);
+	Parser::Cmdline(options, _cmdline_input);
 	Radial(_tree, rd.step, rd.delta_angle);
 }
 
+//--------------------------------------------------------------
 void Tree::Layout::Radial(Tree& _tree, float _step, float _delta_angle)
 {
 	auto& node = _tree.Root();
@@ -293,6 +282,7 @@ void Tree::Layout::Radial(Tree& _tree, float _step, float _delta_angle)
 	RadialSubTree(*node, 0, TWO_PI, 0, _step, _delta_angle);
 }
 
+//--------------------------------------------------------------
 void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _step, float _delta_angle)
 {
 	float new_wedge_start = _wedge_start;

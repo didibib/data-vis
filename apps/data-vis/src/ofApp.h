@@ -10,8 +10,10 @@ struct ImGuiData
 class ofApp : public ofBaseApp {
 
 private:
+	std::vector<std::unique_ptr<DataVis::IStructure>> m_layouts;
+	std::vector<std::shared_ptr<DataVis::Dataset>> m_datasets;
+
 	ofEasyCam m_camera;
-	std::vector<std::unique_ptr<DataVis::ILayout>> m_layouts;
 
 	ImGuiData m_imgui_data;
 	std::vector<string> m_graph_file_names;
