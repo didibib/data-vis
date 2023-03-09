@@ -34,6 +34,8 @@ void Graph::Select(const glm::vec3& _position)
 
 void Graph::Update(float delta_time)
 {
+
+	Graph::Layout::Force( *this, .5f, 10 );
 }
 
 void Graph::DrawLayout()
@@ -52,7 +54,7 @@ void Graph::DrawLayout()
 		ofDrawLine(start, end);
 	}
 
-	ofSetColor(255);
+	ofSetColor(10);
 	ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 	for (const auto& node : m_nodes) {
 		glm::vec3 pos = node->GetPosition();
@@ -69,4 +71,68 @@ std::vector<std::shared_ptr<IStructure::Node>>& Graph::GetNodes()
 	return m_nodes;
 }
 
+std::vector<std::reference_wrapper<ILayout::Node>> Graph::Nodes()
+{
+	return m_reference_nodes;
+}
+
+void Graph::Layout::Force( Graph& _graph, float _C, int _iterations )
+{
+	float k = _C * sqrtf( _graph.GetBounds().getArea() / (float)_graph.Nodes().size() );
+	float k2 = k * k;
+
+	static float t = .002f;
+	
+	for (int i = 0; i < _iterations; i++)
+	{
+		// Repulsion
+		for (int j = 0; j < _graph.Nodes().size(); j++)
+		{
+			auto& v = _graph.m_nodes[j];
+			v->SetDisplacement( glm::vec3( 0 ) );
+			for (auto& u : _graph.m_nodes)
+			{
+				if (v == u) continue;
+
+				glm::vec3 delta = v->GetPosition() - u->GetPosition();
+				float delta_l = length( delta );
+				float fr = k2 / delta_l;
+				v->SetDisplacement( v->GetDisplacement() + (delta / delta_l) * fr );
+			}
+		}
+
+		// Attraction
+		for (auto& e : _graph.Edges())
+		{
+			auto& v = _graph.m_nodes[e.m_source];
+			auto& u = _graph.m_nodes[e.m_target];
+			glm::vec3 delta = v->GetPosition() - u->GetPosition();
+			float delta_l = length( delta );
+			glm::vec3 offset = (delta / delta_l) * (delta_l * delta_l / k);
+			v->SetDisplacement( v->GetDisplacement() - offset );
+			u->SetDisplacement( u->GetDisplacement() + offset );
+		}
+
+		/*
+			auto& vertex = _graph.Vertices()[j];
+			for (auto& e : vertex.m_out_edges)
+			{
+				auto& u = _graph.m_nodes[e.m_target];
+				glm::vec3 delta = v->GetPosition() - u->GetPosition();
+				float delta_l = length( delta );
+				glm::vec3 offset = (delta / delta_l) * (delta_l * delta_l / k);
+				v->SetDisplacement( v->GetDisplacement() - offset );
+				u->SetDisplacement( u->GetDisplacement() + offset );
+			}*/
+		
+
+		for (auto& v : _graph.Nodes())
+		{
+			auto& node = v.get();
+			node.SetPosition( node.GetPosition() + node.GetDisplacement() * t);
+		}
+		t *= 0.9999f;
+	}
+	//_graph.UpdateBounds( );
+}
 }
