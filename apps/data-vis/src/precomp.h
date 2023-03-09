@@ -46,6 +46,7 @@ typedef unsigned int uint;
 
 namespace DataVis
 {
+// https://www.cppstories.com/2018/09/visit-variants/#the-amazing-stdvisit
 template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
 template<class... Ts> overload(Ts...) -> overload<Ts...>;
 
@@ -65,9 +66,9 @@ float RangeF(float range);
 namespace Curves
 {
 /// <summary>
-/// Gives a value in the range [0,1]
+/// Returns value in the range [0,1]
 /// </summary>
-/// <param name="time">: in of [0,1]</param>
+/// <param name="time">: in range of [0,1]</param>
 /// <returns></returns>
 float Bezier(float time);
 } // namespace Curves

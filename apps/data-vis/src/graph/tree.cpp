@@ -78,6 +78,7 @@ void Tree::PostBuild()
 void Tree::HandleInput()
 {
 }
+
 //--------------------------------------------------------------
 void Tree::Select(const glm::vec3& _position)
 {
@@ -191,7 +192,7 @@ void Tree::Gui()
 }
 
 //--------------------------------------------------------------
-//-------- Extract
+// Extract
 //--------------------------------------------------------------
 void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
 {
@@ -201,12 +202,10 @@ void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
 	std::vector<VertexIdx> parents(vertices.size(), 0);
 	parents[_root] = -1;
 	// Keep track of which vertex are already processed
-	std::vector<bool> included(vertices.size(), 0);
+	std::vector<bool> included(vertices.size(), false);
 	// Keep track of the minimum edge cost of a vertex
 	std::vector<float> costs(vertices.size(), 1e30f);
 	costs[_root] = 0;
-	// Keep track of the actual minimum edge associated with the cost
-	std::vector<Edge*> edges;
 
 	// Graph will have |vertices| vertices
 	for (int i = 0; i < vertices.size(); i++) {
@@ -227,7 +226,7 @@ void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
 		// Update outgoing edges from this vertex
 		for (auto& neigbor : *vertices[idx].neighbors) {
 			uint v = neigbor.to_idx;
-			int weight = _tree.GetDataset().GetEdges()[neigbor.edge_idx].attributes.Find("weight", 1);
+			float weight = _tree.GetDataset().GetEdges()[neigbor.edge_idx].attributes.FindFloat("weight", 1);
 			if (!included[v] && weight < costs[v]) {
 				// Found a cheaper edge to v
 				parents[v] = idx;
@@ -237,13 +236,13 @@ void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
 	}
 
 	// Construct a tree
-	_tree.m_root = std::make_shared<Node>(Node( vertices[_root].id, _root));
+	_tree.m_root = std::make_shared<Node>(vertices[_root].id, _root);
 
 	// Construct recursive lambda to create the tree
 	static std::function<void(std::shared_ptr<Node>)> MakeTree = [&](std::shared_ptr<Node> n) {
 		// Look through all vertices which have parent == n.vertex
 		for (int i = 0; i < vertices.size(); i++)
-			if (parents[i] == i) {
+			if (parents[i] == n->GetVertexIdx()) {
 				// Add node to n.children
 				auto child = std::make_shared<Node>(vertices[i].id, i, n);
 				n->children.push_back(child);
@@ -255,7 +254,7 @@ void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
 }
 
 //--------------------------------------------------------------
-//-------- Layouts
+// Layouts
 //--------------------------------------------------------------
 const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& Tree::Layout::Functions()
 {

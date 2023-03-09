@@ -2,6 +2,44 @@
 
 namespace DataVis
 {
+//--------------------------------------------------------------
+// Attributes
+//--------------------------------------------------------------
+void Attributes::Init(Model::Attributes& _attributes)
+{
+	for (auto& it = _attributes.begin(); it != _attributes.end(); it++) {
+		try {
+			float value = std::stof(it->second);
+			m_attributes.insert({ it->first, value });
+		}
+		catch (std::exception&) {
+			m_attributes.insert({ it->first, it->second });
+		}
+	}
+}
+
+float Attributes::FindFloat(std::string _key, float _default)
+{
+	auto& it = m_attributes.find(_key);
+	if (it != m_attributes.end()) {
+		return std::visit(VisitFloat{ _default }, it->second);
+	}
+	m_attributes[_key] = _default;
+	return _default;
+}
+
+std::string Attributes::FindString(std::string _key)
+{
+	auto& it = m_attributes.find(_key);
+	if (it != m_attributes.end()) {
+		return std::visit(VisitString{}, it->second);
+	}
+	return "";
+}
+
+//--------------------------------------------------------------
+// Dataset
+//--------------------------------------------------------------
 bool Dataset::Load(std::string _filename)
 {
 	m_filename = _filename;
