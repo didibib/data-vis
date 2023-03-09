@@ -13,12 +13,11 @@ public:
 	void Update(float delta_time) override;
 	void DrawLayout() override;
 	void Gui() override;
-	std::vector<std::shared_ptr<IStructure::Node>>& GetNodes() override;
+	VectorOfNodes& GetNodes() override;
 
 	float radius = 10;
 protected:
-	void PostBuild() override {};
-	std::vector<std::shared_ptr<Node>> m_nodes;
+	VectorOfNodes m_nodes;
 
 private:
 };

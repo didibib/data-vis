@@ -7,7 +7,7 @@ void ofApp::setup()
 	// Init ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui::StyleColorsClassic();
+	ImGui::StyleColorsLight();
 	ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ofGetWindowPtr()->getWindowContext(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
@@ -32,8 +32,8 @@ void ofApp::setup()
 
 	auto graph = std::make_unique<DataVis::Graph>();
 	graph->Init(dataset);
-	DataVis::IStructure::Random(*graph, 800, 600);
-	DataVis::Optimizer::LocalSearch(*graph, 50000);
+	DataVis::Layout::Random(*graph, 800, 600);
+	m_layouts.push_back(std::move(graph));
 
 	auto tree = std::make_unique<DataVis::Tree>();
 	tree->Init(dataset);
@@ -41,11 +41,11 @@ void ofApp::setup()
 	DataVis::Tree::Layout::Radial(*tree, 100, 150);
 	tree->UpdateAABB();
 
-	//m_layouts.push_back(std::move(graph));
 	tree->SetPosition({ 100, 50, 0 });
 	m_layouts.push_back(std::move(tree));
 }
 
+//--------------------------------------------------------------
 void ofApp::LoadDotFiles()
 {
 	string data_path = ofToDataPath("", false);
@@ -127,12 +127,11 @@ void ofApp::Gui()
 
 			auto graph = std::make_unique<DataVis::Graph>();
 			//DataVis::Graph::Extract::Load( *graph, new_graph_file );
-			DataVis::IStructure::Random(*graph, 800, 600);
+			DataVis::Layout::Random(*graph, 800, 600);
 			DataVis::Optimizer::LocalSearch(*graph, 50000);
 			graph->UpdateAABB();
 			m_layouts.push_back(std::move(graph));
 		}
-
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
@@ -141,7 +140,7 @@ void ofApp::Gui()
 	// Select Layout
 	//--------------------------------------------------------------
 	if (ImGui::TreeNode("Layout")) {
-		auto& layout_functions = DataVis::IStructure::LayoutFunctions();
+		auto& layout_functions = DataVis::Layout::Functions();
 		std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
 		const char* layout_preview = layout_chosen.c_str();
 		if (ImGui::BeginCombo("Select Layout", layout_preview))
@@ -159,7 +158,7 @@ void ofApp::Gui()
 			ImGui::EndCombo();
 		}
 
-		auto& layout_descriptions = DataVis::IStructure::LayoutDescriptions();
+		auto& layout_descriptions = DataVis::Layout::Descriptions();
 		ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
 
 		static char options[256] = "";

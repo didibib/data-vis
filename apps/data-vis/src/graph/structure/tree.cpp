@@ -8,24 +8,36 @@ const char* Tree::__RADIAL = "Radial";
 void Tree::Init(const std::shared_ptr<Dataset> _dataset)
 {
 	m_dataset = _dataset;
+	m_nodes.resize(_dataset->GetVertices().size());
 }
 
-//--------------------------------------------------------------
-int Tree::Leaves(std::shared_ptr<Node> node)
+IStructure::VectorOfNodes& Tree::GetNodes()
 {
-	int leaves = 0;
+	return m_nodes;
+}
+
+std::shared_ptr<Tree::Node> Tree::Root()
+{
+	return m_root;
+}
+//--------------------------------------------------------------
+// Properties
+//--------------------------------------------------------------
+uint Tree::Leaves(std::shared_ptr<Node> node)
+{
+	uint leaves = 0;
 	if (node->children.size() == 0) leaves++;
 	for (auto& child : node->children) leaves += Leaves(child);
 	return leaves;
 }
 
 //--------------------------------------------------------------
-int Tree::Depth(std::shared_ptr<Node> node)
+uint Tree::Depth(std::shared_ptr<Node> node)
 {
-	int max = 0;
+	uint max = 0;
 	for (auto& child : node->children)
 	{
-		int child_depth = Depth(child);
+		uint child_depth = Depth(child);
 		if (child_depth > max) max = child_depth;
 	}
 	return max + 1;
@@ -64,11 +76,11 @@ void Tree::SwapRoot(std::shared_ptr<Node> _new_root)
 	}
 
 	m_root = _new_root;
-	PostBuild();
+	UpdateProperties();
 }
 
 //--------------------------------------------------------------
-void Tree::PostBuild()
+void Tree::UpdateProperties()
 {
 	leaves = Leaves(m_root);
 	depth = Depth(m_root);
@@ -111,18 +123,11 @@ void Tree::SetAABB()
 	// Still uses hardcoded radius and delta_angle
 	int r = (depth - 1) * 150;
 	m_aabb = { {-r, -r}, {r, r} };
-	//m_bounds.clear();
-	//m_bounds.addVertex( { -r,r,0 } );
-	//m_bounds.addVertex( { r, r, 0 } );
-	//m_bounds.addVertex( { r, -r, 0 } );
-	//m_bounds.addVertex( { -r, -r, 0 } );
-	//m_bounds.addVertex( { -r, r, 0 } );
 }
 
 //--------------------------------------------------------------
 void Tree::Update(float _delta_time)
 {
-	// TODO: Check if we should animate before traversing
 	static std::function<void(std::shared_ptr<Node>)> EaseInEaseOut = [&](std::shared_ptr<Node> n) {
 		n->EaseInEaseOut(_delta_time);
 		for (auto child : n->children) EaseInEaseOut(child);
@@ -237,20 +242,23 @@ void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
 
 	// Construct a tree
 	_tree.m_root = std::make_shared<Node>(vertices[_root].id, _root);
+	_tree.GetNodes()[_root] = _tree.m_root;
 
 	// Construct recursive lambda to create the tree
-	static std::function<void(std::shared_ptr<Node>)> MakeTree = [&](std::shared_ptr<Node> n) {
+	static std::function<void(std::shared_ptr<Node>, VectorOfNodes&)> MakeTree = 
+		[&](std::shared_ptr<Node> n, VectorOfNodes& nodes) {
 		// Look through all vertices which have parent == n.vertex
 		for (int i = 0; i < vertices.size(); i++)
 			if (parents[i] == n->GetVertexIdx()) {
 				// Add node to n.children
 				auto child = std::make_shared<Node>(vertices[i].id, i, n);
+				nodes[i] = child;
 				n->children.push_back(child);
-				MakeTree(child);
+				MakeTree(child, nodes);
 			}
 	};
-	MakeTree(_tree.m_root);
-	_tree.PostBuild();
+	MakeTree(_tree.m_root, _tree.GetNodes());
+	_tree.UpdateProperties();
 }
 
 //--------------------------------------------------------------

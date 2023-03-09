@@ -5,7 +5,7 @@ namespace DataVis
 class Tree : public IStructure
 {
 	static const char* __RADIAL;
-	struct RadialData : Data
+	struct RadialData : DataVis::Layout::Data
 	{
 	public:
 		float step = 100;
@@ -59,13 +59,13 @@ public:
 	void Select(const glm::vec3&) override;
 	void Update(float delta_time) override;
 	void Gui() override;
-	std::vector<std::shared_ptr<IStructure::Node>>& GetNodes() override { return m_nodes; };
+	VectorOfNodes& GetNodes() override;
 	void SetSelectedNode(std::shared_ptr<Node>);
 
 	//--------------------------------------------------------------
-	std::shared_ptr<Node> Root() { return m_root; }
-	static int Leaves(std::shared_ptr<Tree::Node>);
-	static int Depth(std::shared_ptr<Tree::Node>);
+	std::shared_ptr<Node> Root();
+	static uint Leaves(std::shared_ptr<Tree::Node>);
+	static uint Depth(std::shared_ptr<Tree::Node>);
 	void SwapRoot(std::shared_ptr<Tree::Node>);
 
 	float speed = 5;
@@ -77,11 +77,11 @@ public:
 protected:
 	void DrawLayout() override;
 	void SetAABB() override;
-	std::vector<std::shared_ptr<IStructure::Node>> m_nodes;
+	VectorOfNodes m_nodes;
 
 	//--------------------------------------------------------------
 private:
-	void PostBuild();
+	void UpdateProperties();
 	std::shared_ptr<Tree::Node> m_root;
 	std::shared_ptr<Tree::Node> m_selected_node;
 };
