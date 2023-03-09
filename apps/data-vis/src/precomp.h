@@ -93,7 +93,8 @@ void Cmdline(const boost::program_options::options_description&, std::string);
 //--------------------------------------------------------------
 // Own headers
 #include "dataset.h"
-#include "structure.h"
-#include "graph.h"
-#include "tree.h"
-#include "optimizer.h"
+#include "structure/structure.h"
+#include "layout/layout.h"
+#include "structure/graph.h"
+#include "structure/tree.h"
+#include "layout/optimizer.h"

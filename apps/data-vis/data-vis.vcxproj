@@ -115,19 +115,27 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\graph\graph.cpp">
+    <ClCompile Include="src\graph\layout\layout.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\graph\structure.cpp">
+    <ClCompile Include="src\graph\layout\optimizer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\graph\optimizer.cpp">
+    <ClCompile Include="src\graph\structure\graph.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\graph\tree.cpp">
+    <ClCompile Include="src\graph\structure\node.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\graph\structure\structure.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\graph\structure\tree.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -156,10 +164,11 @@
     <ClInclude Include="external\imgui\imstb_truetype.h" />
     <ClInclude Include="src\graph\dataset.h" />
     <ClInclude Include="src\graph\external\spirit-graphviz.hpp" />
-    <ClInclude Include="src\graph\graph.h" />
-    <ClInclude Include="src\graph\structure.h" />
-    <ClInclude Include="src\graph\optimizer.h" />
-    <ClInclude Include="src\graph\tree.h" />
+    <ClInclude Include="src\graph\layout\layout.h" />
+    <ClInclude Include="src\graph\layout\optimizer.h" />
+    <ClInclude Include="src\graph\structure\graph.h" />
+    <ClInclude Include="src\graph\structure\structure.h" />
+    <ClInclude Include="src\graph\structure\tree.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\precomp.h" />
   </ItemGroup>

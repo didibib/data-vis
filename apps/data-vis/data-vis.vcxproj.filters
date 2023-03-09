@@ -40,20 +40,26 @@
     <ClCompile Include="external\imgui\imgui.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\graph.cpp">
-      <Filter>src\graph</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graph\optimizer.cpp">
-      <Filter>src\graph</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graph\structure.cpp">
-      <Filter>src\graph</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graph\tree.cpp">
-      <Filter>src\graph</Filter>
-    </ClCompile>
     <ClCompile Include="src\graph\dataset.cpp">
       <Filter>src\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\layout\optimizer.cpp">
+      <Filter>src\graph\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\layout\layout.cpp">
+      <Filter>src\graph\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\structure\structure.cpp">
+      <Filter>src\graph\structure</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\structure\tree.cpp">
+      <Filter>src\graph\structure</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\structure\graph.cpp">
+      <Filter>src\graph\structure</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\structure\node.cpp">
+      <Filter>src\graph\structure</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +77,12 @@
     </Filter>
     <Filter Include="src\graph\external">
       <UniqueIdentifier>{78cdd33e-4b28-4648-b55e-1ee7f55fa104}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\layout">
+      <UniqueIdentifier>{9680b4e8-f577-41df-9041-7fc9cf2c39a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\structure">
+      <UniqueIdentifier>{125c10b3-f052-4d1d-9880-4bb70c7bb55a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -113,23 +125,26 @@
     <ClInclude Include="external\imgui\imgui.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\graph.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graph\optimizer.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graph\structure.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graph\tree.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
     <ClInclude Include="src\graph\external\spirit-graphviz.hpp">
       <Filter>src\graph\external</Filter>
     </ClInclude>
     <ClInclude Include="src\graph\dataset.h">
       <Filter>src\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\layout\optimizer.h">
+      <Filter>src\graph\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\layout\layout.h">
+      <Filter>src\graph\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\structure\structure.h">
+      <Filter>src\graph\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\structure\tree.h">
+      <Filter>src\graph\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\structure\graph.h">
+      <Filter>src\graph\structure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
