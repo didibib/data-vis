@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
 void ofApp::setup() {
@@ -22,15 +23,21 @@ void ofApp::setup() {
 
 	// Load
 	LoadDotFiles();
+	// Dataset
+	auto dataset = std::make_shared<DataVis::Dataset>();
+	dataset->Load(m_current_graph_file);
+	m_datasets.push_back(dataset);
+
 	auto graph = std::make_unique<DataVis::Graph>();
-	DataVis::Graph::Extract::Load(*graph, m_current_graph_file);
-	DataVis::ILayout::Random(*graph, 800, 600);
+	graph->Init(dataset);
+	DataVis::IStructure::Random(*graph, 800, 600);
 	DataVis::Optimizer::LocalSearch(*graph, 50000 );
 
 	auto tree = std::make_unique<DataVis::Tree>();
-	DataVis::Tree::Extract::MSP(*tree, *graph, 0);
+	tree->Init(dataset);
+	DataVis::Tree::Extract::MSP(*tree, 0);
 	DataVis::Tree::Layout::Radial(*tree, 100, 150);
-	tree->UpdateBounds();
+	tree->UpdateAABB();
 
 	//m_layouts.push_back(std::move(graph));
 	tree->SetPosition( { 100, 50, 0 } );
@@ -115,10 +122,10 @@ void ofApp::Gui()
 			string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
 
 			auto graph = std::make_unique<DataVis::Graph>();
-			DataVis::Graph::Extract::Load( *graph, new_graph_file );
-			DataVis::ILayout::Random( *graph, 800, 600 );
+			//DataVis::Graph::Extract::Load( *graph, new_graph_file );
+			DataVis::IStructure::Random( *graph, 800, 600 );
 			DataVis::Optimizer::LocalSearch( *graph, 50000 );
-			graph->UpdateBounds();
+			graph->UpdateAABB();
 			m_layouts.push_back( std::move(graph) );
 		}
 
@@ -130,7 +137,7 @@ void ofApp::Gui()
 	// Select Layout
 	//--------------------------------------------------------------
 	if (ImGui::TreeNode("Layout")) {
-		auto& layout_functions = DataVis::ILayout::LayoutFunctions();
+		auto& layout_functions = DataVis::IStructure::LayoutFunctions();
 		std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
 		const char* layout_preview = layout_chosen.c_str();
 		if (ImGui::BeginCombo("Select Layout", layout_preview))
@@ -148,7 +155,7 @@ void ofApp::Gui()
 			ImGui::EndCombo();
 		}
 
-		auto& layout_descriptions = DataVis::ILayout::LayoutDescriptions();
+		auto& layout_descriptions = DataVis::IStructure::LayoutDescriptions();
 		ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
 
 		static char options[256] = "";
@@ -233,7 +240,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 			auto& layout = m_layouts[i];
 			auto world = ScreenToWorld( glm::vec2( x, y ) );
 			auto transformed = world - layout.get()->GetPosition();
-			if (layout.get()->GetMoveBounds().inside( transformed ))
+			if (layout.get()->GetMoveAABB().inside( transformed ))
 			{
 				m_dragging_layout_idx = i;
 				m_prev_mouse_drag = world;
@@ -245,7 +252,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 		{
 			// Transform it to local coordinate system
 			auto transformed = ScreenToWorld( glm::vec2( x, y ) ) - layout.get()->GetPosition();
-			if (layout.get()->GetBounds().inside( transformed ))
+			if (layout.get()->GetAABB().inside( transformed ))
 				layout.get()->Select( transformed );
 		}
 	}

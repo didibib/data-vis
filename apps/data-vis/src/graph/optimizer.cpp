@@ -1,7 +1,7 @@
 #include "precomp.h"
 
 namespace DataVis {
-	float Optimizer::LocalSearch(Graph& _graph, int _iterations)
+	float Optimizer::LocalSearch(IStructure& _graph, int _iterations)
 	{		
 		float cost = CalculateCost(_graph);
 		for (size_t i = 0; i < _iterations; i++)
@@ -11,72 +11,71 @@ namespace DataVis {
 		return cost;
 	}
 
-	float Optimizer::CalculateCost(Graph& _graph)
+	float Optimizer::CalculateCost(IStructure& _structure)
 	{
 		float cost = 0;
-		for (auto& edge : _graph.Edges()) {
-			int startIdx = edge.m_source;
-			int endIdx = edge.m_target;
-			glm::vec3 start = _graph.Nodes()[startIdx].get().GetPosition();
-			glm::vec3 end = _graph.Nodes()[endIdx].get().GetPosition();
+		for (auto& edge : _structure.GetDataset().GetEdges()) {
+			VertexIdx startIdx = edge.from_idx;
+			VertexIdx endIdx = edge.to_idx;
+			glm::vec3 start = _structure.GetNodes()[startIdx]->GetPosition();
+			glm::vec3 end = _structure.GetNodes()[endIdx]->GetPosition();
 			cost += glm::distance(start, end);
 		}
 		return cost;
 	}
 
-	float Optimizer::CalculateIncrementalCost( Graph& _graph, uint _idx0, uint _idx1 )
+	float Optimizer::CalculateIncrementalCost(IStructure& _structure, uint _idx0, uint _idx1 )
 	{
 		float cost = 0;
 		// Subtract cost of all edges before swap at both indices
-		cost -= CalculateNodeCost( _graph, _idx0 );
-		cost -= CalculateNodeCost( _graph, _idx1 );
+		cost -= CalculateNodeCost(_structure, _idx0 );
+		cost -= CalculateNodeCost(_structure, _idx1 );
 		// Temporarily swap the positions of the two nodes
-		auto& node0 = _graph.Nodes()[_idx0].get();
-		auto& node1 = _graph.Nodes()[_idx1].get();
-		auto pos0 = node0.GetPosition();
-		auto pos1 = node1.GetPosition();
-		node0.SetPosition(pos1);
-		node1.SetPosition(pos0);
+		auto& node0 = _structure.GetNodes()[_idx0];
+		auto& node1 = _structure.GetNodes()[_idx1];
+		auto pos0 = node0->GetPosition();
+		auto pos1 = node1->GetPosition();
+		node0->SetPosition(pos1);
+		node1->SetPosition(pos0);
 		// Add cost of all edges after swap at both indices
-		cost += CalculateNodeCost( _graph, _idx0 );
-		cost += CalculateNodeCost( _graph, _idx1 );
+		cost += CalculateNodeCost(_structure, _idx0 );
+		cost += CalculateNodeCost(_structure, _idx1 );
 		// Swap back
-		node0.SetPosition(pos0);
-		node1.SetPosition(pos1);
+		node0->SetPosition(pos0);
+		node1->SetPosition(pos1);
 		return cost;
 	}
 
-	float Optimizer::CalculateNodeCost( Graph& _graph, uint _idx )
+	float Optimizer::CalculateNodeCost(IStructure& _structure, uint _idx )
 	{
 		float cost = 0;
-		auto& node = _graph.Vertices()[_idx];
-		for ( auto& edge : node.m_out_edges )
+		auto& node = _structure.GetNodes()[_idx];
+		for ( auto& neigbor : node->neighbors)
 		{
-			int targetIdx = edge.m_target;
-			glm::vec3 start = _graph.Nodes()[_idx].get().GetPosition();
-			glm::vec3 end = _graph.Nodes()[targetIdx].get().GetPosition();
+			glm::vec3 start = node->GetPosition();
+			glm::vec3 end = neigbor->GetPosition();
 			cost += glm::distance( start, end );
 		}
 		return cost;
 	}
 
-	void Optimizer::SwapPos( Graph& _graph, float& _currCost )
+	void Optimizer::SwapPos(IStructure& _structure, float& _currCost )
 	{
-		auto& nodes = _graph.Vertices();
+		auto& nodes = _structure.GetNodes();
 		int range = nodes.size() - 1;
 		uint idx0 = Random::Range( range );
 		uint idx1 = Random::Range( range );
 		while ( idx0 == idx1 ) idx1 = Random::Range( range );
-		float costDif = CalculateIncrementalCost( _graph, idx0, idx1 );
+		float costDif = CalculateIncrementalCost(_structure, idx0, idx1 );
 		if ( costDif < 0 )
 		{
 			// Swap the nodes
-			auto& node0 = _graph.Nodes()[idx0].get();
-			auto& node1 = _graph.Nodes()[idx1].get();
-			auto pos0 = node0.GetPosition();
-			auto pos1 = node1.GetPosition();
-			node0.SetPosition(pos1);
-			node1.SetPosition(pos0);
+			auto& node0 = _structure.GetNodes()[idx0];
+			auto& node1 = _structure.GetNodes()[idx1];
+			auto pos0 = node0->GetPosition();
+			auto pos1 = node1->GetPosition();
+			node0->SetPosition(pos1);
+			node1->SetPosition(pos0);
 			_currCost += costDif;
 		}
 	}

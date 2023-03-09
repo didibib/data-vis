@@ -3,11 +3,11 @@
 namespace DataVis {
 	class Optimizer {
 	public:
-		static float LocalSearch(Graph&, int iterations);
+		static float LocalSearch(IStructure&, int iterations);
 	private:
-		static float CalculateCost(Graph&);
-		static float CalculateIncrementalCost( Graph&, uint idx0, uint idx1 );
-		static float CalculateNodeCost( Graph&, uint idx );
-		static void SwapPos(Graph&, float& current_cost);
+		static float CalculateCost(IStructure&);
+		static float CalculateIncrementalCost(IStructure&, uint idx0, uint idx1 );
+		static float CalculateNodeCost(IStructure&, uint idx );
+		static void SwapPos(IStructure&, float& current_cost);
 	};
 }

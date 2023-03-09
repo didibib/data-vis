@@ -17,7 +17,8 @@
 #include "ofMain.h"
 
 // Purple color palette: #635985 #443C68 #393053 #18122B
-namespace Color {
+namespace Color
+{
 const ofColor palettePurple_0(99, 89, 133);
 const ofColor palettePurple_1(68, 60, 104);
 const ofColor palettePurple_2(57, 48, 83);
@@ -37,11 +38,19 @@ const ofColor palettePurple_3(24, 18, 43);
 #include <fstream>
 #include <iostream>
 #include <deque>
+#include <variant>
+#include <limits.h>
 
 //--------------------------------------------------------------
 typedef unsigned int uint;
 
-namespace Random {
+namespace DataVis
+{
+template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
+template<class... Ts> overload(Ts...) -> overload<Ts...>;
+
+namespace Random
+{
 std::random_device random_device;
 std::mt19937 MT19937(random_device());
 
@@ -51,20 +60,23 @@ uint Range(uint, uint);
 uint Range(uint);
 float Float();
 float RangeF(float range);
-}
+} // namespace Random
 
-namespace Curves {
+namespace Curves
+{
 /// <summary>
 /// Gives a value in the range [0,1]
 /// </summary>
 /// <param name="time">: in of [0,1]</param>
 /// <returns></returns>
 float Bezier(float time);
-}
+} // namespace Curves
 
-namespace Parser {
-	void Cmdline(const boost::program_options::options_description&, std::string);
-}
+namespace Parser
+{
+void Cmdline(const boost::program_options::options_description&, std::string);
+} // namespace Parser
+} // namespace DataVis
 
 //--------------------------------------------------------------
 // External
@@ -72,7 +84,8 @@ namespace Parser {
 
 //--------------------------------------------------------------
 // Own headers
-#include "layout.h"
+#include "dataset.h"
+#include "structure.h"
 #include "graph.h"
 #include "tree.h"
 #include "optimizer.h"

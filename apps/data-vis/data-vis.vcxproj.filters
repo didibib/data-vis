@@ -46,10 +46,13 @@
     <ClCompile Include="src\graph\optimizer.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\layout.cpp">
+    <ClCompile Include="src\graph\structure.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
     <ClCompile Include="src\graph\tree.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\dataset.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,7 +119,7 @@
     <ClInclude Include="src\graph\optimizer.h">
       <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\layout.h">
+    <ClInclude Include="src\graph\structure.h">
       <Filter>src\graph</Filter>
     </ClInclude>
     <ClInclude Include="src\graph\tree.h">
@@ -124,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="src\graph\external\spirit-graphviz.hpp">
       <Filter>src\graph\external</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\dataset.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
