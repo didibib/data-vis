@@ -52,7 +52,7 @@ public:
 	virtual void HandleInput() = 0;
 	virtual void Select(const glm::vec3&) = 0;
 	virtual void Update(float delta_time) = 0;
-	void Draw();
+	void Draw(bool is_focussed);
 	virtual void Gui() = 0;
 	virtual std::vector<std::shared_ptr<IStructure::Node>>& GetNodes() = 0;
 
@@ -61,6 +61,8 @@ public:
 	void Move(glm::vec3 offset);
 	const ofRectangle& GetAABB() const;
 	const ofRectangle& GetMoveAABB() const;
+	bool InsideAABB(glm::vec3 position);
+	bool InsideMoveAABB(glm::vec3 position);
 	void UpdateAABB();
 
 protected:

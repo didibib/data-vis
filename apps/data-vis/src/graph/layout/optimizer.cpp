@@ -87,7 +87,7 @@ void Optimizer::SwapPos(IStructure& _structure, float& _currCost)
 //--------------------------------------------------------------
 // Force Directed
 //--------------------------------------------------------------
-void Optimizer::ForceDirected(IStructure& _structure, float _C, int _iterations)
+void Optimizer::ForceDirected(IStructure& _structure, float _C, float _t, int _iterations)
 {
 	int area = _structure.GetAABB().getArea();
 	float k = _C * sqrtf(area / static_cast<float>(_structure.GetNodes().size()));
@@ -121,12 +121,12 @@ void Optimizer::ForceDirected(IStructure& _structure, float _C, int _iterations)
 			float delta_l = length(delta);
 			glm::vec3 offset = (delta / delta_l) * (delta_l * delta_l / k);
 			v->SetDisplacement(v->GetDisplacement() - offset);
-			u->SetDisplacement(u->GetDisplacement() + offset);
+			u->SetDisplacement(u->GetDisplacement() + offset); 
 		}
 
 		for (auto& node : _structure.GetNodes())
 		{
-			node->SetPosition(node->GetPosition() + node->GetDisplacement() * t);
+			node->SetPosition(node->GetPosition() + node->GetDisplacement() * _t);
 		}
 		t *= 0.9999f;
 	}

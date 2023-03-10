@@ -94,10 +94,11 @@ void Tree::HandleInput()
 //--------------------------------------------------------------
 void Tree::Select(const glm::vec3& _position)
 {
+	glm::vec3 transformed = _position - m_position;
 	// Loop through all vertices and find one within radius of pos
 	static std::function<std::shared_ptr<Tree::Node>(std::shared_ptr<Node>)> SelectInTree = [&](std::shared_ptr<Tree::Node> n)
 	{
-		if (n->Inside(_position)) return n;
+		if (n->Inside(transformed)) return n;
 		for (auto& child : n->children)
 		{
 			std::shared_ptr<Tree::Node> selected = SelectInTree(child);
