@@ -1,11 +1,10 @@
 #include "precomp.h"
-#include "ofApp.h"
 
 namespace DataVis
 {
 void Graph::Init(const std::shared_ptr<Dataset> _dataset)
 {
-	m_dataset = _dataset;
+	IStructure::Init(_dataset);
 	m_nodes.clear();
 	m_nodes.reserve(_dataset->GetVertices().size());
 	auto& vertices = _dataset->GetVertices();
@@ -22,32 +21,13 @@ void Graph::Init(const std::shared_ptr<Dataset> _dataset)
 			m_nodes[i]->neighbors.push_back(m_nodes[n.to_idx]);
 		}
 	}
-}
 
-IStructure::VectorOfNodes& Graph::GetNodes()
-{
-	return m_nodes;
-}
-
-//--------------------------------------------------------------
-void Graph::HandleInput()
-{
+	// Add layout
+	m_layouts.push_back(std::make_unique<ForceDirected>());
 }
 
 //--------------------------------------------------------------
-void Graph::Select(const glm::vec3& _position)
-{
-}
-
-//--------------------------------------------------------------
-void Graph::Update(float delta_time)
-{
-	if(m_imgui_data.button_fd_enabled)
-		Optimizer::ForceDirected(*this, m_imgui_data.input_fd_C, m_imgui_data.input_fd_t, m_imgui_data.input_fd_iter_per_frame);
-}
-
-//--------------------------------------------------------------
-void Graph::DrawLayout()
+void Graph::DrawNodes()
 {
 	ofFill();
 	ofSetColor(123);
@@ -62,53 +42,12 @@ void Graph::DrawLayout()
 		ofDrawLine(start, end);
 	}
 
-	ofSetColor(10);
 	ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 	for (const auto& node : m_nodes) {
 		glm::vec3 pos = node->GetPosition();
+		ofSetColor(node->color);
 		ofDrawCircle(pos, radius);
 	}
 }
-
-//--------------------------------------------------------------
-void Graph::Gui()
-{
-	ImGui::Begin("Graph Settings");
-
-	//--------------------------------------------------------------
-	// Optimize Layout
-	//--------------------------------------------------------------
-	if (ImGui::TreeNode("Local Search")) {
-		ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
-		if (ImGui::Button("Optimize Graph"))
-		{
-			DataVis::Optimizer::LocalSearch(*this, m_imgui_data.input_optimize_iterations);
-		}
-
-		ImGui::TreePop();
-		ImGui::Separator();
-	}
-
-	if (ImGui::TreeNode("Force Directed"))
-	{
-		ImGui::Checkbox("Enabled", &m_imgui_data.button_fd_enabled);
-		ImGui::InputInt("Iterations per frame", &(m_imgui_data.input_fd_iter_per_frame));
-		ImGui::InputFloat("C", &(m_imgui_data.input_fd_C));
-		ImGui::InputFloat("t", &(m_imgui_data.input_fd_t));
-
-		ImGui::TreePop();
-		ImGui::Separator();
-	}
-
-	if (ImGui::Button("Delete"))
-	{
-		/*auto app = m_app.lock();
-		app.get()->DeleteStructure(*this);*/
-		m_on_delete_callback(*this);
-	}
-	ImGui::End();
-}
-
-//--------------------------------------------------------------
 
 } // namespace DataVis

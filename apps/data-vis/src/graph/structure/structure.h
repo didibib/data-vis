@@ -2,9 +2,10 @@
 
 namespace DataVis
 {
-//--------------------------------------------------------------
+class Layout;
 namespace po = boost::program_options;
 
+//--------------------------------------------------------------
 class IStructure
 {
 public:
@@ -18,6 +19,7 @@ public:
 		VertexIdx GetVertexIdx() const;
 		const glm::vec3& GetPosition();
 		void SetPosition(glm::vec3& position);
+		const glm::vec3& GetNewPosition();
 		void SetNewPosition(glm::vec3& new_position);
 		void SetDisplacement(glm::vec3 displacement);
 		const glm::vec3& GetDisplacement();
@@ -48,16 +50,15 @@ public:
 	virtual ~IStructure();
 	const int& Idx() const;
 	Dataset& GetDataset() const;
-	virtual void Init(const std::shared_ptr<Dataset>) = 0;
-	virtual void HandleInput() = 0;
-	virtual void Select(const glm::vec3&) = 0;
-	virtual void Update(float delta_time) = 0;
-	void Draw(bool is_focussed);
-	virtual void Gui() = 0;
-	virtual VectorOfNodes& GetNodes() = 0;
-
+	VectorOfNodes& GetNodes();
 	glm::vec3 GetPosition() const;
 	void SetPosition(glm::vec3 new_position);
+	virtual void Init(const std::shared_ptr<Dataset>);
+	virtual void Update(float delta_time);
+
+	void Draw(bool is_focussed);
+	void Gui();
+	void Select(const glm::vec3&);
 	void Move(glm::vec3 offset);
 	const ofRectangle& GetAABB() const;
 	const ofRectangle& GetMoveAABB() const;
@@ -67,17 +68,30 @@ public:
 	void SetOnDeleteCallback(std::function<void(IStructure&)> callback);
 
 protected:
+	VectorOfNodes m_nodes;
+	std::vector<std::shared_ptr<Layout>> m_layouts;
+	std::shared_ptr<Layout> m_active_layout;
 	std::shared_ptr<Dataset> m_dataset;
 	glm::vec3 m_position = glm::vec3(0);
 	ofRectangle m_aabb;
 	ofRectangle m_move_aabb;
 	int m_move_aabb_size = 50;
+	std::shared_ptr<Node> m_selected_node;
+
+	struct GuiData
+	{
+		bool checkbox_node_labels = false;
+		float slider_radius = 10;
+	} m_gui_data;
 
 	std::function<void(IStructure&)> m_on_delete_callback;
 
-	virtual void DrawLayout() = 0;
+	virtual void DrawNodes() = 0;
+	virtual void NodeInfoGui();
+
 	virtual void SetAABB();
 	void SetMoveAABB();
+	void SetSelectedNode(std::shared_ptr<Node> _node);
 
 private:
 	static int __idx;
