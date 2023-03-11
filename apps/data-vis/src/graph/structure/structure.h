@@ -54,7 +54,7 @@ public:
 	virtual void Update(float delta_time) = 0;
 	void Draw();
 	virtual void Gui() = 0;
-	virtual std::vector<std::shared_ptr<IStructure::Node>>& GetNodes() = 0;
+	virtual VectorOfNodes& GetNodes() = 0;
 
 	glm::vec3 GetPosition() const;
 	void SetPosition(glm::vec3 new_position);

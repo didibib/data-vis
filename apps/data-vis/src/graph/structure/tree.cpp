@@ -4,12 +4,6 @@ namespace DataVis
 {
 const char* Tree::__RADIAL = "Radial";
 
-//--------------------------------------------------------------
-void Tree::Init(const std::shared_ptr<Dataset> _dataset)
-{
-	m_dataset = _dataset;
-	m_nodes.resize(_dataset->GetVertices().size());
-}
 
 IStructure::VectorOfNodes& Tree::GetNodes()
 {
@@ -197,71 +191,6 @@ void Tree::Gui()
 }
 
 //--------------------------------------------------------------
-// Extract
-//--------------------------------------------------------------
-void Tree::Extract::MSP(Tree& _tree, VertexIdx _root)
-{
-	auto& vertices = _tree.GetDataset().GetVertices();
-
-	// Keep track of the parent of each vertex so we can construct a tree after
-	std::vector<VertexIdx> parents(vertices.size(), 0);
-	parents[_root] = -1;
-	// Keep track of which vertex are already processed
-	std::vector<bool> included(vertices.size(), false);
-	// Keep track of the minimum edge cost of a vertex
-	std::vector<float> costs(vertices.size(), 1e30f);
-	costs[_root] = 0;
-
-	// Graph will have |vertices| vertices
-	for (int i = 0; i < vertices.size(); i++) {
-		// Argmin for costs
-		float min = 1e30;
-		int idx = -1;
-		for (int v = 0; v < vertices.size(); v++) {
-			if (!included[v] && costs[v] < min) {
-				min = costs[v];
-				idx = v;
-			}
-		}
-
-		// Add lowest vertex
-		assert(idx not_eq -1);
-		included[idx] = true;
-
-		// Update outgoing edges from this vertex
-		for (auto& neigbor : *vertices[idx].neighbors) {
-			uint v = neigbor.to_idx;
-			float weight = _tree.GetDataset().GetEdges()[neigbor.edge_idx].attributes.FindFloat("weight", 1);
-			if (!included[v] && weight < costs[v]) {
-				// Found a cheaper edge to v
-				parents[v] = idx;
-				costs[v] = weight;
-			}
-		}
-	}
-
-	// Construct a tree
-	_tree.m_root = std::make_shared<Node>(vertices[_root].id, _root);
-	_tree.GetNodes()[_root] = _tree.m_root;
-
-	// Construct recursive lambda to create the tree
-	static std::function<void(std::shared_ptr<Node>, VectorOfNodes&)> MakeTree = 
-		[&](std::shared_ptr<Node> n, VectorOfNodes& nodes) {
-		// Look through all vertices which have parent == n.vertex
-		for (int i = 0; i < vertices.size(); i++)
-			if (parents[i] == n->GetVertexIdx()) {
-				// Add node to n.children
-				auto child = std::make_shared<Node>(vertices[i].id, i, n);
-				nodes[i] = child;
-				n->children.push_back(child);
-				MakeTree(child, nodes);
-			}
-	};
-	MakeTree(_tree.m_root, _tree.GetNodes());
-	_tree.UpdateProperties();
-}
-
-//--------------------------------------------------------------
 // Layouts
 //--------------------------------------------------------------
 const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& Tree::Layout::Functions()
@@ -305,4 +234,81 @@ void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _w
 		new_wedge_start = new_wedge_end;
 	}
 }
+
+//--------------------------------------------------------------
+// MSP
+//--------------------------------------------------------------
+void MSP::Init(const std::shared_ptr<Dataset> _dataset)
+{
+	m_dataset = _dataset;
+	m_nodes.resize(_dataset->GetVertices().size());
+	Create(0);
+}
+
+//--------------------------------------------------------------
+// Extract
+//--------------------------------------------------------------
+void MSP::Create(VertexIdx _root)
+{
+	auto& vertices = m_dataset->GetVertices();
+
+	// Keep track of the parent of each vertex so we can construct a tree after
+	std::vector<VertexIdx> parents(vertices.size(), 0);
+	parents[_root] = -1;
+	// Keep track of which vertex are already processed
+	std::vector<bool> included(vertices.size(), false);
+	// Keep track of the minimum edge cost of a vertex
+	std::vector<float> costs(vertices.size(), 1e30f);
+	costs[_root] = 0;
+
+	// Graph will have |vertices| vertices
+	for (int i = 0; i < vertices.size(); i++) {
+		// Argmin for costs
+		float min = 1e30;
+		int idx = -1;
+		for (int v = 0; v < vertices.size(); v++) {
+			if (!included[v] && costs[v] < min) {
+				min = costs[v];
+				idx = v;
+			}
+		}
+
+		// Add lowest vertex
+		assert(idx not_eq -1);
+		included[idx] = true;
+
+		// Update outgoing edges from this vertex
+		for (auto& neigbor : *vertices[idx].neighbors) {
+			uint v = neigbor.to_idx;
+			float weight = m_dataset->GetEdges()[neigbor.edge_idx].attributes.FindFloat("weight", 1);
+			if (!included[v] && weight < costs[v]) {
+				// Found a cheaper edge to v
+				parents[v] = idx;
+				costs[v] = weight;
+			}
+		}
+	}
+
+	// Construct a tree
+	m_root = std::make_shared<Node>(vertices[_root].id, _root);
+	m_nodes[_root] = m_root;
+
+	// Construct recursive lambda to create the tree
+	static std::function<void(std::shared_ptr<Node>, VectorOfNodes&)> MakeTree =
+		[&](std::shared_ptr<Node> n, VectorOfNodes& nodes) {
+		// Look through all vertices which have parent == n.vertex
+		for (int i = 0; i < vertices.size(); i++)
+			if (parents[i] == n->GetVertexIdx()) {
+				// Add node to n.children
+				auto child = std::make_shared<Node>(vertices[i].id, i, n);
+				nodes[i] = child;
+				n->children.push_back(child);
+				MakeTree(child, nodes);
+			}
+	};
+	MakeTree(m_root, m_nodes);
+	UpdateProperties();
+	UpdateAABB();
+}
+
 } // DataVis
