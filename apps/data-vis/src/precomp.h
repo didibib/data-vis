@@ -57,7 +57,7 @@ namespace DataVis
 template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
 template<class... Ts> overload(Ts...) -> overload<Ts...>;
 
-namespace Random
+namespace RandomNumber
 {
 std::random_device random_device;
 std::mt19937 MT19937(random_device());
@@ -79,11 +79,6 @@ namespace Curves
 /// <returns></returns>
 float Bezier(float time);
 } // namespace Curves
-
-namespace Parser
-{
-void Cmdline(const boost::program_options::options_description&, std::string);
-} // namespace Parser
 } // namespace DataVis
 
 //--------------------------------------------------------------
@@ -94,8 +89,6 @@ void Cmdline(const boost::program_options::options_description&, std::string);
 // Own headers
 #include "dataset.h"
 #include "structure/structure.h"
-#include "layout/layout.h"
 #include "structure/graph.h"
 #include "structure/tree.h"
-#include "structure/factory.h"
-#include "layout/optimizer.h"
+#include "layout/layout.h"

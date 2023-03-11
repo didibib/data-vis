@@ -57,16 +57,23 @@ const glm::vec3& IStructure::Node::GetPosition()
 	return m_position;
 }
 
-void IStructure::Node::SetPosition(glm::vec3& _position)
+void IStructure::Node::SetPosition(glm::vec3& _new_position)
 {
-	m_position = _position;
-	m_bounding_box.setPosition(_position - glm::vec2(m_radius));
+	m_position = _new_position;
+	m_old_position = _new_position;
+}
+
+const glm::vec3& IStructure::Node::GetNewPosition()
+{
+	return m_new_position;
 }
 
 void IStructure::Node::SetNewPosition(glm::vec3& _new_position)
 {
 	m_new_position = _new_position;
+	m_bounding_box.setPosition(_new_position - glm::vec2(m_radius));
 	m_animate = true;
+	m_time = 0;
 }
 
 //--------------------------------------------------------------

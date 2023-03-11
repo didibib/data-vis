@@ -38,26 +38,6 @@ void ofApp::setup()
 				m->Init(_dataset);
 				return m;
 			} });
-
-	// Dataset
-	/*auto dataset = std::make_shared<DataVis::Dataset>();
-	dataset->Load(m_current_graph_file);
-	m_datasets.push_back(dataset);
-	auto graph = std::make_shared<DataVis::Graph>();
-	graph->Init(dataset);
-	DataVis::Layout::Random(*graph, 800, 600);
-	graph->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
-	m_structures.push_back(std::move(graph));
-
-	auto tree = std::make_shared<DataVis::Tree>();
-	tree->Init(dataset);
-	tree->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
-	DataVis::Tree::Extract::MSP(*tree, 0);
-	DataVis::Tree::Layout::Radial(*tree, 100, 150);
-	tree->UpdateAABB();
-
-	tree->SetPosition({ 100, 50, 0 });
-	m_structures.push_back(std::move(tree));*/
 }
 
 //--------------------------------------------------------------
@@ -66,8 +46,13 @@ void ofApp::LoadDotFiles()
 	string data_path = ofToDataPath("", false);
 	for (const auto& entry : filesystem::directory_iterator(data_path))
 	{
-		if (entry.path().extension() == ".dot")
-			m_graph_file_names.push_back(entry.path().filename().string());
+		if (entry.path().extension() == ".dot") {
+			std::string filename = entry.path().filename().string();
+			m_graph_file_names.push_back(filename);
+			std::unique_ptr<DataVis::Dataset> dataset = std::make_unique<DataVis::Dataset>();
+			dataset->Load(filename);
+			m_datasets.push_back(std::move(dataset));
+		}
 	}
 	m_current_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
 }
@@ -120,38 +105,8 @@ void ofApp::Gui()
 {
 	if (ImGui::BeginMainMenuBar()) {
 		//--------------------------------------------------------------
-		// Loading Dataset 
-		//--------------------------------------------------------------
-		if (ImGui::BeginMenu("Load")) {
-			const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
-			if (ImGui::BeginCombo("Select Dataset", select_file_preview))
-			{
-				for (int n = 0; n < m_graph_file_names.size(); n++)
-				{
-					const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
-					if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
-						m_imgui_data.combo_graph_file_index = n;
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();
-				}
-				ImGui::EndCombo();
-			}
-
-			if (ImGui::Button("Load Dataset"))
-			{
-				std::string new_dataset_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
-				std::unique_ptr<DataVis::Dataset> dataset = std::make_unique<DataVis::Dataset>();
-				dataset->Load(new_dataset_file);
-				m_datasets.push_back(std::move(dataset));
-			}
-
-			ImGui::EndMenu();
-		}
-
-		//--------------------------------------------------------------
 		// Create IStructure 
 		//--------------------------------------------------------------
-
 		if (!m_datasets.empty()) {
 			if (ImGui::BeginMenu("Create")) {
 				const char* select_dataset_preview = m_datasets[m_imgui_data.combo_dataset_index]->GetFilename().c_str();
@@ -187,7 +142,7 @@ void ofApp::Gui()
 					auto new_dataset_file = m_datasets[m_imgui_data.combo_dataset_index];
 					auto factory = m_factories[m_imgui_data.combo_structure_index].second;
 					auto structure = factory(new_dataset_file);
-					Layout::Random(*structure, 800, 800);
+					Random::Apply(*structure, 800, 800);
 					structure->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
 					m_structures.push_back(std::move(structure));
 				}

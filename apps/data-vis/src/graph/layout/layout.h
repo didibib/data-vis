@@ -2,56 +2,86 @@
 
 namespace DataVis
 {
+//--------------------------------------------------------------
+// Layout
+//--------------------------------------------------------------
 class Layout
 {
-	static const char* __RANDOM;
-	static const char* __GRID;
 public:
-	struct Data
-	{
-		virtual po::options_description Options() = 0;
-		virtual ~Data() {}
-	};
+	virtual bool Gui(IStructure&) = 0;
+	virtual void Draw() {}
+};
+
+//--------------------------------------------------------------
+// Random
+//--------------------------------------------------------------
+class Random : public Layout
+{
+public:
+	bool Gui(IStructure&) override;
+	static void Apply(IStructure&, int width, int height);
 	
-	struct RandomData : Data
-	{
-		int width = 800;
-		float height = 600;
-		po::options_description Options() override
-		{
-			po::options_description desc(__RANDOM);
-			desc.add_options()
-				("w", po::value(&width), "Range width, default = 800")
-				("h", po::value(&height), "Range Height, default = 600");
-			return desc;
-		}
-	};
-
-	struct GridData : Data
-	{
-		int width = 800;
-		float height = 600;
-		float step = 100;
-		po::options_description Options() override
-		{
-			po::options_description desc(__GRID);
-			desc.add_options()
-				("w", po::value(&width), "Width, default = 800")
-				("h", po::value(&height), "Height, default = 600")
-				("s", po::value(&step), "Step, default = 100");
-			return desc;
-		}
-	};
-
-	//--------------------------------------------------------------
-	static std::unordered_map<std::string, std::string>& Descriptions();
-	static const std::vector <std::pair<std::string, std::function<void(IStructure&, std::string)>>>& Functions();
-	static void RandomCmdline(IStructure&, std::string);
-	static void GridCmdline(IStructure&, std::string);
-
-	static void Random(IStructure&, int width, int height);
-	static void Grid(IStructure&, int width, int height, float step);
 private:
-	static std::unordered_map<std::string, std::string> InitDescriptions();
+	int m_width = 800, m_height = 800;
+};
+
+//--------------------------------------------------------------
+// Grid
+//--------------------------------------------------------------
+class Grid : public Layout
+{
+public:
+	bool Gui(IStructure&) override;
+	static void Apply(IStructure&, int width, int height, float step);
+	
+private:
+	int m_width = 800, m_height = 800;
+	float m_step = 100;
+};
+
+//--------------------------------------------------------------
+// Radial
+//--------------------------------------------------------------
+class Radial : public Layout
+{
+public:
+	bool Gui(IStructure&) override;
+	void Draw() override;
+	static void Apply(Tree&, float start, float step);
+private:
+	// Pavlo, 2006 https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1355&context=theses
+	static void SubTree(Tree::Node&, float angle_start, float angle_end, int depth, float step, float delta_angle);
+	float m_start = 100, m_step = 100;
+	uint m_depth = 0;
+};
+
+//--------------------------------------------------------------
+// Force Directed
+//--------------------------------------------------------------
+class ForceDirected : public Layout
+{
+public:
+	bool Gui(IStructure&) override;
+	static void Apply(IStructure&, float _C, float _t, int _iterations);
+private:
+	float m_C = 0.5, m_T = 0.002;
+	int m_iterations = 10;
+	bool m_enabled = false;
+};
+
+//--------------------------------------------------------------
+// Local Search
+//--------------------------------------------------------------
+class LocalSearch : public Layout
+{
+public:
+	bool Gui(IStructure&) override;
+	static void Apply(IStructure&, int _iterations);
+private:
+	static float CalculateCost(IStructure& _structure);
+	static float CalculateIncrementalCost(IStructure& _structure, uint _idx0, uint _idx1);
+	static float CalculateNodeCost(IStructure& _structure, uint _idx);
+	static void SwapPos(IStructure& _structure, float& _currCost);
+	int m_iterations = 10000;
 };
 } // namespace DataVis

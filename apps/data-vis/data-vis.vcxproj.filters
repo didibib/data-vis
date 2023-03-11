@@ -43,9 +43,6 @@
     <ClCompile Include="src\graph\dataset.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\layout\optimizer.cpp">
-      <Filter>src\graph\layout</Filter>
-    </ClCompile>
     <ClCompile Include="src\graph\layout\layout.cpp">
       <Filter>src\graph\layout</Filter>
     </ClCompile>
@@ -131,9 +128,6 @@
     <ClInclude Include="src\graph\dataset.h">
       <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\layout\optimizer.h">
-      <Filter>src\graph\layout</Filter>
-    </ClInclude>
     <ClInclude Include="src\graph\layout\layout.h">
       <Filter>src\graph\layout</Filter>
     </ClInclude>
@@ -144,9 +138,6 @@
       <Filter>src\graph\structure</Filter>
     </ClInclude>
     <ClInclude Include="src\graph\structure\graph.h">
-      <Filter>src\graph\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graph\structure\factory.h">
       <Filter>src\graph\structure</Filter>
     </ClInclude>
   </ItemGroup>

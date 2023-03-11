@@ -1,14 +1,11 @@
 #include "precomp.h"
-#include "ofApp.h"
 
 namespace DataVis
 {
-const char* Tree::__RADIAL = "Radial";
-
-
-IStructure::VectorOfNodes& Tree::GetNodes()
+void Tree::Init(const std::shared_ptr<Dataset> _dataset)
 {
-	return m_nodes;
+	IStructure::Init(_dataset);
+	m_layouts.push_back(std::make_unique<Radial>());
 }
 
 std::shared_ptr<Tree::Node> Tree::Root()
@@ -42,7 +39,7 @@ uint Tree::Depth(std::shared_ptr<Node> node)
 void Tree::SwapRoot(std::shared_ptr<Node> _new_root)
 {
 	std::shared_ptr<Node> node = _new_root;
-	while (node != m_root)
+	while (node->GetVertexIdx() != m_root->GetVertexIdx())
 	{
 		node->children.push_back(node->parent);
 		auto& parent_children = node->parent->children;
@@ -81,69 +78,18 @@ void Tree::UpdateProperties()
 	depth = Depth(m_root);
 }
 
-//--------------------------------------------------------------
-void Tree::HandleInput()
-{
-}
+// //--------------------------------------------------------------
+// void Tree::SetAABB()
+// {
+// 	// Still uses hardcoded radius and delta_angle
+// 	int r = (depth - 1) * 150;
+// 	m_aabb = { {-r, -r}, {r, r} };
+// }
 
 //--------------------------------------------------------------
-void Tree::Select(const glm::vec3& _position)
-{
-	glm::vec3 transformed = _position - m_position;
-	// Loop through all vertices and find one within radius of pos
-	static std::function<std::shared_ptr<Tree::Node>(std::shared_ptr<Node>)> SelectInTree = [&](std::shared_ptr<Tree::Node> n)
-	{
-		if (n->Inside(transformed)) return n;
-		for (auto& child : n->children)
-		{
-			std::shared_ptr<Tree::Node> selected = SelectInTree(child);
-			if (selected != nullptr) return selected;
-		}
-		return std::shared_ptr<Tree::Node>();
-	};
-	SetSelectedNode(SelectInTree(m_root));
-}
-
-//--------------------------------------------------------------
-void Tree::SetSelectedNode(std::shared_ptr<Tree::Node> n)
-{
-	if (m_selected_node != nullptr)
-		m_selected_node->color = ofColor::white;
-	if (n != nullptr) n->color = ofColor::green;
-	m_selected_node = n;
-}
-
-//--------------------------------------------------------------
-void Tree::SetAABB()
-{
-	// Still uses hardcoded radius and delta_angle
-	int r = (depth - 1) * 150;
-	m_aabb = { {-r, -r}, {r, r} };
-}
-
-//--------------------------------------------------------------
-void Tree::Update(float _delta_time)
-{
-	static std::function<void(std::shared_ptr<Node>)> EaseInEaseOut = [&](std::shared_ptr<Node> n) {
-		n->EaseInEaseOut(_delta_time);
-		for (auto child : n->children) EaseInEaseOut(child);
-	};
-	EaseInEaseOut(m_root);
-}
-
-//--------------------------------------------------------------
-void Tree::DrawLayout()
+void Tree::DrawNodes()
 {
 	ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
-
-	// Draw radial circles
-	ofNoFill();
-	ofSetColor(65);
-	ofSetCircleResolution(50);
-	for (int i = 0; i < depth - 1; i++)
-	{
-		ofDrawCircle(glm::vec3(0), m_imgui_data.input_radial_step + i * m_imgui_data.input_radial_delta_angle);
-	}
 
 	// Draw vertices and edges
 	ofFill();
@@ -165,102 +111,30 @@ void Tree::DrawLayout()
 		ofSetColor(node->color);
 		ofDrawCircle(node->GetPosition(), node->GetRadius());
 
-		ofDrawBitmapStringHighlight(ofToString(node->GetVertexId()), node->GetPosition() + glm::vec3(10, 10, -1));
+		//ofDrawBitmapStringHighlight(ofToString(node->GetVertexId()), node->GetPosition() + glm::vec3(10, 10, -1));
 
 		for (auto& child : node->children) stack.push(child);
 	}
 }
 
-//--------------------------------------------------------------
-void Tree::Gui()
+void Tree::NodeInfoGui()
 {
-	ImGui::Begin("Tree Settings");
-
-	if (ImGui::TreeNode("Radial Layout"))
+	if (m_selected_node != nullptr)
 	{
-		ImGui::InputFloat("Step", &(m_imgui_data.input_radial_step));
-		ImGui::InputFloat("Delta angle", &(m_imgui_data.input_radial_delta_angle));
-
-		if (ImGui::Button("Apply"))
-		{
-			DataVis::Tree::Layout::Radial(*this, m_imgui_data.input_radial_step, m_imgui_data.input_radial_delta_angle);
-		}
-
-		ImGui::TreePop();
-		ImGui::Separator();
-	}
-
-	if (m_selected_node.get() != nullptr)
-	{
-		auto x = m_selected_node.get();
-
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-		ImGui::BeginChild("ChildR", ImVec2(0, 100), true);
+		ImGui::BeginChild("SelectedNode", ImVec2(0, 85), true);
 		
 		ImGui::Text("Selected Node:");
-		ImGui::Text("Vertex: %i", m_selected_node->GetVertexId());
+		ImGui::Text("Vertex: %s", m_selected_node->GetVertexId().c_str());
 		ImGui::Text("Position: (%f.0, %f.0)", m_selected_node->GetPosition().x, m_selected_node->GetPosition().y);
 
 		if (ImGui::Button("Make root"))
 		{
-			SwapRoot(m_selected_node);
-			Tree::Layout::Radial(*this, 100, 150);
-			UpdateAABB();
+			SwapRoot(std::static_pointer_cast<Tree::Node>(m_selected_node));
 		}
+
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
-	}
-
-	if (ImGui::Button("Delete"))
-	{
-		m_on_delete_callback(*this);
-	}
-
-	ImGui::End();
-}
-
-//--------------------------------------------------------------
-// Layouts
-//--------------------------------------------------------------
-const std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>>& Tree::Layout::Functions()
-{
-	static std::vector <std::pair<std::string, std::function<void(Tree&, std::string)>>> layout_functions = {
-		{ __RADIAL, Tree::Layout::RadialCmdline }
-	};
-	return layout_functions;
-}
-
-//--------------------------------------------------------------
-void Tree::Layout::RadialCmdline(Tree& _tree, std::string _cmdline_input)
-{
-	static RadialData rd;
-	static auto options = rd.Options();
-	Parser::Cmdline(options, _cmdline_input);
-	Radial(_tree, rd.step, rd.delta_angle);
-}
-
-//--------------------------------------------------------------
-void Tree::Layout::Radial(Tree& _tree, float _step, float _delta_angle)
-{
-	auto& node = _tree.Root();
-	node->SetNewPosition(glm::vec3(0));
-	RadialSubTree(*node, 0, TWO_PI, 0, _step, _delta_angle);
-}
-
-//--------------------------------------------------------------
-void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _step, float _delta_angle)
-{
-	float new_wedge_start = _wedge_start;
-	float radius = _step + (_delta_angle * _depth);
-	float parent_leaves = Tree::Leaves(std::make_shared<Tree::Node>(_node));
-	for (auto& child : _node.children) {
-		float child_leaves = Tree::Leaves(child);
-		float new_wedge_end = new_wedge_start + (child_leaves / parent_leaves * (_wedge_end - _wedge_start));
-		float angle = (new_wedge_start + new_wedge_end) * .5f;
-		child->SetNewPosition(glm::vec3(radius * glm::cos(angle), radius * glm::sin(angle), 0));
-		if (child->children.size() > 0)
-			RadialSubTree(*child, new_wedge_start, new_wedge_end, _depth + 1, _step, _delta_angle);
-		new_wedge_start = new_wedge_end;
 	}
 }
 
@@ -269,13 +143,11 @@ void Tree::Layout::RadialSubTree(Tree::Node& _node, float _wedge_start, float _w
 //--------------------------------------------------------------
 void MSP::Init(const std::shared_ptr<Dataset> _dataset)
 {
-	m_dataset = _dataset;
+	Tree::Init(_dataset);
 	m_nodes.resize(_dataset->GetVertices().size());
 	Create(0);
 }
 
-//--------------------------------------------------------------
-// Extract
 //--------------------------------------------------------------
 void MSP::Create(VertexIdx _root)
 {

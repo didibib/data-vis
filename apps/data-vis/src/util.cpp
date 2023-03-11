@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 namespace DataVis
 {
-namespace Random
+namespace RandomNumber
 {
 
 static uint seed = 0x12345678;
@@ -26,7 +26,7 @@ uint UInt(uint& _seed)
 uint Range(uint min, uint max)
 {
 	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
-	return dist(Random::MT19937);
+	return dist(RandomNumber::MT19937);
 }
 
 uint Range(uint max)
@@ -46,21 +46,4 @@ float Bezier(float _t)
 	return _t * _t * (3.0f - 2.0f * _t);
 }
 } // namespace Curves
-
-//--------------------------------------------------------------
-namespace Parser
-{
-void Cmdline(const boost::program_options::options_description& _options, std::string _cmdline_input)
-{
-	namespace po = boost::program_options;
-	po::variables_map vm;
-	try {
-		po::store(po::command_line_parser(po::split_unix(_cmdline_input)).options(_options).run(), vm);
-	}
-	catch (std::exception& e) {
-		std::cout << e.what();
-	}
-	po::notify(vm);
-}
-} // namespace Parser
 } // namespace DataVis

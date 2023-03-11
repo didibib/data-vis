@@ -75,19 +75,25 @@ bool Dataset::Load(std::string _filename)
 			}
 
 			for (auto& edge : graph.all_edges) {
-				VertexIdx v_from_id = m_vertex_idx[edge.from.id];
-				VertexIdx v_to_id = m_vertex_idx[edge.to.id];
+				VertexIdx v_from_idx = m_vertex_idx[edge.from.id];
+				VertexIdx v_to_idx = m_vertex_idx[edge.to.id];
 				
 				Edge e;
 				e.attributes.Init(edge.attributes);
-				e.from_idx = v_from_id;
-				e.to_idx = v_to_id;
+				e.from_idx = v_from_idx;
+				e.to_idx = v_to_idx;
 
-				Neighbor n;
-				n.to_idx = v_to_id;
-				n.edge_idx = m_edges.size();
-				
-				m_vertices[v_from_id].neighbors->push_back(std::move(n));
+				Neighbor n_to;
+				n_to.to_idx = v_to_idx;
+				n_to.edge_idx = m_edges.size();
+
+				m_vertices[v_from_idx].neighbors->push_back(std::move(n_to));
+				if(graph.kind == Model::GraphKind::undirected){
+					Neighbor n_from;
+					n_from.to_idx = v_from_idx;
+					n_from.edge_idx = m_edges.size();
+					m_vertices[v_to_idx].neighbors->push_back(std::move(n_from));
+				}
 				m_edges.push_back(std::move(e));
 			}
 		}
@@ -100,6 +106,7 @@ bool Dataset::Load(std::string _filename)
 	catch (::Parser::qi::expectation_failure<It> const& e) {
 		std::cerr << e.what() << ": " << e.what_ << " at " << std::string(e.first, e.last) << "\n";
 	}
+	file.close();
 	return ok;
 }
 
