@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "ofApp.h"
 
 namespace DataVis
 {
@@ -99,6 +100,12 @@ void Graph::Gui()
 		ImGui::Separator();
 	}
 
+	if (ImGui::Button("Delete"))
+	{
+		/*auto app = m_app.lock();
+		app.get()->DeleteStructure(*this);*/
+		m_on_delete_callback(*this);
+	}
 	ImGui::End();
 }
 

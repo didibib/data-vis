@@ -1,8 +1,6 @@
 #pragma once
 
-
-
-class ofApp : public ofBaseApp 
+class ofApp : public ofBaseApp
 {
 	struct ImGuiData
 	{
@@ -12,7 +10,7 @@ class ofApp : public ofBaseApp
 	};
 
 private:
-	std::vector<std::shared_ptr<DataVis::IStructure>> m_layouts;
+	std::vector<std::shared_ptr<DataVis::IStructure>> m_structures;
 	std::vector<std::shared_ptr<DataVis::Dataset>> m_datasets;
 
 	ofEasyCam m_camera;
@@ -50,4 +48,6 @@ public:
 	void windowResized(int w, int h);
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
+
+	void DeleteStructure(DataVis::IStructure& structure);
 };
