@@ -54,7 +54,7 @@ public:
 
 	//--------------------------------------------------------------
 	Tree() = default;
-	void Init(const std::shared_ptr<Dataset>) override;
+	void Init(const std::shared_ptr<Dataset>) = 0;
 	void HandleInput() override;
 	void Select(const glm::vec3&) override;
 	void Update(float delta_time) override;
@@ -80,10 +80,19 @@ protected:
 	VectorOfNodes m_nodes;
 
 	//--------------------------------------------------------------
-private:
 	void UpdateProperties();
 	std::shared_ptr<Tree::Node> m_root;
 	std::shared_ptr<Tree::Node> m_selected_node;
 };
+
+class MSP : public Tree
+{
+public:
+	void Init(const std::shared_ptr<Dataset>) override;
+
+private:
+	void Create(VertexIdx _root);
+};
+
 
 } // DataVis

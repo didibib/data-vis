@@ -20,8 +20,8 @@ void ofApp::setup()
 	m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
 	m_camera.setScrollSensitivity(20);
 	m_camera.setVFlip(true);
-	m_camera.setFarClip( 1e30 );
-	m_camera.setGlobalPosition( glm::vec3( 0, 0, 2500 ) );
+	m_camera.setFarClip(1e30);
+	m_camera.setGlobalPosition(glm::vec3(0, 0, 2500));
 
 	// Load
 	LoadDotFiles();
@@ -71,7 +71,8 @@ void ofApp::update()
 }
 
 //--------------------------------------------------------------
-void ofApp::draw() {
+void ofApp::draw()
+{
 	ofBackgroundGradient(Color::paletteCold_0, Color::paletteCold_0, OF_GRADIENT_CIRCULAR);
 
 	ImGui_ImplOpenGL3_NewFrame();
@@ -102,90 +103,81 @@ void ofApp::exit()
 
 void ofApp::Gui()
 {
-	ImGui::Begin("Settings");
-	//--------------------------------------------------------------
-	// Loading Graph 
-	//--------------------------------------------------------------
-	if (ImGui::TreeNode("Loading Graph")) {
-		const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
-		if (ImGui::BeginCombo("Select File", select_file_preview))
-		{
-			for (int n = 0; n < m_graph_file_names.size(); n++)
+	if (ImGui::BeginMainMenuBar()) {
+		//--------------------------------------------------------------
+		// Loading Dataset 
+		//--------------------------------------------------------------
+		if (ImGui::BeginMenu("Load")) {
+			const char* select_file_preview = m_graph_file_names[m_imgui_data.combo_graph_file_index].c_str();  // Pass in the preview value visible before opening the combo (it could be anything)
+			if (ImGui::BeginCombo("Select Dataset", select_file_preview))
 			{
-				const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
-				if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
-					m_imgui_data.combo_graph_file_index = n;
-				if (is_selected)
-					ImGui::SetItemDefaultFocus();
-			}
-			ImGui::EndCombo();
-		}
-
-		if (ImGui::Button("Load Graph"))
-		{
-			string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
-
-			auto graph = std::make_unique<DataVis::Graph>();
-			//DataVis::Graph::Extract::Load( *graph, new_graph_file );
-			DataVis::Layout::Random(*graph, 800, 600);
-			DataVis::Optimizer::LocalSearch(*graph, 50000);
-			graph->UpdateAABB();
-			m_layouts.push_back(std::move(graph));
-		}
-		ImGui::TreePop();
-		ImGui::Separator();
-	}
-
-	//--------------------------------------------------------------
-	// Select Layout
-	//--------------------------------------------------------------
-	if (ImGui::TreeNode("Layout")) {
-		auto& layout_functions = DataVis::Layout::Functions();
-		std::string layout_chosen = layout_functions[m_imgui_data.combo_layout_function_index].first;
-		const char* layout_preview = layout_chosen.c_str();
-		if (ImGui::BeginCombo("Select Layout", layout_preview))
-		{
-			for (int n = 0; n < layout_functions.size(); n++)
-			{
-				const bool is_selected = (m_imgui_data.combo_layout_function_index == n);
-				if (ImGui::Selectable(layout_functions[n].first.c_str(), is_selected)) {
-					m_imgui_data.combo_layout_function_index = n;
-					layout_chosen = layout_functions[n].first;
+				for (int n = 0; n < m_graph_file_names.size(); n++)
+				{
+					const bool is_selected = (m_imgui_data.combo_graph_file_index == n);
+					if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
+						m_imgui_data.combo_graph_file_index = n;
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
 				}
-				if (is_selected)
-					ImGui::SetItemDefaultFocus();
+				ImGui::EndCombo();
 			}
-			ImGui::EndCombo();
+
+			if (ImGui::Button("Load Dataset"))
+			{
+				std::string new_dataset_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
+				std::unique_ptr<DataVis::Dataset> dataset = std::make_unique<DataVis::Dataset>();
+				dataset->Load(new_dataset_file);
+				m_datasets.push_back(std::move(dataset));
+			}
+
+			ImGui::EndMenu();
 		}
 
-		auto& layout_descriptions = DataVis::Layout::Descriptions();
-		ImGui::TextWrapped(layout_descriptions[layout_chosen].c_str());
+		//--------------------------------------------------------------
+		// Create IStructure 
+		//--------------------------------------------------------------
+		if (ImGui::BeginMenu("Create")) {
+			const char* select_dataset_preview = m_datasets[m_imgui_data.combo_dataset_index]->GetFilename().c_str();
+			if (ImGui::BeginCombo("Select Dataset", select_dataset_preview))
+			{
+				for (int n = 0; n < m_datasets.size(); n++)
+				{
+					const bool is_selected = (m_imgui_data.combo_dataset_index == n);
+					if (ImGui::Selectable(m_datasets[n]->GetFilename().c_str(), is_selected))
+						m_imgui_data.combo_dataset_index = n;
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
 
-		static char options[256] = "";
-		ImGui::InputText("Options", options, IM_ARRAYSIZE(options));
-		if (ImGui::Button("Apply Layout"))
-		{
-			auto function = layout_functions[m_imgui_data.combo_layout_function_index].second;
-			// TODO: function(m_graph, options);
+			const char* select_structure_preview = "";
+			if (ImGui::BeginCombo("Select Structure", select_dataset_preview))
+			{
+				for (int n = 0; n < m_datasets.size(); n++)
+				{
+					const bool is_selected = (m_imgui_data.combo_dataset_index == n);
+					if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
+						m_imgui_data.combo_graph_file_index = n;
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("Create Structure"))
+			{
+				std::string new_dataset_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
+				std::unique_ptr<DataVis::Dataset> dataset = std::make_unique<DataVis::Dataset>();
+				dataset->Load(new_dataset_file);
+				m_datasets.push_back(std::move(dataset));
+			}
+
+			ImGui::EndMenu();
 		}
 
-		ImGui::TreePop();
-		ImGui::Separator();
+		ImGui::EndMainMenuBar();
 	}
-	//--------------------------------------------------------------
-	// Optimize Layout
-	//--------------------------------------------------------------
-	if (ImGui::TreeNode("Optimizer")) {
-		ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
-		if (ImGui::Button("Optimize Graph"))
-		{
-			// TODO: DataVis::Optimizer::LocalSearch(m_graph, m_imgui_data.input_optimize_iterations);
-		}
-
-		ImGui::TreePop();
-		ImGui::Separator();
-	}
-	ImGui::End();
 
 	for (auto& layout : m_layouts) {
 		layout.get()->Gui();

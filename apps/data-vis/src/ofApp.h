@@ -1,21 +1,22 @@
 #pragma once
 
-struct ImGuiData
-{
-	int combo_graph_file_index = 3;
-	int input_optimize_iterations = 10000;
-	int combo_layout_function_index = 0;
-};
+
 
 class ofApp : public ofBaseApp {
 
 private:
+	struct ImGuiData
+	{
+		int combo_graph_file_index = 3;
+		int combo_dataset_index = 0;
+		int combo_structure_index = 0;
+		int combo_layout_function_index = 0;
+	} m_imgui_data;
 	std::vector<std::unique_ptr<DataVis::IStructure>> m_layouts;
 	std::vector<std::shared_ptr<DataVis::Dataset>> m_datasets;
 
 	ofEasyCam m_camera;
 
-	ImGuiData m_imgui_data;
 	std::vector<string> m_graph_file_names;
 	std::string m_current_graph_file = "";
 
