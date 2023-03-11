@@ -1,9 +1,13 @@
 #pragma once
 
+class ofApp;
 namespace DataVis
 {
 //--------------------------------------------------------------
 namespace po = boost::program_options;
+
+// Forward declare ofApp
+
 class IStructure
 {
 	//--------------------------------------------------------------
@@ -25,7 +29,7 @@ public:
 		void SetRadius(float radius);
 		bool Inside(glm::vec3 position);
 
-		ofColor color;
+		ofColor color = ofColor::black;
 		std::vector<std::shared_ptr<Node>> neighbors;
 
 	protected:
@@ -52,7 +56,7 @@ public:
 	virtual void HandleInput() = 0;
 	virtual void Select(const glm::vec3&) = 0;
 	virtual void Update(float delta_time) = 0;
-	void Draw();
+	void Draw(bool is_focussed);
 	virtual void Gui() = 0;
 	virtual VectorOfNodes& GetNodes() = 0;
 
@@ -61,7 +65,10 @@ public:
 	void Move(glm::vec3 offset);
 	const ofRectangle& GetAABB() const;
 	const ofRectangle& GetMoveAABB() const;
+	bool InsideAABB(glm::vec3 position);
+	bool InsideMoveAABB(glm::vec3 position);
 	void UpdateAABB();
+	void SetOnDeleteCallback(std::function<void(IStructure&)> callback);
 
 protected:
 	std::shared_ptr<Dataset> m_dataset;
@@ -69,6 +76,8 @@ protected:
 	ofRectangle m_aabb;
 	ofRectangle m_move_aabb;
 	int m_move_aabb_size = 50;
+
+	std::function<void(IStructure&)> m_on_delete_callback;
 
 	virtual void DrawLayout() = 0;
 	virtual void SetAABB();

@@ -93,20 +93,39 @@ void IStructure::SetMoveAABB()
 	m_move_aabb = { bb_tl, { bb_tl.x - m_move_aabb_size, bb_tl.y - m_move_aabb_size } };
 }
 
+bool IStructure::InsideAABB(glm::vec3 _position)
+{
+	return m_aabb.inside(_position - m_position);
+}
+
+bool IStructure::InsideMoveAABB(glm::vec3 _position)
+{
+	return m_move_aabb.inside(_position - m_position);
+}
+
+void IStructure::SetOnDeleteCallback(std::function<void(IStructure&)> _callback)
+{
+	m_on_delete_callback = _callback;
+}
+
 //--------------------------------------------------------------
 // Rendering
 //--------------------------------------------------------------
-void IStructure::Draw()
+void IStructure::Draw(bool _is_focussed)
 {
 	ofPushMatrix();
 	ofTranslate(m_position);
 
 	// Draw the bounds
 	ofNoFill();
-	ofSetColor(ofColor::black);
+	if (_is_focussed)
+		ofSetColor(ofColor::green);
+	else
+		ofSetColor(ofColor::black);
 	ofDrawRectangle(m_aabb);
 
 	ofFill();
+	ofSetColor(ofColor::black);
 	ofDrawRectangle(m_move_aabb);
 	ofNoFill();
 
