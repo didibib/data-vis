@@ -146,6 +146,9 @@
     <ClInclude Include="src\graph\structure\graph.h">
       <Filter>src\graph\structure</Filter>
     </ClInclude>
+    <ClInclude Include="src\graph\structure\factory.h">
+      <Filter>src\graph\structure</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />

@@ -25,8 +25,22 @@ void ofApp::setup()
 
 	// Load
 	LoadDotFiles();
+
+	m_factories.push_back({ "Graph",
+			[](std::shared_ptr<Dataset> _dataset) {
+				auto g = make_shared<Graph>();
+				g->Init(_dataset);
+				return g;
+			} });
+	m_factories.push_back({ "MSP",
+			[](std::shared_ptr<Dataset> _dataset) {
+				auto m = make_shared<MSP>();
+				m->Init(_dataset);
+				return m;
+			} });
+
 	// Dataset
-	auto dataset = std::make_shared<DataVis::Dataset>();
+	/*auto dataset = std::make_shared<DataVis::Dataset>();
 	dataset->Load(m_current_graph_file);
 	m_datasets.push_back(dataset);
 	auto graph = std::make_shared<DataVis::Graph>();
@@ -43,7 +57,7 @@ void ofApp::setup()
 	tree->UpdateAABB();
 
 	tree->SetPosition({ 100, 50, 0 });
-	m_structures.push_back(std::move(tree));
+	m_structures.push_back(std::move(tree));*/
 }
 
 //--------------------------------------------------------------
@@ -137,50 +151,54 @@ void ofApp::Gui()
 		//--------------------------------------------------------------
 		// Create IStructure 
 		//--------------------------------------------------------------
-		if (ImGui::BeginMenu("Create")) {
-			const char* select_dataset_preview = m_datasets[m_imgui_data.combo_dataset_index]->GetFilename().c_str();
-			if (ImGui::BeginCombo("Select Dataset", select_dataset_preview))
-			{
-				for (int n = 0; n < m_datasets.size(); n++)
+
+		if (!m_datasets.empty()) {
+			if (ImGui::BeginMenu("Create")) {
+				const char* select_dataset_preview = m_datasets[m_imgui_data.combo_dataset_index]->GetFilename().c_str();
+				if (ImGui::BeginCombo("Select Dataset", select_dataset_preview))
 				{
-					const bool is_selected = (m_imgui_data.combo_dataset_index == n);
-					if (ImGui::Selectable(m_datasets[n]->GetFilename().c_str(), is_selected))
-						m_imgui_data.combo_dataset_index = n;
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();
+					for (int n = 0; n < m_datasets.size(); n++)
+					{
+						const bool is_selected = (m_imgui_data.combo_dataset_index == n);
+						if (ImGui::Selectable(m_datasets[n]->GetFilename().c_str(), is_selected))
+							m_imgui_data.combo_dataset_index = n;
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
 				}
-				ImGui::EndCombo();
-			}
 
-			const char* select_structure_preview = "";
-			if (ImGui::BeginCombo("Select Structure", select_dataset_preview))
-			{
-				for (int n = 0; n < m_datasets.size(); n++)
+				const char* select_structure_preview = m_factories[m_imgui_data.combo_structure_index].first.c_str();
+				if (ImGui::BeginCombo("Select Structure", select_structure_preview))
 				{
-					const bool is_selected = (m_imgui_data.combo_dataset_index == n);
-					if (ImGui::Selectable(m_graph_file_names[n].c_str(), is_selected))
-						m_imgui_data.combo_graph_file_index = n;
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();
+					for (int n = 0; n < m_factories.size(); n++)
+					{
+						const bool is_selected = (m_imgui_data.combo_structure_index == n);
+						if (ImGui::Selectable(m_factories[n].first.c_str(), is_selected))
+							m_imgui_data.combo_structure_index = n;
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
 				}
-				ImGui::EndCombo();
-			}
 
-			if (ImGui::Button("Create Structure"))
-			{
-				std::string new_dataset_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
-				std::unique_ptr<DataVis::Dataset> dataset = std::make_unique<DataVis::Dataset>();
-				dataset->Load(new_dataset_file);
-				m_datasets.push_back(std::move(dataset));
+				if (ImGui::Button("Create Structure"))
+				{
+					auto new_dataset_file = m_datasets[m_imgui_data.combo_dataset_index];
+					auto factory = m_factories[m_imgui_data.combo_structure_index].second;
+					auto structure = factory(new_dataset_file);
+					Layout::Random(*structure, 800, 800);
+					structure->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
+					m_structures.push_back(std::move(structure));
+				}
+				ImGui::EndMenu();
 			}
-
-			ImGui::EndMenu();
 		}
 
 		ImGui::EndMainMenuBar();
 	}
 
-	if(m_focussed_layout)
+	if (m_focussed_layout)
 		m_focussed_layout.get()->Gui();
 }
 
@@ -200,10 +218,10 @@ void ofApp::DeleteStructure(DataVis::IStructure& _structure)
 	}
 }
 
-glm::vec3 ofApp::ScreenToWorld( const glm::vec2& _position )
+glm::vec3 ofApp::ScreenToWorld(const glm::vec2& _position)
 {
 	auto cam = m_camera.getGlobalPosition();
-	auto world = m_camera.screenToWorld( glm::vec3( _position.x, _position.y, 0 ) );
+	auto world = m_camera.screenToWorld(glm::vec3(_position.x, _position.y, 0));
 	// Ray from camera origin through mouse click
 	auto dir = world - cam;
 	// Make dir with z-length of 1
@@ -213,47 +231,47 @@ glm::vec3 ofApp::ScreenToWorld( const glm::vec2& _position )
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed( int key )
+void ofApp::keyPressed(int key)
 {
 
 }
 
-void ofApp::keyReleased( int key )
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved( int x, int y )
+void ofApp::keyReleased(int key)
 {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged( int x, int y, int button )
+void ofApp::mouseMoved(int x, int y)
 {
-	if( button == OF_MOUSE_BUTTON_LEFT && m_dragging_layout != nullptr )
+
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseDragged(int x, int y, int button)
+{
+	if (button == OF_MOUSE_BUTTON_LEFT && m_dragging_layout != nullptr)
 	{
-		auto world = ScreenToWorld( glm::vec2( x, y ) );
+		auto world = ScreenToWorld(glm::vec2(x, y));
 
 		auto dif = world - m_prev_mouse_drag;
-		m_dragging_layout->Move( dif );
+		m_dragging_layout->Move(dif);
 		m_prev_mouse_drag = world;
 	}
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed( int x, int y, int button )
+void ofApp::mousePressed(int x, int y, int button)
 {
 	const ImGuiIO& io = ImGui::GetIO();
-	if( io.WantCaptureMouse ) return;
+	if (io.WantCaptureMouse) return;
 
-	if( button == OF_MOUSE_BUTTON_LEFT )
+	if (button == OF_MOUSE_BUTTON_LEFT)
 	{
 		auto world = ScreenToWorld(glm::vec2(x, y));
 
 		// Check if we are beginning to drag a layout
-		for(auto& layout : m_structures)
+		for (auto& layout : m_structures)
 		{
 			auto transformed = world - layout.get()->GetPosition();
 			if (layout.get()->GetMoveAABB().inside(transformed))

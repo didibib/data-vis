@@ -166,6 +166,7 @@
     <ClInclude Include="src\graph\external\spirit-graphviz.hpp" />
     <ClInclude Include="src\graph\layout\layout.h" />
     <ClInclude Include="src\graph\layout\optimizer.h" />
+    <ClInclude Include="src\graph\structure\factory.h" />
     <ClInclude Include="src\graph\structure\graph.h" />
     <ClInclude Include="src\graph\structure\structure.h" />
     <ClInclude Include="src\graph\structure\tree.h" />

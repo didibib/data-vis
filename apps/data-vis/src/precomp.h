@@ -97,4 +97,5 @@ void Cmdline(const boost::program_options::options_description&, std::string);
 #include "layout/layout.h"
 #include "structure/graph.h"
 #include "structure/tree.h"
+#include "structure/factory.h"
 #include "layout/optimizer.h"
