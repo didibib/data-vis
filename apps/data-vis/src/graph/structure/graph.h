@@ -1,5 +1,6 @@
 #pragma once
 
+class ofApp;
 namespace DataVis
 {
 class Graph : public IStructure

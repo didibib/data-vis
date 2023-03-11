@@ -103,6 +103,11 @@ bool IStructure::InsideMoveAABB(glm::vec3 _position)
 	return m_move_aabb.inside(_position - m_position);
 }
 
+void IStructure::SetOnDeleteCallback(std::function<void(IStructure&)> _callback)
+{
+	m_on_delete_callback = _callback;
+}
+
 //--------------------------------------------------------------
 // Rendering
 //--------------------------------------------------------------

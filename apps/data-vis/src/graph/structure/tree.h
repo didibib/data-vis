@@ -1,5 +1,6 @@
 #pragma once
 
+class ofApp;
 namespace DataVis
 {
 class Tree : public IStructure
@@ -21,6 +22,13 @@ class Tree : public IStructure
 	};
 	//--------------------------------------------------------------
 public:
+	struct ImGuiData
+	{
+		bool checkbox_draw_all_edges = false;
+		float input_radial_step = 100;
+		float input_radial_delta_angle = 100;
+		
+	};
 	class Node : public IStructure::Node
 	{
 	public:
@@ -73,6 +81,7 @@ public:
 
 	// Properties
 	int leaves = 0, depth = 0;
+	ImGuiData m_imgui_data;
 
 protected:
 	void DrawLayout() override;

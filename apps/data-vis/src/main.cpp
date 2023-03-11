@@ -8,5 +8,5 @@ int main( ){
 	settings.setGLVersion(3, 3);
 	ofCreateWindow(settings);
 
-	ofRunApp(new ofApp());
+	ofRunApp(make_shared<ofApp>());
 }

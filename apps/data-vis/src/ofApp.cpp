@@ -29,20 +29,21 @@ void ofApp::setup()
 	auto dataset = std::make_shared<DataVis::Dataset>();
 	dataset->Load(m_current_graph_file);
 	m_datasets.push_back(dataset);
-
 	auto graph = std::make_shared<DataVis::Graph>();
 	graph->Init(dataset);
 	DataVis::Layout::Random(*graph, 800, 600);
-	m_layouts.push_back(std::move(graph));
+	graph->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
+	m_structures.push_back(std::move(graph));
 
 	auto tree = std::make_shared<DataVis::Tree>();
 	tree->Init(dataset);
+	tree->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
 	DataVis::Tree::Extract::MSP(*tree, 0);
 	DataVis::Tree::Layout::Radial(*tree, 100, 150);
 	tree->UpdateAABB();
 
 	tree->SetPosition({ 100, 50, 0 });
-	m_layouts.push_back(std::move(tree));
+	m_structures.push_back(std::move(tree));
 }
 
 //--------------------------------------------------------------
@@ -64,7 +65,7 @@ void ofApp::update()
 	if (io.WantCaptureMouse || io.WantCaptureKeyboard)
 		m_camera.disableMouseInput();
 	else m_camera.enableMouseInput();
-	for (auto& layout : m_layouts) {
+	for (auto& layout : m_structures) {
 		float t = ofGetLastFrameTime();
 		layout.get()->Update(t);
 	}
@@ -80,7 +81,7 @@ void ofApp::draw() {
 
 	m_camera.begin();
 
-	for (auto& layout : m_layouts) {
+	for (auto& layout : m_structures) {
 		layout.get()->Draw(m_focussed_layout == layout);
 	}
 
@@ -126,13 +127,14 @@ void ofApp::Gui()
 			string new_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
 
 			auto dataset = std::make_shared<DataVis::Dataset>();
-			dataset->Load(m_current_graph_file);
+			dataset->Load(m_graph_file_names[m_imgui_data.combo_graph_file_index]);
 			m_datasets.push_back(dataset);
 
 			auto graph = std::make_shared<DataVis::Graph>();
 			graph->Init(dataset);
+			graph->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
 			DataVis::Layout::Random(*graph, 800, 600);
-			m_layouts.push_back(std::move(graph));
+			m_structures.push_back(std::move(graph));
 		}
 		ImGui::TreePop();
 		ImGui::Separator();
@@ -179,6 +181,22 @@ void ofApp::Gui()
 
 	if(m_focussed_layout)
 		m_focussed_layout.get()->Gui();
+}
+
+void ofApp::DeleteStructure(DataVis::IStructure& _structure)
+{
+	auto it = m_structures.begin();
+	while (it != m_structures.end())
+	{
+		if (it->get() == addressof(_structure))
+		{
+			m_structures.erase(it);
+			if (m_focussed_layout.get() == addressof(_structure))
+				m_focussed_layout = nullptr;
+			return;
+		}
+		it++;
+	}
 }
 
 glm::vec3 ofApp::ScreenToWorld( const glm::vec2& _position )
@@ -234,7 +252,7 @@ void ofApp::mousePressed( int x, int y, int button )
 		auto world = ScreenToWorld(glm::vec2(x, y));
 
 		// Check if we are beginning to drag a layout
-		for(auto& layout : m_layouts)
+		for(auto& layout : m_structures)
 		{
 			auto transformed = world - layout.get()->GetPosition();
 			if (layout.get()->GetMoveAABB().inside(transformed))
@@ -254,7 +272,7 @@ void ofApp::mousePressed( int x, int y, int button )
 		{
 			m_focussed_layout = nullptr;
 			// Check all layouts
-			for (auto& layout : m_layouts)
+			for (auto& layout : m_structures)
 			{
 				if (layout.get()->InsideAABB(world))
 				{

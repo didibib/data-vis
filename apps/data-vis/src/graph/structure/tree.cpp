@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "ofApp.h"
 
 namespace DataVis
 {
@@ -147,7 +148,7 @@ void Tree::DrawLayout()
 	ofSetCircleResolution(50);
 	for (int i = 0; i < depth - 1; i++)
 	{
-		ofDrawCircle(glm::vec3(0), 100 + i * 150);
+		ofDrawCircle(glm::vec3(0), m_imgui_data.input_radial_step + i * m_imgui_data.input_radial_delta_angle);
 	}
 
 	// Draw vertices and edges
@@ -179,11 +180,30 @@ void Tree::DrawLayout()
 //--------------------------------------------------------------
 void Tree::Gui()
 {
+	ImGui::Begin("Tree Settings");
+
+	if (ImGui::TreeNode("Radial Layout"))
+	{
+		ImGui::InputFloat("Step", &(m_imgui_data.input_radial_step));
+		ImGui::InputFloat("Delta angle", &(m_imgui_data.input_radial_delta_angle));
+
+		if (ImGui::Button("Apply"))
+		{
+			DataVis::Tree::Layout::Radial(*this, m_imgui_data.input_radial_step, m_imgui_data.input_radial_delta_angle);
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+
 	if (m_selected_node.get() != nullptr)
 	{
 		auto x = m_selected_node.get();
-		ImGui::Begin("Selected Node");
 
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+		ImGui::BeginChild("ChildR", ImVec2(0, 100), true);
+		
+		ImGui::Text("Selected Node:");
 		ImGui::Text("Vertex: %i", m_selected_node->GetVertexId());
 		ImGui::Text("Position: (%f.0, %f.0)", m_selected_node->GetPosition().x, m_selected_node->GetPosition().y);
 
@@ -193,8 +213,16 @@ void Tree::Gui()
 			Tree::Layout::Radial(*this, 100, 150);
 			UpdateAABB();
 		}
-		ImGui::End();
+		ImGui::EndChild();
+		ImGui::PopStyleVar();
 	}
+
+	if (ImGui::Button("Delete"))
+	{
+		m_on_delete_callback(*this);
+	}
+
+	ImGui::End();
 }
 
 //--------------------------------------------------------------
