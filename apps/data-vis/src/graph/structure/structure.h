@@ -1,16 +1,12 @@
 #pragma once
 
-class ofApp;
 namespace DataVis
 {
 //--------------------------------------------------------------
 namespace po = boost::program_options;
 
-// Forward declare ofApp
-
 class IStructure
 {
-	//--------------------------------------------------------------
 public:
 	class Node
 	{

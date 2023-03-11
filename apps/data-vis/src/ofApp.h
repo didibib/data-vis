@@ -1,6 +1,6 @@
 #pragma once
 
-
+using namespace DataVis;
 
 class ofApp : public ofBaseApp {
 
@@ -12,7 +12,10 @@ private:
 		int combo_structure_index = 0;
 		int combo_layout_function_index = 0;
 	} m_imgui_data;
-	std::vector<std::unique_ptr<DataVis::IStructure>> m_structures;
+
+	std::vector<std::pair<std::string, std::function<std::shared_ptr<IStructure>(std::shared_ptr<Dataset>)>>> m_factories;
+
+	std::vector<std::shared_ptr<DataVis::IStructure>> m_structures;
 	std::vector<std::shared_ptr<DataVis::Dataset>> m_datasets;
 
 	ofEasyCam m_camera;
