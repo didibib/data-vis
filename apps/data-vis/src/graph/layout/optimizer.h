@@ -18,7 +18,7 @@ private:
 	// Force Directed
 	//--------------------------------------------------------------
 public:
-	static void ForceDirected(IStructure&, float C, int iterations);
+	static void ForceDirected(IStructure&, float C, float t, int iterations);
 
 };
 }

@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "ofApp.h"
 
 namespace DataVis
 {
@@ -41,7 +42,8 @@ void Graph::Select(const glm::vec3& _position)
 //--------------------------------------------------------------
 void Graph::Update(float delta_time)
 {
-	Optimizer::ForceDirected(*this, .5f, 10);
+	if(m_imgui_data.button_fd_enabled)
+		Optimizer::ForceDirected(*this, m_imgui_data.input_fd_C, m_imgui_data.input_fd_t, m_imgui_data.input_fd_iter_per_frame);
 }
 
 //--------------------------------------------------------------
@@ -71,6 +73,40 @@ void Graph::DrawLayout()
 //--------------------------------------------------------------
 void Graph::Gui()
 {
+	ImGui::Begin("Graph Settings");
+
+	//--------------------------------------------------------------
+	// Optimize Layout
+	//--------------------------------------------------------------
+	if (ImGui::TreeNode("Local Search")) {
+		ImGui::InputInt("# of iterations", &(m_imgui_data.input_optimize_iterations));
+		if (ImGui::Button("Optimize Graph"))
+		{
+			DataVis::Optimizer::LocalSearch(*this, m_imgui_data.input_optimize_iterations);
+		}
+
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+
+	if (ImGui::TreeNode("Force Directed"))
+	{
+		ImGui::Checkbox("Enabled", &m_imgui_data.button_fd_enabled);
+		ImGui::InputInt("Iterations per frame", &(m_imgui_data.input_fd_iter_per_frame));
+		ImGui::InputFloat("C", &(m_imgui_data.input_fd_C));
+		ImGui::InputFloat("t", &(m_imgui_data.input_fd_t));
+
+		ImGui::TreePop();
+		ImGui::Separator();
+	}
+
+	if (ImGui::Button("Delete"))
+	{
+		/*auto app = m_app.lock();
+		app.get()->DeleteStructure(*this);*/
+		m_on_delete_callback(*this);
+	}
+	ImGui::End();
 }
 
 //--------------------------------------------------------------
