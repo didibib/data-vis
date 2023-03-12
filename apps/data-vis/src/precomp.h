@@ -53,10 +53,6 @@ typedef unsigned int uint;
 
 namespace DataVis
 {
-// https://www.cppstories.com/2018/09/visit-variants/#the-amazing-stdvisit
-template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
-template<class... Ts> overload(Ts...) -> overload<Ts...>;
-
 namespace RandomNumber
 {
 std::random_device random_device;
@@ -79,6 +75,9 @@ namespace Curves
 /// <returns></returns>
 float Bezier(float time);
 } // namespace Curves
+
+
+
 } // namespace DataVis
 
 //--------------------------------------------------------------
@@ -88,6 +87,8 @@ float Bezier(float time);
 //--------------------------------------------------------------
 // Own headers
 #include "dataset.h"
+#include "animator.h"
+#include "aabb.h"
 #include "structure/structure.h"
 #include "structure/graph.h"
 #include "structure/tree.h"

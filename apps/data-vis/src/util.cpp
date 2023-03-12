@@ -5,7 +5,6 @@ namespace DataVis
 {
 namespace RandomNumber
 {
-
 static uint seed = 0x12345678;
 uint UInt()
 {
@@ -46,4 +45,7 @@ float Bezier(float _t)
 	return _t * _t * (3.0f - 2.0f * _t);
 }
 } // namespace Curves
+
+
+
 } // namespace DataVis

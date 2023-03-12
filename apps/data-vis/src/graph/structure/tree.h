@@ -10,8 +10,8 @@ public:
 		bool checkbox_draw_all_edges = false;
 		float input_radial_step = 100;
 		float input_radial_delta_angle = 100;
-		
-	};
+	} m_imgui_data;
+
 	class Node : public IStructure::Node
 	{
 	public:
@@ -39,11 +39,9 @@ public:
 
 	// Properties
 	int leaves = 0, depth = 0;
-	ImGuiData m_imgui_data;
 
 protected:
 	void DrawNodes() override;
-	//void SetAABB() override;
 	void NodeInfoGui() override;
 
 	void UpdateProperties();

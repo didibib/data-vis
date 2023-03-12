@@ -78,14 +78,6 @@ void Tree::UpdateProperties()
 	depth = Depth(m_root);
 }
 
-// //--------------------------------------------------------------
-// void Tree::SetAABB()
-// {
-// 	// Still uses hardcoded radius and delta_angle
-// 	int r = (depth - 1) * 150;
-// 	m_aabb = { {-r, -r}, {r, r} };
-// }
-
 //--------------------------------------------------------------
 void Tree::DrawNodes()
 {

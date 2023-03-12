@@ -108,7 +108,7 @@ bool Radial::Gui(IStructure& _structure)
 			try {
 				Tree& tree = dynamic_cast<Tree&>(_structure);
 				Apply(tree, m_start, m_step);
-				m_depth = tree.Depth(tree.Root());
+				m_rings.Set(tree.Depth(tree.Root()), m_start, m_step);
 				active = true;
 			}
 			catch (std::exception& e) {
@@ -122,16 +122,14 @@ bool Radial::Gui(IStructure& _structure)
 	return active;
 }
 
+void Radial::Update(float _delta_time)
+{
+	m_rings.EaseInEaseOut(_delta_time);
+}
+
 void Radial::Draw()
 {
-	// Draw radial circles
-	ofNoFill();
-	ofSetColor(65);
-	ofSetCircleResolution(50);
-	for (int i = 0; i < m_depth - 1; i++)
-	{
-		ofDrawCircle(glm::vec3(0), m_start + i * m_step);
-	}
+	m_rings.Draw();
 }
 
 //--------------------------------------------------------------
@@ -141,6 +139,7 @@ void Radial::Apply(Tree& _tree, float _start, float _step)
 	node->SetNewPosition(glm::vec3(0));
 	SubTree(*node, 0, TWO_PI, 0, _start, _step);
 	_tree.UpdateAABB();
+	
 }
 
 //--------------------------------------------------------------
@@ -189,8 +188,8 @@ bool ForceDirected::Gui(IStructure& _structure)
 //--------------------------------------------------------------
 void ForceDirected::Apply(IStructure& _structure, float _C, float _t, int _iterations)
 {
-	int area = _structure.GetAABB().getArea();
-	float k = _C * sqrtf(area / static_cast<float>(_structure.GetNodes().size()));
+	float area = _structure.GetArea();
+	float k = _C * sqrtf(area / _structure.GetNodes().size());
 	float k2 = k * k;
 
 	for (int i = 0; i < _iterations; i++)

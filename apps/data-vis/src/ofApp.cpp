@@ -103,6 +103,7 @@ void ofApp::exit()
 
 void ofApp::Gui()
 {
+	ImGui::ShowDemoWindow();
 	if (ImGui::BeginMainMenuBar()) {
 		//--------------------------------------------------------------
 		// Create IStructure 
@@ -205,12 +206,11 @@ void ofApp::mouseMoved(int x, int y)
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button)
 {
-	if (button == OF_MOUSE_BUTTON_LEFT && m_dragging_layout != nullptr)
+	if (button == OF_MOUSE_BUTTON_LEFT && m_dragging_layout)
 	{
 		auto world = ScreenToWorld(glm::vec2(x, y));
-
-		auto dif = world - m_prev_mouse_drag;
-		m_dragging_layout->Move(dif);
+		auto diff = world - m_prev_mouse_drag;
+		m_dragging_layout->Move(diff);
 		m_prev_mouse_drag = world;
 	}
 }
@@ -228,8 +228,7 @@ void ofApp::mousePressed(int x, int y, int button)
 		// Check if we are beginning to drag a layout
 		for (auto& layout : m_structures)
 		{
-			auto transformed = world - layout.get()->GetPosition();
-			if (layout.get()->GetMoveAABB().inside(transformed))
+			if (layout->InsideDraggable(world))
 			{
 				m_dragging_layout = layout;
 				m_prev_mouse_drag = world;
@@ -238,9 +237,9 @@ void ofApp::mousePressed(int x, int y, int button)
 		}
 
 		// Check if click is inside focussed layout
-		if (m_focussed_layout != nullptr && m_focussed_layout.get()->InsideAABB(world))
+		if (m_focussed_layout not_eq nullptr && m_focussed_layout->Inside(world))
 		{
-			m_focussed_layout.get()->Select(world);
+			m_focussed_layout->Select(world);
 		}
 		else
 		{
@@ -248,7 +247,7 @@ void ofApp::mousePressed(int x, int y, int button)
 			// Check all layouts
 			for (auto& layout : m_structures)
 			{
-				if (layout.get()->InsideAABB(world))
+				if (layout->Inside(world))
 				{
 					m_focussed_layout = layout;
 					break;
