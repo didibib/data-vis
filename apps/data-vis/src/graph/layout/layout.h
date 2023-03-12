@@ -41,6 +41,22 @@ private:
 };
 
 //--------------------------------------------------------------
+// Local Search
+//--------------------------------------------------------------
+class LocalSearch : public Layout
+{
+public:
+	bool Gui(IStructure&) override;
+	static void Apply(IStructure&, int _iterations);
+private:
+	static float CalculateCost(IStructure& _structure);
+	static float CalculateIncrementalCost(IStructure& _structure, uint _idx0, uint _idx1);
+	static float CalculateNodeCost(IStructure& _structure, uint _idx);
+	static void SwapPos(IStructure& _structure, float& _currCost);
+	int m_iterations = 10000;
+};
+
+//--------------------------------------------------------------
 // Radial
 //--------------------------------------------------------------
 class Radial : public Layout
@@ -72,18 +88,19 @@ private:
 };
 
 //--------------------------------------------------------------
-// Local Search
+// Force Directed
 //--------------------------------------------------------------
-class LocalSearch : public Layout
+class Sugiyama : public Layout
 {
 public:
 	bool Gui(IStructure&) override;
-	static void Apply(IStructure&, int _iterations);
+	static void Apply(Graph&);
 private:
-	static float CalculateCost(IStructure& _structure);
-	static float CalculateIncrementalCost(IStructure& _structure, uint _idx0, uint _idx1);
-	static float CalculateNodeCost(IStructure& _structure, uint _idx);
-	static void SwapPos(IStructure& _structure, float& _currCost);
-	int m_iterations = 10000;
+	static void BreakCycles(Graph&);
+	static void LayerAssignment(Graph&);
+	static void CrossingMinimization(Graph&);
+	static void VertexPositioning(Graph&);
+
+
 };
 } // namespace DataVis

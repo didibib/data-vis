@@ -6,9 +6,10 @@ class Animator
 {
 public:
 	Animator() = default;
-	void EaseInEaseOut(float t, float speed = 1.f);
+	virtual void Update(float delta_time, float speed = 1.f);
 
 protected:
+	void EaseInEaseOut(float t, float speed = 1.f);
 	void StartAnimation();
 	virtual void OnStopAnimation() = 0;
 	virtual void Interpolate(float percentage) = 0;

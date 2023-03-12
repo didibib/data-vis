@@ -64,6 +64,12 @@
     <ClCompile Include="src\graph\animator.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
+    <ClCompile Include="src\graph\layout\local_search.cpp">
+      <Filter>src\graph\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\layout\sugiyama.cpp">
+      <Filter>src\graph\layout</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
