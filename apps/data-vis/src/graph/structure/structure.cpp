@@ -31,9 +31,9 @@ const int& IStructure::Idx() const
 
 void IStructure::Update(float _delta_time)
 {
-	m_aabb.EaseInEaseOut(_delta_time);
+	m_aabb.Update(_delta_time);
 	for (auto& node : m_nodes)
-		node->EaseInEaseOut(_delta_time, 0.2f);
+		node->Update(_delta_time, 0.2f);
 	if (m_active_layout)
 		m_active_layout->Update(_delta_time);
 }

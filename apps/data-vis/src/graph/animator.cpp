@@ -5,6 +5,11 @@ namespace DataVis
 //--------------------------------------------------------------
 // Animator
 //--------------------------------------------------------------
+void Animator::Update(float _t, float _speed)
+{
+	EaseInEaseOut(_t, _speed);
+}
+
 void Animator::EaseInEaseOut(float _t, float _speed)
 {
 	if (m_time > 1)
@@ -40,7 +45,6 @@ void Animator::StopAnimation()
 //--------------------------------------------------------------
 void Rings::Draw()
 {
-	// Draw radial circles
 	ofNoFill();
 	ofSetCircleResolution(50);
 	for (int i = 0; i < m_amount; i++)
@@ -61,7 +65,7 @@ void Rings::Set(int _new_amount, float _start, float _step)
 		for (int i = m_amount; i < _new_amount; i++)
 		{
 			m_alpha[i].new_value = 255;
-			m_radius[i].old_value = max(0, i - 1) * _step;
+			m_radius[i].old_value = std::max(0, i - 1) * _step;
 			m_radius[i].new_value = i * _step;
 		}
 	}
@@ -70,7 +74,7 @@ void Rings::Set(int _new_amount, float _start, float _step)
 		for (int i = m_amount - 1; i > _new_amount; i--)
 		{
 			m_alpha[i].new_value = 0;
-			m_radius[i].new_value = max(0, i - 1) * _step;
+			m_radius[i].new_value = std::max(0, i - 1) * _step;
 		}
 	}
 	m_amount = _new_amount;
