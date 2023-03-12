@@ -11,29 +11,20 @@ IStructure::Node::Node(std::string _vertex_id, VertexIdx _vertex_index, glm::vec
 	m_vertex_idx = _vertex_index;
 	m_position = _position;
 	m_old_position = _position;
-	m_bounding_box = ofRectangle(_position - glm::vec2(m_radius), m_radius * 2, m_radius * 2);
+	m_aabb = ofRectangle(_position - glm::vec2(m_radius), m_radius * 2, m_radius * 2);
 }
 
 //--------------------------------------------------------------
 // Animation
 //--------------------------------------------------------------
-void IStructure::Node::EaseInEaseOut(float _t, float _speed)
+void IStructure::Node::OnStopAnimation()
 {
-	if (m_time > 1) {
-		m_animate = false;
-		m_time = 0;
-	}
-	if (m_animate) {
-		m_time += _t * _speed;
-		float p = Curves::Bezier(m_time);
-		SetPosition((1 - p) * m_old_position + p * m_new_position);
-		if (p >= .999f) {
-			m_animate = false;
-			m_time = 0;
-			SetPosition(m_new_position);
-			m_old_position = m_new_position;
-		}
-	}
+	SetPosition(m_new_position);
+}
+
+void IStructure::Node::Interpolate(float _p)
+{
+	SetPosition((1 - _p) * m_old_position + _p * m_new_position);
 }
 
 //--------------------------------------------------------------
@@ -71,9 +62,8 @@ const glm::vec3& IStructure::Node::GetNewPosition()
 void IStructure::Node::SetNewPosition(glm::vec3& _new_position)
 {
 	m_new_position = _new_position;
-	m_bounding_box.setPosition(_new_position - glm::vec2(m_radius));
-	m_animate = true;
-	m_time = 0;
+	m_aabb.setPosition(_new_position - glm::vec2(m_radius));
+	StartAnimation();
 }
 
 //--------------------------------------------------------------
@@ -87,7 +77,7 @@ const float& IStructure::Node::GetRadius()
 void IStructure::Node::SetRadius(float _radius)
 {
 	m_radius = _radius;
-	m_bounding_box.setSize(_radius * 2, _radius * 2);
+	m_aabb.setSize(_radius * 2, _radius * 2);
 }
 
 //--------------------------------------------------------------

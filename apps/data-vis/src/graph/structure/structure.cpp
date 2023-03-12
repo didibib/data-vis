@@ -31,9 +31,13 @@ const int& IStructure::Idx() const
 
 void IStructure::Update(float _delta_time)
 {
+	m_aabb.EaseInEaseOut(_delta_time);
 	for (auto& node : m_nodes)
-		node->EaseInEaseOut(_delta_time);
+		node->EaseInEaseOut(_delta_time, 0.2f);
+	if (m_active_layout)
+		m_active_layout->Update(_delta_time);
 }
+
 //--------------------------------------------------------------
 // Get
 //--------------------------------------------------------------
@@ -50,14 +54,14 @@ IStructure::VectorOfNodes& IStructure::GetNodes()
 //--------------------------------------------------------------
 // Position
 //--------------------------------------------------------------
-glm::vec3 IStructure::GetPosition() const
+const glm::vec3& IStructure::GetPosition() const
 {
 	return m_position;
 };
 
-void IStructure::SetPosition(glm::vec3 _new_position)
+void IStructure::SetPosition(const glm::vec3& _position)
 {
-	m_position = _new_position;
+	m_position = _position;
 };
 
 //--------------------------------------------------------------
@@ -107,28 +111,13 @@ void IStructure::SetSelectedNode(std::shared_ptr<Node> _node)
 //--------------------------------------------------------------
 // Bounding Box
 //--------------------------------------------------------------
-const ofRectangle& IStructure::GetAABB() const
-{
-	return m_aabb;
-};
-
-const ofRectangle& IStructure::GetMoveAABB() const
-{
-	return m_move_aabb;
-};
-
-void IStructure::SetAABB()
+void IStructure::UpdateAABB()
 {
 	glm::vec3 tl{ 1e30 };
 	glm::vec3 br{ -1e30 };
 
 	for (const auto& node : GetNodes())
 	{
-		/*tl.x = min(node->GetPosition().x - node->GetRadius(), tl.x);
-		tl.y = min(node->GetPosition().y - node->GetRadius(), tl.y);
-		br.x = max(node->GetPosition().x + node->GetRadius(), br.x);
-		br.y = max(node->GetPosition().y + node->GetRadius(), br.y);*/
-
 		tl.x = min(node->GetNewPosition().x - node->GetRadius(), tl.x);
 		tl.y = min(node->GetNewPosition().y - node->GetRadius(), tl.y);
 		br.x = max(node->GetNewPosition().x + node->GetRadius(), br.x);
@@ -136,39 +125,41 @@ void IStructure::SetAABB()
 	}
 	tl.z = 0;
 	br.z = 0;
-	m_aabb = { tl, br };
+	m_aabb.SetNewBounds(tl, br);
 }
 
-void IStructure::UpdateAABB()
+//--------------------------------------------------------------
+bool IStructure::Inside(const glm::vec3& _position) const
 {
-	SetAABB();
-	SetMoveAABB();
-};
-
-void IStructure::SetMoveAABB()
-{
-	auto bb_tl = m_aabb.getTopLeft();
-	m_move_aabb = { bb_tl, { bb_tl.x - m_move_aabb_size, bb_tl.y - m_move_aabb_size } };
+	return m_aabb.Inside(_position - m_position);
 }
 
-bool IStructure::InsideAABB(glm::vec3 _position)
+//--------------------------------------------------------------
+bool IStructure::InsideDraggable(const glm::vec3& _position) const
 {
-	return m_aabb.inside(_position - m_position);
+	return m_aabb.InsideDraggable(_position - m_position);
 }
 
-bool IStructure::InsideMoveAABB(glm::vec3 _position)
+//--------------------------------------------------------------
+float IStructure::GetArea() const
 {
-	return m_move_aabb.inside(_position - m_position);
+	return m_aabb.GetArea();
 }
 
+//--------------------------------------------------------------
+// Callback
+//--------------------------------------------------------------
 void IStructure::SetOnDeleteCallback(std::function<void(IStructure&)> _callback)
 {
 	m_on_delete_callback = _callback;
 }
 
+//--------------------------------------------------------------
+// Gui
+//--------------------------------------------------------------
 void IStructure::Gui()
 {
-	ImGui::Begin("Structure Settings");
+	ImGui::Begin("Structure Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
 	if (ImGui::Button("Delete"))
 	{
@@ -176,6 +167,8 @@ void IStructure::Gui()
 		m_on_delete_callback(*this);
 		return;
 	}
+
+	m_dataset->InfoGui();
 
 	if (ImGui::TreeNode("Node Settings"))
 	{
@@ -200,6 +193,7 @@ void IStructure::Gui()
 	ImGui::End();
 }
 
+//--------------------------------------------------------------
 void IStructure::NodeInfoGui()
 {
 	if (m_selected_node != nullptr)
@@ -225,17 +219,7 @@ void IStructure::Draw(bool _is_focussed)
 	ofTranslate(m_position);
 
 	// Draw the bounds
-	ofNoFill();
-	if (_is_focussed)
-		ofSetColor(ofColor::green);
-	else
-		ofSetColor(ofColor::lightGray);
-	ofDrawRectangle(m_aabb);
-
-	ofFill();
-	ofSetColor(ofColor::black);
-	ofDrawRectangle(m_move_aabb);
-	ofNoFill();
+	m_aabb.Draw(_is_focussed);
 
 	if (m_active_layout) m_active_layout->Draw();
 
@@ -246,11 +230,7 @@ void IStructure::Draw(bool _is_focussed)
 	{
 		for (auto& node : m_nodes)
 			ofDrawBitmapStringHighlight(ofToString(node->GetVertexId()), node->GetPosition() + glm::vec3(10, 10, -1));
-
 	}
-
 	ofPopMatrix();
 }
-
-
 } // DataVis

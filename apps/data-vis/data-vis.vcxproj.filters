@@ -58,6 +58,12 @@
     <ClCompile Include="src\graph\structure\node.cpp">
       <Filter>src\graph\structure</Filter>
     </ClCompile>
+    <ClCompile Include="src\graph\aabb.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graph\animator.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -139,6 +145,12 @@
     </ClInclude>
     <ClInclude Include="src\graph\structure\graph.h">
       <Filter>src\graph\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\aabb.h">
+      <Filter>src\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graph\animator.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

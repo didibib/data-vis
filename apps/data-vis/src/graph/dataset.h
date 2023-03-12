@@ -85,14 +85,18 @@ class Dataset
 public:
 	Dataset() = default;
 	bool Load(std::string filename);
+	void InfoGui();
 	const std::string& GetFilename();
 	std::vector<Edge>& GetEdges();
 	std::vector<Vertex>& GetVertices();
 
 private:
+	void SetInfo();
+
 	std::string m_filename;
 	std::unordered_map<std::string, VertexIdx> m_vertex_idx;
-	std::vector<Edge> m_edges;
 	std::vector<Vertex> m_vertices;
+	std::vector<Edge> m_edges;
+	std::vector<std::pair<std::string, std::string>> m_info;
 };
 } // namespace DataVis

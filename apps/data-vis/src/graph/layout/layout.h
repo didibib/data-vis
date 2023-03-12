@@ -9,6 +9,7 @@ class Layout
 {
 public:
 	virtual bool Gui(IStructure&) = 0;
+	virtual void Update(float) {};
 	virtual void Draw() {}
 };
 
@@ -46,13 +47,14 @@ class Radial : public Layout
 {
 public:
 	bool Gui(IStructure&) override;
+	void Update(float) override;
 	void Draw() override;
 	static void Apply(Tree&, float start, float step);
 private:
 	// Pavlo, 2006 https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1355&context=theses
 	static void SubTree(Tree::Node&, float angle_start, float angle_end, int depth, float step, float delta_angle);
 	float m_start = 100, m_step = 100;
-	uint m_depth = 0;
+	Rings m_rings;
 };
 
 //--------------------------------------------------------------
