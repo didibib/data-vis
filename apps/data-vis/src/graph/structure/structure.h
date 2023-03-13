@@ -57,6 +57,7 @@ public:
 	void SetPosition(const glm::vec3&);
 
 	// AABB
+	AABB GetAABB();
 	void UpdateAABB();
 	bool Inside(const glm::vec3&) const;
 	bool InsideDraggable(const glm::vec3&) const;

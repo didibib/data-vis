@@ -224,7 +224,9 @@ void ForceDirected::Apply(IStructure& _structure, float _C, float _t, int _itera
 
 		for (auto& node : _structure.GetNodes())
 		{
-			node->SetPosition(node->GetPosition() + node->GetDisplacement() * _t);
+			glm::vec3 new_pos = node->GetPosition() + node->GetDisplacement() * _t;
+			node->SetPosition( _structure.GetAABB().Clamp( new_pos ) );
+			//node->SetPosition(node->GetPosition() + node->GetDisplacement() * _t);
 		}
 		_t *= 0.9999f;
 	}

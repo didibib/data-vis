@@ -96,15 +96,20 @@ public:
 	bool Gui( IStructure& ) override;
 	static void Apply( Graph& );
 private:
+	using Layer = std::vector<int>;
+	using GetNeighbors = std::function<std::vector<Neighbor> (Vertex&)>;
+
 	static const int VisitedIdx;
 	static const std::string DummyId;
 	static const int RemoveIdx;
-	static Dataset BreakCycles( Graph& );
-	static void LayerAssignment( Graph&, std::vector<std::vector<int>>& vertices_per_layer, std::vector<int>& layer_per_vertex );
-	static Dataset AddDummyVertices( Graph&, std::vector<std::vector<int>>& vertices_per_layer, std::vector<int>& layer_per_vertex );
-	static void CrossingMinimization( Graph& );
+
+	static Dataset BreakCycles( Dataset& );
+	static void LayerAssignment( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
+	static Dataset AddDummyVertices( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
+	static void CrossingMinimization( Dataset&, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex);
 	static void VertexPositioning( Graph& );
 
+	// Layer Assignment
 	static bool IsSink( Vertex& );
 	static bool IsSource( Vertex& );
 	static bool Has( std::function<bool( Vertex& )>, std::vector<Vertex>, Vertex& out );
@@ -112,5 +117,13 @@ private:
 	static void RemoveIncomingNeighbors( Dataset&, Vertex& );
 	static void RemoveNeighbors( Dataset&, Edge& );
 	static void AddNeighbors( Dataset&, Edge&);
+
+	// OSCM
+	static bool BarycenterHeuristic( Dataset&, std::vector<float>& all_coords, Layer& layer_fixed, Layer& layer, Layer& new_layer,
+		GetNeighbors get_neighbors,
+		GetNeighbors get_reverse_neighbors );
+
+	static int Crossings( Dataset&, Layer& layer_1, Layer& layer_2 );
+
 };
 } // namespace DataVis

@@ -31,14 +31,15 @@ bool Sugiyama::Gui( IStructure& _structure )
 //--------------------------------------------------------------
 void Sugiyama::Apply( Graph& _graph )
 {
-	Dataset dataset = BreakCycles( _graph );
-	_graph.Load( std::make_shared<Dataset>( dataset ) );
+	Dataset dataset = BreakCycles( _graph.GetDataset() );
+	//_graph.Load( std::make_shared<Dataset>( dataset ) );
 
-	std::vector<std::vector<int>> vertices_per_layer;
-	std::vector<int> layer_per_vertex;
-	LayerAssignment( _graph, vertices_per_layer, layer_per_vertex );
+	std::vector<Layer> vertices_per_layer;
+	Layer layer_per_vertex;
+	LayerAssignment( dataset, vertices_per_layer, layer_per_vertex );
 	
-	Dataset dummy_dataset = AddDummyVertices(_graph, vertices_per_layer, layer_per_vertex);
+	Dataset dummy_dataset = AddDummyVertices(dataset, vertices_per_layer, layer_per_vertex);
+	CrossingMinimization( dummy_dataset, vertices_per_layer, layer_per_vertex );
 	_graph.Load(std::make_shared<Dataset>(dummy_dataset));
 	for ( int y = 0; y < vertices_per_layer.size( ); y++ )
 	{
@@ -54,16 +55,15 @@ void Sugiyama::Apply( Graph& _graph )
 }
 
 //--------------------------------------------------------------
-Dataset Sugiyama::BreakCycles( Graph& _graph )
+Dataset Sugiyama::BreakCycles( Dataset& _dataset )
 {
 	// Make a copy
-	auto dataset = _graph.GetDataset( );
-	auto& vertices = dataset.vertices;
+	auto& vertices = _dataset.vertices;
 
 	// Create a new dataset without any edges
 	Dataset new_dataset;
-	new_dataset.SetKind( dataset.GetKind( ) );
-	new_dataset.edges = dataset.edges;
+	new_dataset.SetKind( _dataset.GetKind( ) );
+	new_dataset.edges = _dataset.edges;
 	auto& new_vertices = new_dataset.vertices;
 
 	for ( int i = 0; i < vertices.size( ); i++ )
@@ -227,11 +227,11 @@ bool Sugiyama::Has( std::function<bool( Vertex& )> _f, std::vector<Vertex> _vs, 
 }
 
 //--------------------------------------------------------------
-void Sugiyama::LayerAssignment( Graph& _graph, std::vector<std::vector<int>>& _vertices_per_layer, std::vector<int>& _layer_per_vertex )
+void Sugiyama::LayerAssignment( Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex )
 {
 	int layer = 0;
-	Dataset copy_dataset = _graph.GetDataset( );
-	int size = _graph.GetDataset( ).vertices.size( );
+	Dataset copy_dataset = _dataset;
+	int size = _dataset.vertices.size( );
 	_layer_per_vertex.resize( size );
 
 	bool hasSources = false;
@@ -266,9 +266,9 @@ void Sugiyama::LayerAssignment( Graph& _graph, std::vector<std::vector<int>>& _v
 }
 
 //--------------------------------------------------------------
-Dataset Sugiyama::AddDummyVertices( Graph& _graph, std::vector<std::vector<int>>& _vertices_per_layer, std::vector<int>& _layer_per_vertex )
+Dataset Sugiyama::AddDummyVertices( Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex )
 {
-	Dataset copy_dataset = _graph.GetDataset();
+	Dataset copy_dataset = _dataset;
 	auto& vertices = copy_dataset.vertices;
 	int size = copy_dataset.edges.size();
 	for(int j = 0; j < size; j++)
@@ -304,18 +304,6 @@ Dataset Sugiyama::AddDummyVertices( Graph& _graph, std::vector<std::vector<int>>
 		}
 	}
 	return copy_dataset;
-}
-
-//--------------------------------------------------------------
-void Sugiyama::CrossingMinimization( Graph& _graph )
-{
-
-}
-
-//--------------------------------------------------------------
-void Sugiyama::VertexPositioning( Graph& _graph )
-{
-
 }
 
 bool Sugiyama::IsSink( Vertex& _v )
@@ -378,7 +366,6 @@ void Sugiyama::AddNeighbors( Dataset& _dataset, Edge& _e )
 	outgoing.push_back({ _e.to_idx, _e.idx});
 	auto& incoming = _dataset.vertices[_e.to_idx].incoming_neighbors;
 	incoming.push_back({ _e.from_idx, _e.idx});
-	
 }
 
 void Sugiyama::RemoveIncomingNeighbors( Dataset& _dataset, Vertex& _v )
@@ -399,5 +386,150 @@ void Sugiyama::RemoveIncomingNeighbors( Dataset& _dataset, Vertex& _v )
 	}
 	_v.incoming_neighbors.clear( );
 }
+
+//--------------------------------------------------------------
+void Sugiyama::CrossingMinimization( Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex )
+{
+	auto& vertices = _dataset.vertices;
+
+	std::shuffle( _vertices_per_layer[0].begin(), _vertices_per_layer[0].end(), RandomNumber::random_device );
+
+	GetNeighbors get_neighbors = []( Vertex& v ) { return v.neighbors; };
+	GetNeighbors get_reverse_neighbors = []( Vertex& v ) { return v.incoming_neighbors; };
+
+	//auto& neighbors = get_neighbors( _dataset.vertices[0] );
+
+	std::vector<float> all_coords( vertices.size() );
+
+	int crossings = 0;
+	int new_crossings = 1e30;
+
+	do
+	{
+		crossings = new_crossings;
+		new_crossings = 0;
+
+		std::fill(all_coords.begin(), all_coords.end(), 0);
+		// Go up
+		for(int i = 1; i < _vertices_per_layer.size(); i++) 
+		{
+			Layer new_layer;
+			BarycenterHeuristic( _dataset, all_coords, _vertices_per_layer[i - 1], _vertices_per_layer[i], new_layer, get_neighbors, get_reverse_neighbors );
+			_vertices_per_layer[i] = new_layer;
+		}
+		
+		std::fill( all_coords.begin(), all_coords.end(), 0 );
+		// Go down
+		for(int i = _vertices_per_layer.size() - 2; i >= 0; i--)
+		{
+			Layer new_layer;
+			BarycenterHeuristic( _dataset, all_coords, _vertices_per_layer[i + 1], _vertices_per_layer[i], new_layer, get_reverse_neighbors, get_neighbors );
+			_vertices_per_layer[i] = new_layer;
+		}
+
+		// Count crossings
+		for (int i = 1; i < _vertices_per_layer.size(); i++)
+		{
+			new_crossings += Crossings( _dataset, _vertices_per_layer[i - 1], _vertices_per_layer[i] );
+		}
+	}
+	while(new_crossings < crossings);
+
+	_dataset.AddInfo( "Crossings", std::to_string( new_crossings ) );
+}
+
+bool Sugiyama::BarycenterHeuristic( Dataset& _dataset,
+	std::vector<float>& _all_coords, 
+	Layer& _layer_fixed, 
+	Layer& _layer, 
+	Layer& _new_layer,
+	GetNeighbors _get_neighbors,
+	GetNeighbors _get_reverse_neighbors )
+{
+	auto& vertices = _dataset.vertices;
+
+	for (int i = 0; i < _layer_fixed.size(); i++)
+	{
+		auto& neighbors = _get_neighbors( vertices[_layer_fixed[i]] );
+		for (auto& n : neighbors)
+		{
+			_all_coords[n.idx] += i;
+		}
+	}
+
+	// barycenter, vertex idx
+	std::vector<std::pair<float, int>> coords( _layer.size() );
+	for (int i = 0; i < coords.size(); i++)
+	{
+		float coor = _all_coords[_layer[i]];
+		coor /= (float)_get_reverse_neighbors(vertices[_layer[i]]).size();
+		coords[i] = {coor, _layer[i]};
+	}
+
+	bool changed = false;
+	std::stable_sort( coords.begin(), coords.end(), [&]( pair<float, int> a, pair<float, int> b ) {
+		changed |= a.first < b.first;
+		return a.first < b.first;
+	});
+
+	_new_layer.resize(coords.size());
+	for (int i = 0; i < coords.size(); i++) _new_layer[i] = coords[i].second;
+	return changed;
+}
+
+int Sugiyama::Crossings( Dataset& _dataset, Layer& _layer_1, Layer& _layer_2 )
+{
+	std::vector<bool> flags;
+	std::vector<std::pair<int, int>> open_edges;
+	int count = 0;
+	// First open all edges
+	for (int i = 0; i < _layer_1.size(); i++)
+	{
+		int vertex_idx = _layer_1[i];
+		auto& neighbors = _dataset.vertices[vertex_idx].neighbors;
+
+		for (auto& n : neighbors)
+			open_edges.push_back( { vertex_idx, n.idx } );
+	}
+	flags.resize( open_edges.size(), false);
+
+	// Then close all edges
+	for (int i = _layer_2.size() - 1; i >= 0; i--)
+	{
+		int vertex_idx = _layer_2[i];
+		auto& neighbors = _dataset.vertices[vertex_idx].neighbors;
+		for (auto& n : neighbors)
+		{
+			std::pair<int, int> edge( n.idx, vertex_idx );
+			// Backwards linear scan
+			for (int j = open_edges.size() - 1; j >= 0; j--)
+			{
+				if (flags[j]) continue;
+				// Encountered ourselves
+				if (open_edges[j] == edge)
+				{
+					// Remove ourself from open_edges
+					flags[j] = true;
+				}
+
+				if (open_edges[j].first != edge.first && open_edges[j].second != edge.second)
+				{
+					// Found a crossing
+					count++;
+				}
+			}
+		}
+	}
+
+	return count;
+}
+
+
+//--------------------------------------------------------------
+void Sugiyama::VertexPositioning( Graph& _graph )
+{
+
+}
+
 
 } // namespace DataVis

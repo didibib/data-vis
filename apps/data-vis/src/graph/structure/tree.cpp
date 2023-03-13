@@ -187,7 +187,7 @@ void MSP::Create(VertexIdx _root)
 	m_nodes[_root] = m_root;
 
 	// Construct recursive lambda to create the tree
-	static std::function<void(std::shared_ptr<Node>, VectorOfNodes&)> MakeTree =
+	static std::function<void(std::shared_ptr<Node>, VectorOfNodes&)> make_tree =
 		[&](std::shared_ptr<Node> n, VectorOfNodes& nodes) {
 		// Look through all vertices which have parent == n.vertex
 		for (int i = 0; i < vertices.size(); i++)
@@ -196,10 +196,10 @@ void MSP::Create(VertexIdx _root)
 				auto child = std::make_shared<Node>(vertices[i].id, i, n);
 				nodes[i] = child;
 				n->children.push_back(child);
-				MakeTree(child, nodes);
+				make_tree(child, nodes);
 			}
 	};
-	MakeTree(m_root, m_nodes);
+	make_tree(m_root, m_nodes);
 	UpdateProperties();
 	UpdateAABB();
 }

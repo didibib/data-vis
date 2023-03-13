@@ -11,6 +11,7 @@ public:
 	bool Inside(const glm::vec3& position)  const;
 	bool InsideDraggable(const glm::vec3& position) const;
 	void SetNewBounds(const glm::vec3& top_left, const glm::vec3& bottom_right);
+	glm::vec3 Clamp( const glm::vec3 );
 
 protected:
 	virtual void OnStopAnimation() override;
