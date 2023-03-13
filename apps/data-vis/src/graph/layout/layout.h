@@ -97,13 +97,17 @@ public:
 	static void Apply(Graph&);
 private:
 	static const int VisitedIdx;
+	static const int DummyIdx;
+	static const int RemoveIdx;
 	static Dataset BreakCycles(Graph&);
-	static void LayerAssignment(Graph&);
+	static void LayerAssignment(Graph&, std::vector<std::vector<int>>& vertices_per_layer, std::vector<int>& layer_per_vertex);
 	static void CrossingMinimization(Graph&);
 	static void VertexPositioning(Graph&);
 	
 	static bool IsSink( Vertex&  );
 	static bool IsSource( Vertex&  );
 	static bool Has( std::function<bool( Vertex& )>, std::vector<Vertex>, Vertex& out );
+	static void RemoveOutgoingNeighbors(Dataset&, Vertex&);
+	static void RemoveIncomingNeighbors(Dataset&, Vertex&);
 };
 } // namespace DataVis
