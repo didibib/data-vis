@@ -70,10 +70,10 @@ bool Dataset::Load( std::string _filename )
 			for ( auto& node : graph.all_nodes ) {
 				Vertex v;
 				v.id = node.id( );
-				v.idx = m_vertices.size( );
+				v.idx = vertices.size( );
 				v.attributes.Init( node.node.attributes );
-				m_vertex_idx.insert( { v.id, m_vertices.size( ) } );
-				m_vertices.push_back( std::move( v ) );
+				m_vertex_idx.insert( { v.id, vertices.size( ) } );
+				vertices.push_back( std::move( v ) );
 			}
 
 			for ( auto& edge : graph.all_edges ) {
@@ -84,24 +84,26 @@ bool Dataset::Load( std::string _filename )
 				e.attributes.Init( edge.attributes );
 				e.from_idx = v_from_idx;
 				e.to_idx = v_to_idx;
+				e.idx = edges.size( );
 
 				Neighbor n_to;
 				n_to.idx = v_to_idx;
-				n_to.edge_idx = m_edges.size( );
+				n_to.edge_idx = edges.size( );
 
-				m_vertices[v_from_idx].neighbors.push_back( std::move( n_to ) );
+				vertices[v_from_idx].neighbors.push_back( std::move( n_to ) );
 
 				Neighbor n_from;
 				n_from.idx = v_from_idx;
-				n_from.edge_idx = m_edges.size( );
+				n_from.edge_idx = edges.size( );
 
 				if ( m_kind == Kind::Undirected ) {
-					m_vertices[v_to_idx].neighbors.push_back( std::move( n_from ) );
+					vertices[v_to_idx].neighbors.push_back( std::move( n_from ) );
 				}
 				else if ( m_kind == Kind::Directed ) {
-					m_vertices[v_to_idx].incoming_neighbors.push_back( std::move( n_from ) );
+					vertices[v_to_idx].incoming_neighbors.push_back( std::move( n_from ) );
 				}
-				m_edges.push_back( std::move( e ) );
+				
+				edges.push_back( std::move( e ) );
 			}
 		} else {
 			std::cerr << "Parse failed\n";
@@ -148,8 +150,8 @@ void Dataset::InfoGui( )
 void Dataset::SetInfo( )
 {
 	m_info.push_back( { "filename", m_filename } );
-	m_info.push_back( { "# vertices", std::to_string( m_vertices.size( ) ) } );
-	m_info.push_back( { "# edges", std::to_string( m_edges.size( ) ) } );
+	m_info.push_back( { "# vertices", std::to_string( vertices.size( ) ) } );
+	m_info.push_back( { "# edges", std::to_string( edges.size( ) ) } );
 
 }
 
@@ -167,15 +169,4 @@ void Dataset::SetKind( const Kind& _kind)
 {
 	m_kind = _kind;
 }
-
-std::vector<Vertex>& Dataset::GetVertices( )
-{
-	return m_vertices;
-}
-
-std::vector<Edge>& Dataset::GetEdges( )
-{
-	return m_edges;
-}
-
 } // namespace DataVis

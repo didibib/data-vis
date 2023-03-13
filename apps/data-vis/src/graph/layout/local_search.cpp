@@ -37,7 +37,7 @@ void LocalSearch::Apply(IStructure& _structure, int _iterations)
 float LocalSearch::CalculateCost(IStructure& _structure)
 {
 	float cost = 0;
-	for (auto& edge : _structure.GetDataset().GetEdges())
+	for (auto& edge : _structure.GetDataset().edges)
 	{
 		VertexIdx startIdx = edge.from_idx;
 		VertexIdx endIdx = edge.to_idx;

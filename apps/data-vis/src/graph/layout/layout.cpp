@@ -211,7 +211,7 @@ void ForceDirected::Apply(IStructure& _structure, float _C, float _t, int _itera
 		}
 
 		// Attraction
-		for (auto& e : _structure.GetDataset().GetEdges())
+		for (auto& e : _structure.GetDataset().edges)
 		{
 			auto& v = _structure.GetNodes()[e.from_idx];
 			auto& u = _structure.GetNodes()[e.to_idx];

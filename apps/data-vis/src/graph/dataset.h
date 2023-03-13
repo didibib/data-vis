@@ -55,19 +55,19 @@ private:
 //--------------------------------------------------------------
 // Dataset
 //-------------------------------------------------------------- 
-using VertexIdx = uint;
-using EdgeIdx = uint;
+using VertexIdx = int;
+using EdgeIdx = VertexIdx;
 
 struct Neighbor
 {
-	VertexIdx idx = std::numeric_limits<VertexIdx>::max( );
-	EdgeIdx edge_idx = std::numeric_limits<EdgeIdx>::max( );
+	VertexIdx idx = std::numeric_limits<VertexIdx>::min( );
+	EdgeIdx edge_idx = std::numeric_limits<EdgeIdx>::min( );
 };
 
 struct Vertex
 {
 	std::string id;
-	int idx;
+	VertexIdx idx = std::numeric_limits<VertexIdx>::min( );
 	/// A neighbor is made out of a vertex index and a edge index
 	std::vector<Neighbor> neighbors;
 	std::vector<Neighbor> incoming_neighbors;
@@ -76,8 +76,9 @@ struct Vertex
 
 struct Edge
 {
-	VertexIdx from_idx = std::numeric_limits<VertexIdx>::max( );
-	VertexIdx to_idx = std::numeric_limits<VertexIdx>::max( );
+	EdgeIdx idx = std::numeric_limits<VertexIdx>::max( );
+	VertexIdx from_idx = std::numeric_limits<VertexIdx>::min( );
+	VertexIdx to_idx = std::numeric_limits<VertexIdx>::min( );
 	Attributes attributes;
 };
 
@@ -93,16 +94,15 @@ public:
 	const std::string& GetFilename( );
 	const Kind& GetKind( );
 	void SetKind( const Kind& );
-	std::vector<Edge>& GetEdges( );
-	std::vector<Vertex>& GetVertices( );
+	std::vector<Vertex> vertices;
+	std::vector<Edge> edges;
 
 private:
 	void SetInfo( );
 	Kind m_kind;
 	std::string m_filename;
 	std::unordered_map<std::string, VertexIdx> m_vertex_idx;
-	std::vector<Vertex> m_vertices;
-	std::vector<Edge> m_edges;
+
 	std::vector<std::pair<std::string, std::string>> m_info;
 };
 } // namespace DataVis
