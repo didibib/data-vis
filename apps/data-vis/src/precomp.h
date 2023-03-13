@@ -53,6 +53,8 @@ typedef unsigned int uint;
 
 namespace DataVis
 {
+#define REALLYFAR 1e30
+
 namespace RandomNumber
 {
 std::random_device random_device;

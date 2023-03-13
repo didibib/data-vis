@@ -8,7 +8,7 @@ private:
 	struct ImGuiData
 	{
 		int combo_graph_file_index = 3;
-		int combo_dataset_index = 5;
+		int combo_dataset_index = 6;
 		int combo_structure_index = 0;
 		int combo_layout_function_index = 0;
 	} m_imgui_data;

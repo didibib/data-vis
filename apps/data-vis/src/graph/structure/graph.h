@@ -10,8 +10,6 @@ public:
 	void Init(const std::shared_ptr<Dataset>) override;
 	void DrawNodes() override;
 
-	float radius = 10;
-
 private:
 	struct ImGuiData
 	{

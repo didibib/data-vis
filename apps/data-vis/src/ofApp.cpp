@@ -103,7 +103,6 @@ void ofApp::exit()
 
 void ofApp::Gui()
 {
-	ImGui::ShowDemoWindow();
 	if (ImGui::BeginMainMenuBar()) {
 		//--------------------------------------------------------------
 		// Create IStructure 

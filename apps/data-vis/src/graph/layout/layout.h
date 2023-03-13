@@ -96,11 +96,14 @@ public:
 	bool Gui(IStructure&) override;
 	static void Apply(Graph&);
 private:
-	static void BreakCycles(Graph&);
+	static const int VisitedIdx;
+	static Dataset BreakCycles(Graph&);
 	static void LayerAssignment(Graph&);
 	static void CrossingMinimization(Graph&);
 	static void VertexPositioning(Graph&);
-
-
+	
+	static bool IsSink( Vertex&  );
+	static bool IsSource( Vertex&  );
+	static bool Has( std::function<bool( Vertex& )>, std::vector<Vertex>, Vertex& out );
 };
 } // namespace DataVis

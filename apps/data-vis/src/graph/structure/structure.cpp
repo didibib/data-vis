@@ -19,7 +19,7 @@ IStructure::~IStructure()
 void IStructure::Init(std::shared_ptr<Dataset> _dataset)
 {
 	m_dataset = _dataset;
-
+	m_layouts.clear();
 	m_layouts.push_back(std::make_unique<Random>());
 	m_layouts.push_back(std::make_unique<Grid>());
 }
@@ -226,6 +226,7 @@ void IStructure::Draw(bool _is_focussed)
 	// Draw the actual nodes and edges
 	DrawNodes();
 
+	//ofSetDrawBitmapMode( );
 	if (m_gui_data.checkbox_node_labels)
 	{
 		for (auto& node : m_nodes)
