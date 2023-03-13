@@ -128,6 +128,11 @@ void IStructure::UpdateAABB()
 	m_aabb.SetNewBounds(tl, br);
 }
 
+AABB IStructure::GetAABB()
+{
+	return m_aabb;
+}
+
 //--------------------------------------------------------------
 bool IStructure::Inside(const glm::vec3& _position) const
 {

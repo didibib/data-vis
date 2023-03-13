@@ -65,4 +65,10 @@ void AABB::Interpolate(float _p)
 	m_draggable = { bb_tl, { bb_tl.x - m_draggable_size, bb_tl.y - m_draggable_size } };
 }
 
+glm::vec3 AABB::Clamp( const glm::vec3 _position )
+{
+	glm::vec3 out = max( _position, m_bounds.getTopLeft() );
+	return min( out, m_bounds.getBottomRight() );
+}
+
 } // namespace DataVis

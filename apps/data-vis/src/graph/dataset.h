@@ -96,6 +96,7 @@ public:
 	void SetKind( const Kind& );
 	std::vector<Vertex> vertices;
 	std::vector<Edge> edges;
+	void AddInfo(const std::string& key, const std::string& value);
 
 private:
 	void SetInfo( );
@@ -103,6 +104,7 @@ private:
 	std::string m_filename;
 	std::unordered_map<std::string, VertexIdx> m_vertex_idx;
 
+	std::unordered_map<std::string, int> m_info_idx;
 	std::vector<std::pair<std::string, std::string>> m_info;
 };
 } // namespace DataVis

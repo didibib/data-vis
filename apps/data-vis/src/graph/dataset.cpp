@@ -169,4 +169,15 @@ void Dataset::SetKind( const Kind& _kind)
 {
 	m_kind = _kind;
 }
+
+void Dataset::AddInfo(const std::string& _key, const std::string& _value){
+	int &stored_val = m_info_idx[_key];
+	if (stored_val) {
+		m_info[stored_val].second = _value;
+		return;
+	}
+	stored_val = m_info.size();
+	m_info.push_back({_key, _value});
+}
+
 } // namespace DataVis
