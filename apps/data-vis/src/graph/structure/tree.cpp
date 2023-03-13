@@ -171,8 +171,8 @@ void MSP::Create(VertexIdx _root)
 		included[idx] = true;
 
 		// Update outgoing edges from this vertex
-		for (auto& neigbor : *vertices[idx].neighbors) {
-			uint v = neigbor.to_idx;
+		for (auto& neigbor : vertices[idx].neighbors) {
+			uint v = neigbor.idx;
 			float weight = m_dataset->GetEdges()[neigbor.edge_idx].attributes.FindFloat("weight", 1);
 			if (!included[v] && weight < costs[v]) {
 				// Found a cheaper edge to v
