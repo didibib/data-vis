@@ -16,10 +16,10 @@ void Graph::Load(const std::shared_ptr<Dataset> _dataset)
 {
 	m_dataset = _dataset;
 	m_nodes.clear( );
-	m_nodes.reserve( _dataset->GetVertices( ).size( ) );
-	auto& vertices = _dataset->GetVertices( );
+	m_nodes.reserve( _dataset->vertices.size( ) );
+	auto& vertices = _dataset->vertices;
 	// Add nodes
-	for ( size_t i = 0; i < _dataset->GetVertices( ).size( ); i++ )
+	for ( size_t i = 0; i < _dataset->vertices.size( ); i++ )
 	{
 		auto& vertex = vertices[i];
 		m_nodes.push_back( std::make_shared<Node>( vertex.id, i ) );
@@ -41,7 +41,7 @@ void Graph::DrawNodes( )
 {
 	ofFill( );
 	ofSetColor( 123 );
-	for ( const auto& edge : m_dataset->GetEdges( ) )
+	for ( const auto& edge : m_dataset->edges )
 	{
 		auto const& startIdx = edge.from_idx;
 		auto const& endIdx = edge.to_idx;

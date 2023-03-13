@@ -136,14 +136,14 @@ void Tree::NodeInfoGui()
 void MSP::Init(const std::shared_ptr<Dataset> _dataset)
 {
 	Tree::Init(_dataset);
-	m_nodes.resize(_dataset->GetVertices().size());
+	m_nodes.resize(_dataset->vertices.size());
 	Create(0);
 }
 
 //--------------------------------------------------------------
 void MSP::Create(VertexIdx _root)
 {
-	auto& vertices = m_dataset->GetVertices();
+	auto& vertices = m_dataset->vertices;
 
 	// Keep track of the parent of each vertex so we can construct a tree after
 	std::vector<VertexIdx> parents(vertices.size(), 0);
@@ -173,7 +173,7 @@ void MSP::Create(VertexIdx _root)
 		// Update outgoing edges from this vertex
 		for (auto& neigbor : vertices[idx].neighbors) {
 			uint v = neigbor.idx;
-			float weight = m_dataset->GetEdges()[neigbor.edge_idx].attributes.FindFloat("weight", 1);
+			float weight = m_dataset->edges[neigbor.edge_idx].attributes.FindFloat("weight", 1);
 			if (!included[v] && weight < costs[v]) {
 				// Found a cheaper edge to v
 				parents[v] = idx;
