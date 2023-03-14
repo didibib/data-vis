@@ -39,6 +39,7 @@ void Sugiyama::Apply( Graph& _graph )
 	LayerAssignment( dataset, vertices_per_layer, layer_per_vertex );
 	
 	Dataset dummy_dataset = AddDummyVertices(dataset, vertices_per_layer, layer_per_vertex);
+
 	CrossingMinimization( dummy_dataset, vertices_per_layer, layer_per_vertex );
 	_graph.Load(std::make_shared<Dataset>(dummy_dataset));
 	for ( int y = 0; y < vertices_per_layer.size( ); y++ )
@@ -497,7 +498,7 @@ int Sugiyama::Crossings( Dataset& _dataset, Layer& _layer_1, Layer& _layer_2 )
 	for (int i = _layer_2.size() - 1; i >= 0; i--)
 	{
 		int vertex_idx = _layer_2[i];
-		auto& neighbors = _dataset.vertices[vertex_idx].neighbors;
+		auto& neighbors = _dataset.vertices[vertex_idx].incoming_neighbors;
 		for (auto& n : neighbors)
 		{
 			std::pair<int, int> edge( n.idx, vertex_idx );
@@ -510,6 +511,7 @@ int Sugiyama::Crossings( Dataset& _dataset, Layer& _layer_1, Layer& _layer_2 )
 				{
 					// Remove ourself from open_edges
 					flags[j] = true;
+					break;
 				}
 
 				if (open_edges[j].first != edge.first && open_edges[j].second != edge.second)
