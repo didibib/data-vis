@@ -152,7 +152,7 @@ Dataset Sugiyama::BreakCycles( Dataset& _dataset )
 
 		// Check if vertices is empty
 		int max_vertex_idx = VisitedIdx;
-		int max_difference = -1e30;
+		int max_difference = std::numeric_limits<int>::min();
 		for ( int i = 0; i < vertices.size( ); i++ )
 		{
 			if ( vertices[i].idx != VisitedIdx )
@@ -167,7 +167,7 @@ Dataset Sugiyama::BreakCycles( Dataset& _dataset )
 		}
 
 		// Remove max vertex with outgoing edges
-		if ( max_difference > -1e30 && max_vertex_idx != VisitedIdx )
+		if ( max_difference > std::numeric_limits<int>::min() && max_vertex_idx != VisitedIdx )
 		{
 			Vertex& max_vertex = vertices[max_vertex_idx];
 			// Add outgoing to new dataset and remove from neighbors
