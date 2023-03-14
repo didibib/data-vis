@@ -110,7 +110,7 @@ private:
 	static void LayerAssignment( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
 	static void AddDummyVertices( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
 	static int CrossingMinimization( Dataset&, std::vector<Layer>& vertices_per_layer, int iterations );
-	static void VertexPositioning( Dataset& _dataset, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex, float delta_x );
+	static std::vector<float> VertexPositioning( Dataset& _dataset, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex, float delta_x );
 
 	//--------------------------------------------------------------
 	// Layer Assignment

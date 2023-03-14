@@ -47,7 +47,7 @@ void Sugiyama::Apply( Graph& _graph, int _oscm_iterations, float _delta_x )
 	dataset.AddInfo( "Crossings", std::to_string( crossings ) );
 
 	// Step 04
-	VertexPositioning( dataset, vertices_per_layer, layer_per_vertex, _delta_x );
+	auto x_per_vertex = VertexPositioning( dataset, vertices_per_layer, layer_per_vertex, _delta_x );
 
 	_graph.Load( std::make_shared<Dataset>( dataset ) );
 	for ( int y = 0; y < vertices_per_layer.size( ); y++ )
@@ -57,7 +57,7 @@ void Sugiyama::Apply( Graph& _graph, int _oscm_iterations, float _delta_x )
 		{
 			int idx = vertices[x];
 			auto& node = _graph.GetNodes( )[idx];
-			node->SetNewPosition( glm::vec3( x * 100 + y * 20, y * -100, 0 ) );
+			node->SetNewPosition( glm::vec3( x_per_vertex[idx], y * -100, 0 ) );
 		}
 	}
 	_graph.UpdateAABB( );
@@ -276,6 +276,7 @@ void Sugiyama::LayerAssignment( Dataset& _dataset, std::vector<Layer>& _vertices
 		}
 		layer++;
 	} while ( hasSources );
+	_vertices_per_layer.resize(_vertices_per_layer.size() - 1);
 }
 
 //--------------------------------------------------------------
@@ -551,7 +552,7 @@ int Sugiyama::Crossings( Dataset& _dataset, Layer& _layer_1, Layer& _layer_2 )
 //--------------------------------------------------------------
 // Vertex Positioning
 //--------------------------------------------------------------
-void Sugiyama::VertexPositioning(
+std::vector<float> Sugiyama::VertexPositioning(
 	Dataset& _dataset,
 	std::vector<Layer>& _vertices_per_layer,
 	Layer& _layer_per_vertex,
@@ -574,7 +575,8 @@ void Sugiyama::VertexPositioning(
 	//FlagType1Conflicts( _dataset, _vertices_per_layer, _layer_per_vertex, flags );
 	VerticalAlignment( _dataset, _vertices_per_layer, _layer_per_vertex, pos_per_vertex, root, align, flags );
 	HorizontalCompaction( _dataset, _vertices_per_layer, _layer_per_vertex, pos_per_vertex, root, align, x_per_vertex, _delta );
-	int x = 0;
+
+	return x_per_vertex;
 }
 
 void Sugiyama::FlagType1Conflicts(
@@ -633,8 +635,7 @@ void Sugiyama::VerticalAlignment(
 
 			for ( int m : ms )
 			{
-
-				int u_m = vertices[vertex_idx].neighbors[m].idx;
+				int u_m = vertices[vertex_idx].neighbors[m - 1].idx;
 
 				if ( _align[vertex_idx] not_eq vertex_idx ) continue;
 				// If not flagged
@@ -688,7 +689,7 @@ void Sugiyama::HorizontalCompaction(
 					_x_per_vertex[v] = std::max( _x_per_vertex[v], _x_per_vertex[u] + _delta );
 			}
 			w = _align[w];
-		} while ( w == v );
+		} while ( w != v );
 
 		while ( _align[w] != v )
 		{
@@ -697,7 +698,6 @@ void Sugiyama::HorizontalCompaction(
 			sink[w] = sink[v];
 		}
 	};
-
 
 	for ( size_t i = 0; i < vertices.size( ); i++ )
 	{
@@ -720,7 +720,7 @@ void Sugiyama::HorizontalCompaction(
 			while ( _align[v] != _root[v] )
 			{
 				v = _align[v];
-				j++;
+				j--;
 				if ( _pos_per_vertex[v] > 0 )
 				{
 					int layer = _layer_per_vertex[v];
