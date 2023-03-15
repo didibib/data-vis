@@ -188,7 +188,14 @@ glm::vec3 ofApp::ScreenToWorld(const glm::vec2& _position)
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-
+	if (key == OF_KEY_DEL)
+	{
+		if (m_focussed_layout)
+		{
+			DeleteStructure( *m_focussed_layout );
+			m_focussed_layout = nullptr;
+		}
+	}
 }
 
 void ofApp::keyReleased(int key)

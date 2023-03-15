@@ -65,6 +65,7 @@ void Graph::DrawNodes( )
 
 	for ( const auto& node : m_nodes )
 	{
+		if (node->GetVertexId() == "dummy") continue;
 		glm::vec3 pos = node->GetPosition( );
 		ofSetColor( node->color );
 		ofDrawCircle( pos, node->GetRadius() );
