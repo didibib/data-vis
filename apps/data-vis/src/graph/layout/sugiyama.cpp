@@ -5,6 +5,14 @@ namespace DataVis
 const int Sugiyama::VisitedIdx = -1;
 const std::string Sugiyama::DummyId = "dummy";
 const int Sugiyama::RemoveIdx = -3;
+
+Sugiyama::Sugiyama()
+{
+	m_oscm_heuristics.push_back( {"Barycenter", Sugiyama::OSCMBarycenterHeuristic} );
+	m_oscm_heuristics.push_back( {"Median", Sugiyama::OSCMMedianHeuristic} );
+	m_node_offset = { 100, -200 };
+}
+
 //--------------------------------------------------------------
 bool Sugiyama::Gui( IStructure& _structure )
 {
@@ -12,13 +20,29 @@ bool Sugiyama::Gui( IStructure& _structure )
 	if ( ImGui::TreeNode( "Sugiyama Layout" ) )
 	{
 		ImGui::InputInt( "OSCM Iterations", &m_oscm_iterations );
+		ImGui::InputFloat( "Delta X", &m_node_offset.x );
+		ImGui::InputFloat( "Delta Y", &m_node_offset.y );
+
+		const char* select_oscm_heuristic_preview = m_oscm_heuristics[m_oscm_heuristic_idx].first.c_str();
+		if (ImGui::BeginCombo( "Select OSCM Heuristic", select_oscm_heuristic_preview ))
+		{
+			for (int n = 0; n < m_oscm_heuristics.size(); n++)
+			{
+				const bool is_selected = (m_oscm_heuristic_idx == n);
+				if (ImGui::Selectable( m_oscm_heuristics[n].first.c_str(), is_selected ))
+					m_oscm_heuristic_idx = n;
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
 
 		if ( ImGui::Button( "Apply" ) )
 		{
 			try
 			{
 				Graph& graph = dynamic_cast<Graph&>( _structure );
-				Apply( graph, m_oscm_iterations, 40 );
+				Apply( graph, m_oscm_heuristics[m_oscm_heuristic_idx].second, m_node_offset, m_oscm_iterations);
 				active = true;
 			} catch ( std::exception& e )
 			{
@@ -31,10 +55,11 @@ bool Sugiyama::Gui( IStructure& _structure )
 }
 
 //--------------------------------------------------------------
-void Sugiyama::Apply( Graph& _graph, int _oscm_iterations, float _delta_x )
+void Sugiyama::Apply( Graph& _graph, OSCMHeuristic _heuristic, glm::vec2 _node_offset, int _oscm_iterations )
 {
+	Dataset copy = *_graph.GetDataset().DeepCopy();
 	// Step 01
-	Dataset dataset = BreakCycles( _graph.GetDataset( ) );
+	Dataset dataset = BreakCycles( copy );
 
 	// Step 02
 	std::vector<Layer> vertices_per_layer;
@@ -43,11 +68,11 @@ void Sugiyama::Apply( Graph& _graph, int _oscm_iterations, float _delta_x )
 	AddDummyVertices( dataset, vertices_per_layer, layer_per_vertex );
 
 	// Step 03
-	int crossings = CrossingMinimization( dataset, vertices_per_layer, _oscm_iterations );
+	int crossings = CrossingMinimization( dataset, vertices_per_layer, Sugiyama::OSCMBarycenterHeuristic, _oscm_iterations );
 	dataset.AddInfo( "Crossings", std::to_string( crossings ) );
 
 	// Step 04
-	auto x_per_vertex = VertexPositioning( dataset, vertices_per_layer, layer_per_vertex, _delta_x );
+	auto x_per_vertex = VertexPositioning( dataset, vertices_per_layer, layer_per_vertex, _node_offset.x );
 
 	_graph.Load( std::make_shared<Dataset>( dataset ) );
 	for ( int y = 0; y < vertices_per_layer.size( ); y++ )
@@ -57,7 +82,7 @@ void Sugiyama::Apply( Graph& _graph, int _oscm_iterations, float _delta_x )
 		{
 			int idx = vertices[x];
 			auto& node = _graph.GetNodes( )[idx];
-			node->SetNewPosition( glm::vec3( x_per_vertex[idx], y * -100, 0 ) );
+			node->SetNewPosition( glm::vec3( x_per_vertex[idx], _node_offset.y * y, 0 ) );
 		}
 	}
 	_graph.UpdateAABB( );
@@ -402,12 +427,11 @@ void Sugiyama::RemoveIncomingNeighbors( Dataset& _dataset, Vertex& _v )
 //--------------------------------------------------------------
 // Crossing Minimization
 //--------------------------------------------------------------
-int Sugiyama::CrossingMinimization( Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, int _iterations )
+int Sugiyama::CrossingMinimization( Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, OSCMHeuristic _heuristic, int _iterations )
 {
 	auto& vertices = _dataset.vertices;
 	GetNeighbors get_neighbors = []( Vertex& v ) { return v.neighbors; };
 	GetNeighbors get_reverse_neighbors = []( Vertex& v ) { return v.incoming_neighbors; };
-	std::vector<float> all_coords( vertices.size( ) );
 
 	int best_crossings = std::numeric_limits<int>::max( );
 	std::vector<Layer> best;
@@ -424,21 +448,19 @@ int Sugiyama::CrossingMinimization( Dataset& _dataset, std::vector<Layer>& _vert
 			crossings = new_crossings;
 			new_crossings = 0;
 
-			std::fill( all_coords.begin( ), all_coords.end( ), 0 );
 			// Go up
 			for ( int i = 1; i < vertices_per_layer.size( ); i++ )
 			{
 				Layer new_layer;
-				BarycenterHeuristic( _dataset, all_coords, vertices_per_layer[i - 1], vertices_per_layer[i], new_layer, get_neighbors, get_reverse_neighbors );
+				_heuristic( _dataset, vertices_per_layer[i - 1], vertices_per_layer[i], new_layer, get_reverse_neighbors );
 				vertices_per_layer[i] = new_layer;
 			}
 
-			std::fill( all_coords.begin( ), all_coords.end( ), 0 );
 			// Go down
 			for ( int i = vertices_per_layer.size( ) - 2; i >= 0; i-- )
 			{
 				Layer new_layer;
-				BarycenterHeuristic( _dataset, all_coords, vertices_per_layer[i + 1], vertices_per_layer[i], new_layer, get_reverse_neighbors, get_neighbors );
+				_heuristic( _dataset, vertices_per_layer[i + 1], vertices_per_layer[i], new_layer, get_neighbors );
 				vertices_per_layer[i] = new_layer;
 			}
 
@@ -461,42 +483,101 @@ int Sugiyama::CrossingMinimization( Dataset& _dataset, std::vector<Layer>& _vert
 	return best_crossings;
 }
 
-bool Sugiyama::BarycenterHeuristic( Dataset& _dataset,
-	std::vector<float>& _all_coords,
-	Layer& _layer_fixed,
-	Layer& _layer,
-	Layer& _new_layer,
-	GetNeighbors _get_neighbors,
-	GetNeighbors _get_reverse_neighbors )
+bool Sugiyama::OSCMBarycenterHeuristic( Dataset& _dataset, Layer& _layer_fixed, Layer& _layer, Layer& _new_layer, GetNeighbors _get_neighbors )
 {
 	auto& vertices = _dataset.vertices;
 
-	for ( int i = 0; i < _layer_fixed.size( ); i++ )
+	std::unordered_map<int, int> pos_per_vertex;
+	for (int i = 0; i < _layer_fixed.size(); i++)
 	{
-		auto& neighbors = _get_neighbors( vertices[_layer_fixed[i]] );
-		for ( auto& n : neighbors )
-		{
-			_all_coords[n.idx] += i;
-		}
+		pos_per_vertex[_layer_fixed[i]] = i;
 	}
 
 	// barycenter, vertex idx
 	std::vector<std::pair<float, int>> coords( _layer.size( ) );
-	for ( int i = 0; i < coords.size( ); i++ )
+	for ( int i = 0; i < _layer.size( ); i++ )
 	{
-		float coor = _all_coords[_layer[i]];
-		coor /= (float)_get_reverse_neighbors( vertices[_layer[i]] ).size( );
+		float coor = 0;
+		auto& neighbors = _get_neighbors( vertices[_layer[i]] );
+		for (auto& neighbor : neighbors)
+			coor += pos_per_vertex[neighbor.idx];
+		coor /= (float)neighbors.size( );
 		coords[i] = { coor, _layer[i] };
 	}
 
 	bool changed = false;
-	std::stable_sort( coords.begin( ), coords.end( ), [&]( pair<float, int> a, pair<float, int> b ) {
+	std::stable_sort( coords.begin( ), coords.end( ), [&]( std::pair<float, int> a, std::pair<float, int> b ) {
 		changed |= a.first < b.first;
 		return a.first < b.first;
 		} );
 
-	_new_layer.resize( coords.size( ) );
-	for ( int i = 0; i < coords.size( ); i++ ) _new_layer[i] = coords[i].second;
+	_new_layer.resize( _layer.size( ) );
+	for ( int i = 0; i < _layer.size( ); i++ ) _new_layer[i] = coords[i].second;
+	return changed;
+}
+
+bool Sugiyama::OSCMMedianHeuristic( Dataset& _dataset, Layer& _layer_fixed, Layer& _layer, Layer& _new_layer, GetNeighbors _get_neighbors )
+{
+	auto& vertices = _dataset.vertices;
+
+	std::vector<int> pos_per_vertex( _layer_fixed.size() );
+	for (int i = 0; i < _layer_fixed.size(); i++)
+	{
+		pos_per_vertex[_layer_fixed[i]] = i;
+	}
+	
+	// tuple: position, degree, parity, idx
+	std::vector<std::tuple<int, int, int, int>> medians( _layer.size() );
+	for (int i = 0; i < _layer.size(); i++)
+	{
+		auto& neighbors = _get_neighbors( vertices[_layer[i]] );
+		// sort neighbors in position in _layer_fixed
+		std::vector<int> neighbor_positions( neighbors.size() );
+		for(int j = 0; j < neighbors.size(); j++)
+		{
+			neighbor_positions.push_back( pos_per_vertex[neighbors[j].idx]);
+		}
+		std::sort( neighbor_positions.begin(), neighbor_positions.end());
+
+		int degree = neighbors.size();
+		if (degree == 0)
+		{
+			medians.push_back( { 0, 0, 0, _layer[i] } );
+			continue;
+		}
+
+		int median_idx = std::ceil( degree * .5f ) - 1;
+		medians.push_back( { neighbor_positions[median_idx], degree, degree % 2, i } );
+	}
+
+	bool changed = false;
+	std::sort( medians.begin(), medians.end(), [&]( std::tuple<int, int, int, int> lhs, std::tuple<int, int, int, int> rhs ) {
+		bool eval;
+		// if o(v_1) == o(v_2)
+		if (std::get<0>( lhs ) == std::get<0>( rhs ))
+		{
+			// check if they have the same degree
+			if (std::get<1>(lhs) == std::get<1>(rhs))
+			{
+				// arbitrary so just false
+				eval = false;
+			}
+			else
+			{
+				// different degree, so odd parity to the left
+				eval = std::get<2>( lhs ) > std::get<2>( rhs );
+			}
+		}
+		else
+		{
+			eval = std::get<0>( lhs ) < std::get<0>( rhs );
+		}
+		changed |= eval;
+		return eval;
+	} );
+
+	_new_layer.resize( _layer.size() );
+	for (int i = 0; i < _layer.size(); i++) _new_layer[i] = std::get<3>(medians[i]);
 	return changed;
 }
 

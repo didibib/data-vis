@@ -97,6 +97,7 @@ public:
 	std::vector<Vertex> vertices;
 	std::vector<Edge> edges;
 	void AddInfo(const std::string& key, const std::string& value);
+	std::shared_ptr<Dataset> DeepCopy();
 
 private:
 	void SetInfo( );

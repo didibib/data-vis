@@ -93,23 +93,31 @@ private:
 class Sugiyama : public Layout
 {
 public:
-	bool Gui( IStructure& ) override;
-	static void Apply( Graph&, int oscm_iterations, float delta_x );
-private:
 	using Layer = std::vector<int>;
 	using GetNeighbors = std::function<std::vector<Neighbor>( Vertex& )>;
+	using OSCMHeuristic = std::function<bool(Dataset&, Layer&, Layer&, Layer&, GetNeighbors)>;
+
+	Sugiyama();
+	bool Gui( IStructure& ) override;
+	static void Apply( Graph&, OSCMHeuristic oscm_heuristic, glm::vec2 node_offset, int oscm_iterations );
+private:
 
 	static const int VisitedIdx;
 	static const std::string DummyId;
 	static const int RemoveIdx;
 
+	std::vector<std::pair<std::string, OSCMHeuristic>> m_oscm_heuristics;
+	OSCMHeuristic m_oscm_heuristic;
+	int m_oscm_heuristic_idx = 0;
+
 	int m_oscm_iterations = 100;
+	glm::vec2 m_node_offset;
 
 	// Sugiyama Framework
 	static Dataset BreakCycles( Dataset& );
 	static void LayerAssignment( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
 	static void AddDummyVertices( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
-	static int CrossingMinimization( Dataset&, std::vector<Layer>& vertices_per_layer, int iterations );
+	static int CrossingMinimization( Dataset&, std::vector<Layer>& vertices_per_layer, OSCMHeuristic heuristic, int iterations );
 	static std::vector<float> VertexPositioning( Dataset& _dataset, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex, float delta_x );
 
 	//--------------------------------------------------------------
@@ -126,9 +134,8 @@ private:
 	//--------------------------------------------------------------
 	// OSCM
 	//--------------------------------------------------------------
-	static bool BarycenterHeuristic( Dataset&, std::vector<float>& all_coords, Layer& layer_fixed, Layer& layer, Layer& new_layer,
-		GetNeighbors get_neighbors,
-		GetNeighbors get_reverse_neighbors );
+	static bool OSCMBarycenterHeuristic( Dataset&, Layer& layer_fixed, Layer& layer, Layer& new_layer, GetNeighbors get_neighbors );
+	static bool OSCMMedianHeuristic( Dataset&, Layer& layer_fixed, Layer& layer, Layer& new_layer, GetNeighbors get_neighbors );
 
 	static int Crossings( Dataset&, Layer& layer_1, Layer& layer_2 );
 

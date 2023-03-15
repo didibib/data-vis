@@ -180,4 +180,16 @@ void Dataset::AddInfo(const std::string& _key, const std::string& _value){
 	m_info.push_back({_key, _value});
 }
 
+std::shared_ptr<Dataset> Dataset::DeepCopy()
+{
+	std::shared_ptr<Dataset> copy = std::make_shared<Dataset>();
+	copy->m_filename = m_filename;
+	copy->m_info = m_info;
+	copy->m_info_idx = m_info_idx;
+	copy->m_kind = m_kind;
+	copy->m_vertex_idx = m_vertex_idx;
+	copy->vertices = vertices;
+	copy->edges = edges;
+	return copy;
+}
 } // namespace DataVis
