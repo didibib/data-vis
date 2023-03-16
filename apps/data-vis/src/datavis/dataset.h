@@ -56,8 +56,12 @@ private:
 // Dataset
 //-------------------------------------------------------------- 
 using VertexIdx = int;
-using EdgeIdx = VertexIdx;
+using EdgeIdx = int;
 
+constexpr int VISITED_IDX = -1;
+constexpr const char* DUMMY_ID = "dummy";
+constexpr int REMOVE_IDX = -3;
+	
 struct Neighbor
 {
 	VertexIdx idx = std::numeric_limits<VertexIdx>::min( );
@@ -82,14 +86,16 @@ struct Edge
 	Attributes attributes;
 };
 
-
 //--------------------------------------------------------------
 class Dataset
 {
 public:
 	enum class Kind { Undirected, Directed };
 	Dataset( ) = default;
-	bool Load( std::string filename );
+	~Dataset() = default;
+	Dataset(const Dataset&);
+	Dataset& operator=(const Dataset&) const;
+	bool Load(const std::string filename );
 	void InfoGui( );
 	const std::string& GetFilename( );
 	const Kind& GetKind( );
@@ -97,7 +103,6 @@ public:
 	std::vector<Vertex> vertices;
 	std::vector<Edge> edges;
 	void AddInfo(const std::string& key, const std::string& value);
-	std::shared_ptr<Dataset> DeepCopy();
 
 private:
 	void SetInfo( );

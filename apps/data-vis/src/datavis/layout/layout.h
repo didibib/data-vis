@@ -9,14 +9,15 @@ class Layout
 {
 public:
 	virtual bool Gui( IStructure& ) = 0;
-	virtual void Update( float ) {};
+	virtual void Update( float ) {}
 	virtual void Draw( ) {}
+	virtual ~Layout() = default;
 };
 
 //--------------------------------------------------------------
 // Random
 //--------------------------------------------------------------
-class Random : public Layout
+class RandomLayout final : public Layout
 {
 public:
 	bool Gui( IStructure& ) override;
@@ -29,7 +30,7 @@ private:
 //--------------------------------------------------------------
 // Grid
 //--------------------------------------------------------------
-class Grid : public Layout
+class GridLayout final : public Layout
 {
 public:
 	bool Gui( IStructure& ) override;
@@ -43,7 +44,7 @@ private:
 //--------------------------------------------------------------
 // Local Search
 //--------------------------------------------------------------
-class LocalSearch : public Layout
+class LocalSearch  final : public Layout
 {
 public:
 	bool Gui( IStructure& ) override;
@@ -59,7 +60,7 @@ private:
 //--------------------------------------------------------------
 // Radial
 //--------------------------------------------------------------
-class Radial : public Layout
+class RadialLayout final  : public Layout
 {
 public:
 	bool Gui( IStructure& ) override;
@@ -76,7 +77,7 @@ private:
 //--------------------------------------------------------------
 // Force Directed
 //--------------------------------------------------------------
-class ForceDirected : public Layout
+class ForceDirectedLayout final  : public Layout
 {
 public:
 	bool Gui( IStructure& ) override;
@@ -90,7 +91,7 @@ private:
 //--------------------------------------------------------------
 // Force Directed
 //--------------------------------------------------------------
-class Sugiyama : public Layout
+class Sugiyama final  : public Layout
 {
 public:
 	using Layer = std::vector<int>;
@@ -99,12 +100,8 @@ public:
 
 	Sugiyama();
 	bool Gui( IStructure& ) override;
-	static void Apply( Graph&, OSCMHeuristic oscm_heuristic, glm::vec2 node_offset, int oscm_iterations );
+	static void Apply( Graph&, const  OSCMHeuristic& oscm_heuristic, const  glm::vec2& node_offset, const  int& oscm_iterations );
 private:
-
-	static const int VisitedIdx;
-	static const std::string DummyId;
-	static const int RemoveIdx;
 
 	std::vector<std::pair<std::string, OSCMHeuristic>> m_oscm_heuristics;
 	OSCMHeuristic m_oscm_heuristic;
@@ -117,14 +114,14 @@ private:
 	static Dataset BreakCycles( Dataset& );
 	static void LayerAssignment( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
 	static void AddDummyVertices( Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex );
-	static int CrossingMinimization( Dataset&, std::vector<Layer>& vertices_per_layer, OSCMHeuristic heuristic, int iterations );
+	static int CrossingMinimization( Dataset&, std::vector<Layer>& vertices_per_layer,const OSCMHeuristic& heuristic, int iterations );
 	static std::vector<float> VertexPositioning( Dataset& _dataset, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex, float delta_x );
 
 	//--------------------------------------------------------------
 	// Layer Assignment
 	//--------------------------------------------------------------
-	static bool IsSink( Vertex& );
-	static bool IsSource( Vertex& );
+	static bool IsSink(const Vertex& );
+	static bool IsSource(const Vertex& );
 	static bool Has( std::function<bool( Vertex& )>, std::vector<Vertex>, Vertex& out );
 	static void RemoveOutgoingNeighbors( Dataset&, Vertex& );
 	static void RemoveIncomingNeighbors( Dataset&, Vertex& );
@@ -134,8 +131,8 @@ private:
 	//--------------------------------------------------------------
 	// OSCM
 	//--------------------------------------------------------------
-	static bool OSCMBarycenterHeuristic( Dataset&, Layer& layer_fixed, Layer& layer, Layer& new_layer, GetNeighbors get_neighbors );
-	static bool OSCMMedianHeuristic( Dataset&, Layer& layer_fixed, Layer& layer, Layer& new_layer, GetNeighbors get_neighbors );
+	static bool OSCMBarycenterHeuristic( Dataset&, const Layer& layer_fixed, Layer& layer, Layer& new_layer, const GetNeighbors& get_neighbors );
+	static bool OSCMMedianHeuristic( Dataset&, const Layer& layer_fixed, Layer& layer, Layer& new_layer, const GetNeighbors& get_neighbors );
 
 	static int Crossings( Dataset&, Layer& layer_1, Layer& layer_2 );
 

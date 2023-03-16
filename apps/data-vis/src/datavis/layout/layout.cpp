@@ -6,7 +6,7 @@ namespace DataVis
 // Random
 //--------------------------------------------------------------
 #pragma region Random
-bool Random::Gui(IStructure& _structure)
+bool RandomLayout::Gui(IStructure& _structure)
 {
 	bool active = false;
 	if (ImGui::TreeNode("Random Layout"))
@@ -27,12 +27,12 @@ bool Random::Gui(IStructure& _structure)
 }
 
 //--------------------------------------------------------------
-void Random::Apply(IStructure& _structure, int _width, int _height)
+void RandomLayout::Apply(IStructure& _structure, int _width, int _height)
 {
 	auto& nodes = _structure.GetNodes();
 	for (size_t i = 0; i < nodes.size(); i++) {
-		float x = RandomNumber::RangeF(_width);
-		float y = RandomNumber::RangeF(_height);
+		float x = Random::RangeF(_width);
+		float y = Random::RangeF(_height);
 		float z = 0;
 		nodes[i]->SetNewPosition(glm::vec3(x, y, z));
 	}
@@ -44,7 +44,7 @@ void Random::Apply(IStructure& _structure, int _width, int _height)
 // Grid
 //--------------------------------------------------------------
 #pragma region Grid
-bool Grid::Gui(IStructure& _structure)
+bool GridLayout::Gui(IStructure& _structure)
 {
 	bool active = false;
 	if (ImGui::TreeNode("Grid Layout"))
@@ -66,7 +66,7 @@ bool Grid::Gui(IStructure& _structure)
 }
 
 //--------------------------------------------------------------
-void Grid::Apply(IStructure& _layout, int _width, int _height, float _step)
+void GridLayout::Apply(IStructure& _layout, int _width, int _height, float _step)
 {
 	auto& nodes = _layout.GetNodes();
 	std::vector<glm::vec3> grid;
@@ -82,7 +82,7 @@ void Grid::Apply(IStructure& _layout, int _width, int _height, float _step)
 			grid.push_back(glm::vec3(x, y, z));
 		}
 	// Shuffle vector
-	std::shuffle(std::begin(grid), std::end(grid), RandomNumber::MT19937);
+	std::shuffle(std::begin(grid), std::end(grid), Random::MT19937);
 	// Assign positions
 	for (size_t i = 0; i < nodes.size(); i++) {
 		nodes[i]->SetNewPosition(grid[i]);
@@ -96,7 +96,7 @@ void Grid::Apply(IStructure& _layout, int _width, int _height, float _step)
 // Radial
 //--------------------------------------------------------------
 #pragma region Radial
-bool Radial::Gui(IStructure& _structure)
+bool RadialLayout::Gui(IStructure& _structure)
 {
 	bool active = false;
 	if (ImGui::TreeNode("Radial Layout"))
@@ -123,18 +123,18 @@ bool Radial::Gui(IStructure& _structure)
 	return active;
 }
 
-void Radial::Update(float _delta_time)
+void RadialLayout::Update(float _delta_time)
 {
 	m_rings.Update(_delta_time);
 }
 
-void Radial::Draw()
+void RadialLayout::Draw()
 {
 	m_rings.Draw();
 }
 
 //--------------------------------------------------------------
-void Radial::Apply(Tree& _tree, float _start, float _step)
+void RadialLayout::Apply(Tree& _tree, float _start, float _step)
 {
 	auto& node = _tree.Root();
 	node->SetNewPosition(glm::vec3(0));
@@ -144,7 +144,7 @@ void Radial::Apply(Tree& _tree, float _start, float _step)
 }
 
 //--------------------------------------------------------------
-void Radial::SubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _start, float _step)
+void RadialLayout::SubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _start, float _step)
 {
 	float new_wedge_start = _wedge_start;
 	float radius = _start + (_step * _depth);
@@ -165,7 +165,7 @@ void Radial::SubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, in
 // Force Directed
 //--------------------------------------------------------------
 #pragma region Force Directed
-bool ForceDirected::Gui(IStructure& _structure)
+bool ForceDirectedLayout::Gui(IStructure& _structure)
 {
 	bool active = false;
 	if (ImGui::TreeNode("Force Directed Layout"))
@@ -187,7 +187,7 @@ bool ForceDirected::Gui(IStructure& _structure)
 }
 
 //--------------------------------------------------------------
-void ForceDirected::Apply(IStructure& _structure, float _C, float _t, int _iterations)
+void ForceDirectedLayout::Apply(IStructure& _structure, float _C, float _t, int _iterations)
 {
 	float area = _structure.GetArea();
 	float k = _C * sqrtf(area / _structure.GetNodes().size());

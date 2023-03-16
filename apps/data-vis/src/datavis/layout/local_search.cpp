@@ -85,19 +85,19 @@ float LocalSearch::CalculateNodeCost(IStructure& _structure, uint _idx)
 
 void LocalSearch::SwapPos(IStructure& _structure, float& _currCost)
 {
-	auto& nodes = _structure.GetNodes();
-	int range = nodes.size() - 1;
-	uint idx0 = RandomNumber::Range(range);
-	uint idx1 = RandomNumber::Range(range);
-	while (idx0 == idx1) idx1 = RandomNumber::Range(range);
-	float costDif = CalculateIncrementalCost(_structure, idx0, idx1);
+	const auto& nodes = _structure.GetNodes();
+	const int range = nodes.size() - 1;
+	const uint idx0 = Random::Range(range);
+	uint idx1 = Random::Range(range);
+	while (idx0 == idx1) idx1 = Random::Range(range);
+	const float costDif = CalculateIncrementalCost(_structure, idx0, idx1);
 	if (costDif < 0)
 	{
 		// Swap the nodes
-		auto& node0 = _structure.GetNodes()[idx0];
-		auto& node1 = _structure.GetNodes()[idx1];
-		auto pos0 = node0->GetPosition();
-		auto pos1 = node1->GetPosition();
+		const auto& node0 = _structure.GetNodes()[idx0];
+		const auto& node1 = _structure.GetNodes()[idx1];
+		const auto pos0 = node0->GetPosition();
+		const auto pos1 = node1->GetPosition();
 		node0->SetPosition(pos1);
 		node1->SetPosition(pos0);
 		_currCost += costDif;
