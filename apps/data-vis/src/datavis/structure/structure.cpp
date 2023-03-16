@@ -20,8 +20,8 @@ void IStructure::Init(std::shared_ptr<Dataset> _dataset)
 {
 	m_dataset = _dataset;
 	m_layouts.clear();
-	m_layouts.push_back(std::make_unique<Random>());
-	m_layouts.push_back(std::make_unique<Grid>());
+	m_layouts.push_back(std::make_unique<RandomLayout>());
+	m_layouts.push_back(std::make_unique<GridLayout>());
 }
 
 const int& IStructure::Idx() const
@@ -32,7 +32,7 @@ const int& IStructure::Idx() const
 void IStructure::Update(float _delta_time)
 {
 	m_aabb.Update(_delta_time);
-	for (auto& node : m_nodes)
+	for (const auto& node : m_nodes)
 		node->Update(_delta_time, 0.2f);
 	if (m_active_layout)
 		m_active_layout->Update(_delta_time);

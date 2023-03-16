@@ -40,35 +40,35 @@
     <ClCompile Include="external\imgui\imgui.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\dataset.cpp">
-      <Filter>src\graph</Filter>
+    <ClCompile Include="src\datavis\dataset.cpp">
+      <Filter>src\datavis</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\layout\layout.cpp">
-      <Filter>src\graph\layout</Filter>
+    <ClCompile Include="src\datavis\aabb.cpp">
+      <Filter>src\datavis</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\structure\structure.cpp">
-      <Filter>src\graph\structure</Filter>
+    <ClCompile Include="src\datavis\animator.cpp">
+      <Filter>src\datavis</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\structure\tree.cpp">
-      <Filter>src\graph\structure</Filter>
+    <ClCompile Include="src\datavis\structure\graph.cpp">
+      <Filter>src\datavis\structure</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\structure\graph.cpp">
-      <Filter>src\graph\structure</Filter>
+    <ClCompile Include="src\datavis\structure\node.cpp">
+      <Filter>src\datavis\structure</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\structure\node.cpp">
-      <Filter>src\graph\structure</Filter>
+    <ClCompile Include="src\datavis\structure\structure.cpp">
+      <Filter>src\datavis\structure</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\aabb.cpp">
-      <Filter>src\graph</Filter>
+    <ClCompile Include="src\datavis\structure\tree.cpp">
+      <Filter>src\datavis\structure</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\animator.cpp">
-      <Filter>src\graph</Filter>
+    <ClCompile Include="src\datavis\layout\layout.cpp">
+      <Filter>src\datavis\layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\layout\local_search.cpp">
-      <Filter>src\graph\layout</Filter>
+    <ClCompile Include="src\datavis\layout\local_search.cpp">
+      <Filter>src\datavis\layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\graph\layout\sugiyama.cpp">
-      <Filter>src\graph\layout</Filter>
+    <ClCompile Include="src\datavis\layout\sugiyama.cpp">
+      <Filter>src\datavis\layout</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -81,16 +81,16 @@
     <Filter Include="external\imgui">
       <UniqueIdentifier>{de34471f-37eb-4fc7-88b9-1023b6c8277e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph">
+    <Filter Include="src\datavis">
       <UniqueIdentifier>{42A7CE83-41D0-5147-82D8-F18B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\external">
+    <Filter Include="src\datavis\external">
       <UniqueIdentifier>{78cdd33e-4b28-4648-b55e-1ee7f55fa104}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\layout">
+    <Filter Include="src\datavis\layout">
       <UniqueIdentifier>{9680b4e8-f577-41df-9041-7fc9cf2c39a0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\structure">
+    <Filter Include="src\datavis\structure">
       <UniqueIdentifier>{125c10b3-f052-4d1d-9880-4bb70c7bb55a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -134,29 +134,29 @@
     <ClInclude Include="external\imgui\imgui.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\external\spirit-graphviz.hpp">
-      <Filter>src\graph\external</Filter>
+    <ClInclude Include="src\datavis\animator.h">
+      <Filter>src\datavis</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\dataset.h">
-      <Filter>src\graph</Filter>
+    <ClInclude Include="src\datavis\dataset.h">
+      <Filter>src\datavis</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\layout\layout.h">
-      <Filter>src\graph\layout</Filter>
+    <ClInclude Include="src\datavis\aabb.h">
+      <Filter>src\datavis</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\structure\structure.h">
-      <Filter>src\graph\structure</Filter>
+    <ClInclude Include="src\datavis\structure\graph.h">
+      <Filter>src\datavis\structure</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\structure\tree.h">
-      <Filter>src\graph\structure</Filter>
+    <ClInclude Include="src\datavis\structure\structure.h">
+      <Filter>src\datavis\structure</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\structure\graph.h">
-      <Filter>src\graph\structure</Filter>
+    <ClInclude Include="src\datavis\structure\tree.h">
+      <Filter>src\datavis\structure</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\aabb.h">
-      <Filter>src\graph</Filter>
+    <ClInclude Include="src\datavis\layout\layout.h">
+      <Filter>src\datavis\layout</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph\animator.h">
-      <Filter>src\graph</Filter>
+    <ClInclude Include="src\datavis\external\spirit-graphviz.hpp">
+      <Filter>src\datavis\external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

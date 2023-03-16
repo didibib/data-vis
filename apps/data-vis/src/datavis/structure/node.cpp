@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "precomp.h"
 
 namespace DataVis
@@ -5,9 +7,9 @@ namespace DataVis
 //--------------------------------------------------------------
 // Node
 //--------------------------------------------------------------
-IStructure::Node::Node(std::string _vertex_id, VertexIdx _vertex_index, glm::vec3 _position)
+IStructure::Node::Node(std::string _vertex_id, VertexIdx _vertex_index, const glm::vec3& _position)
 {
-	m_vertex_id = _vertex_id;
+	m_vertex_id = std::move(_vertex_id);
 	m_vertex_idx = _vertex_index;
 	m_position = _position;
 	m_old_position = _position;
@@ -48,7 +50,7 @@ const glm::vec3& IStructure::Node::GetPosition()
 	return m_position;
 }
 
-void IStructure::Node::SetPosition(glm::vec3& _new_position)
+void IStructure::Node::SetPosition(const glm::vec3& _new_position)
 {
 	m_position = _new_position;
 	m_old_position = _new_position;
@@ -59,7 +61,7 @@ const glm::vec3& IStructure::Node::GetNewPosition()
 	return m_new_position;
 }
 
-void IStructure::Node::SetNewPosition(glm::vec3& _new_position)
+void IStructure::Node::SetNewPosition(const glm::vec3& _new_position)
 {
 	m_new_position = _new_position;
 	m_aabb.setPosition(_new_position - glm::vec2(m_radius));
@@ -69,7 +71,7 @@ void IStructure::Node::SetNewPosition(glm::vec3& _new_position)
 //--------------------------------------------------------------
 // Radius
 //--------------------------------------------------------------
-const float& IStructure::Node::GetRadius()
+const float& IStructure::Node::GetRadius() const
 {
 	return m_radius;
 }
@@ -83,7 +85,7 @@ void IStructure::Node::SetRadius(float _radius)
 //--------------------------------------------------------------
 // Interaction
 //--------------------------------------------------------------
-bool IStructure::Node::Inside(glm::vec3 _position)
+bool IStructure::Node::Inside(glm::vec3 _position) const
 {
 	return glm::length(m_position - _position) < m_radius;
 }

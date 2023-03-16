@@ -12,19 +12,19 @@ public:
 	class Node : public Animator
 	{
 	public:
-		Node(std::string vertex_id, VertexIdx vertex_index, glm::vec3 position = glm::vec3(0));
+		Node(std::string vertex_id, VertexIdx vertex_index, const glm::vec3& position = glm::vec3(0));
 
-		const std::string& GetVertexId() const;
-		VertexIdx GetVertexIdx() const;
+		[[nodiscard]] const std::string& GetVertexId() const;
+		[[nodiscard]] VertexIdx GetVertexIdx() const;
 		const glm::vec3& GetPosition();
-		void SetPosition(glm::vec3& position);
+		void SetPosition(const glm::vec3& position);
 		const glm::vec3& GetNewPosition();
-		void SetNewPosition(glm::vec3& new_position);
+		void SetNewPosition(const glm::vec3& new_position);
 		void SetDisplacement(glm::vec3 displacement);
 		const glm::vec3& GetDisplacement();
-		const float& GetRadius();
+		const float& GetRadius() const;
 		void SetRadius(float radius);
-		bool Inside(glm::vec3 position);
+		bool Inside(glm::vec3 position) const;
 
 		ofColor color = ofColor::black;
 		std::vector<std::shared_ptr<Node>> neighbors;
@@ -44,16 +44,26 @@ public:
 		float m_radius = 10;
 	};
 
+	class Edge : public Animator
+	{
+	public:
+		Edge() = default;
+		
+	protected:
+		void OnStopAnimation() override;
+		void Interpolate(float percentage) override;
+	};
+
 	using VectorOfNodes = std::vector<std::shared_ptr<IStructure::Node>>;
 
 	IStructure();
 	virtual ~IStructure();
-	const int& Idx() const;
+	[[nodiscard]] const int& Idx() const;
 	virtual void Init(const std::shared_ptr<Dataset>);
 	virtual void Update(float delta_time);
-	Dataset& GetDataset() const;
+	[[nodiscard]] Dataset& GetDataset() const;
 	VectorOfNodes& GetNodes();
-	const glm::vec3& GetPosition() const;
+	[[nodiscard]] const glm::vec3& GetPosition() const;
 	void SetPosition(const glm::vec3&);
 
 	// AABB

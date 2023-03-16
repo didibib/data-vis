@@ -39,7 +39,24 @@ std::string Attributes::FindString( std::string _key )
 //--------------------------------------------------------------
 // Dataset
 //--------------------------------------------------------------
-bool Dataset::Load( std::string _filename )
+Dataset::Dataset(const Dataset& _dataset)
+{
+	m_filename = _dataset.m_filename;
+	m_info = _dataset.m_info;
+	m_info_idx = _dataset.m_info_idx;
+	m_kind = _dataset.m_kind;
+	m_vertex_idx = _dataset.m_vertex_idx;
+	vertices = _dataset.vertices;
+	edges = _dataset.edges;
+}
+
+Dataset& Dataset::operator=(const Dataset& _dataset) const
+{
+	Dataset dataset = Dataset(_dataset);
+	return dataset;
+}
+
+bool Dataset::Load(const std::string _filename )
 {
 	m_filename = _filename;
 	std::string filepath = ofToDataPath( _filename, false );
@@ -50,13 +67,13 @@ bool Dataset::Load( std::string _filename )
 		return false;
 	}
 	using It = boost::spirit::istream_iterator;
-	::Parser::GraphViz<It> parser;
 
 	It f{ file >> std::noskipws }, l;
 
-	Ast::GraphViz into;
 	bool ok = false;
 	try {
+		Ast::GraphViz into;
+		::Parser::GraphViz<It> parser;
 		ok = parse( f, l, parser, into );
 
 		if ( ok ) {
@@ -72,7 +89,7 @@ bool Dataset::Load( std::string _filename )
 				v.id = node.id( );
 				v.idx = vertices.size( );
 				v.attributes.Init( node.node.attributes );
-				m_vertex_idx.insert( { v.id, vertices.size( ) } );
+				m_vertex_idx.insert( std::make_pair(v.id, vertices.size( )) );
 				vertices.push_back( std::move( v ) );
 			}
 
@@ -90,17 +107,17 @@ bool Dataset::Load( std::string _filename )
 				n_to.idx = v_to_idx;
 				n_to.edge_idx = edges.size( );
 
-				vertices[v_from_idx].neighbors.push_back( std::move( n_to ) );
+				vertices[v_from_idx].neighbors.push_back( n_to );
 
 				Neighbor n_from;
 				n_from.idx = v_from_idx;
 				n_from.edge_idx = edges.size( );
 
 				if ( m_kind == Kind::Undirected ) {
-					vertices[v_to_idx].neighbors.push_back( std::move( n_from ) );
+					vertices[v_to_idx].neighbors.push_back( n_from );
 				}
 				else if ( m_kind == Kind::Directed ) {
-					vertices[v_to_idx].incoming_neighbors.push_back( std::move( n_from ) );
+					vertices[v_to_idx].incoming_neighbors.push_back(  n_from );
 				}
 				
 				edges.push_back( std::move( e ) );
@@ -180,16 +197,4 @@ void Dataset::AddInfo(const std::string& _key, const std::string& _value){
 	m_info.push_back({_key, _value});
 }
 
-std::shared_ptr<Dataset> Dataset::DeepCopy()
-{
-	std::shared_ptr<Dataset> copy = std::make_shared<Dataset>();
-	copy->m_filename = m_filename;
-	copy->m_info = m_info;
-	copy->m_info_idx = m_info_idx;
-	copy->m_kind = m_kind;
-	copy->m_vertex_idx = m_vertex_idx;
-	copy->vertices = vertices;
-	copy->edges = edges;
-	return copy;
-}
 } // namespace DataVis

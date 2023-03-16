@@ -6,7 +6,8 @@ class Animator
 {
 public:
 	Animator() = default;
-	virtual void Update(float delta_time, float speed = 1.f);
+	virtual auto Update(float delta_time, float speed = 1.f) -> void;
+	virtual ~Animator() = default;
 
 protected:
 	void EaseInEaseOut(float t, float speed = 1.f);
@@ -28,15 +29,15 @@ public:
 	void Set(int amount, float start, float step);
 
 protected:
-	void OnStopAnimation();
-	void Interpolate(float percentage);
+	void OnStopAnimation() override;
+	void Interpolate(float percentage) override;
 
 private:
 	struct Value
 	{
 		float value = 0, old_value = 0, new_value = 0;
 	};
-	int m_amount;
+	int m_amount{};
 	std::vector<Value> m_alpha;
 	std::vector<Value> m_radius;
 };

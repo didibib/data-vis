@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 namespace DataVis
 {
-namespace RandomNumber
+namespace Random
 {
 static uint seed = 0x12345678;
 uint UInt()
@@ -25,7 +25,7 @@ uint UInt(uint& _seed)
 uint Range(uint min, uint max)
 {
 	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
-	return dist(RandomNumber::MT19937);
+	return dist(Random::MT19937);
 }
 
 uint Range(uint max)
