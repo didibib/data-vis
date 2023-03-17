@@ -159,6 +159,14 @@ void IStructure::SetOnDeleteCallback(std::function<void(IStructure&)> _callback)
 	m_on_delete_callback = _callback;
 }
 
+void IStructure::SetNodesColor(ofColor _color)
+{
+	for (auto& node : m_nodes)
+	{
+		node->color = _color;
+	}
+}
+
 //--------------------------------------------------------------
 // Gui
 //--------------------------------------------------------------
@@ -175,7 +183,7 @@ void IStructure::Gui()
 
 	m_dataset->InfoGui();
 
-	if (ImGui::TreeNode("Node Settings"))
+	if (ImGui::TreeNode("Settings"))
 	{
 		ImGui::Checkbox("Draw Label", &m_gui_data.checkbox_node_labels);
 		if (ImGui::SliderFloat("Radius", &m_gui_data.slider_radius, 10, 30))
@@ -183,9 +191,19 @@ void IStructure::Gui()
 			for (auto& node : m_nodes)
 				node->SetRadius(m_gui_data.slider_radius);
 		}
+
+		const int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
+		if (ImGuiExtensions::ColorEdit3("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
+		{
+			SetNodesColor(ofColor(m_gui_data.coloredit_node_color.x, m_gui_data.coloredit_node_color.y, m_gui_data.coloredit_node_color.z));
+		}
+		
+		ImGuiExtensions::ColorEdit3("Edge Color", m_gui_data.coloredit_edge_color, color_edit_flags);
+
 		ImGui::TreePop();
 	}
 
+	ImGui::Separator();
 	// Loop over all layout gui's
 	for (auto& layout : m_layouts)
 	{

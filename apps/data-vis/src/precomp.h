@@ -79,6 +79,12 @@ namespace DataVis
         /// <returns></returns>
         float Bezier(float time);
     } // namespace Curves
+
+    namespace ImGuiExtensions
+    {
+        // Converts color from [0..255] to [0..1] for displaying and back
+        bool ColorEdit3(char* label, glm::vec3& color, int flags);
+    }
 } // namespace DataVis
 
 //--------------------------------------------------------------
