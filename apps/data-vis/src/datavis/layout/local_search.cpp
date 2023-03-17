@@ -34,15 +34,15 @@ void LocalSearch::Apply(IStructure& _structure, int _iterations)
 	}
 }
 
-float LocalSearch::CalculateCost(IStructure& _structure)
+float LocalSearch::CalculateCost(const IStructure& _structure)
 {
 	float cost = 0;
-	for (auto& edge : _structure.GetDataset().edges)
+	for (const auto& edge : _structure.dataset->edges)
 	{
-		VertexIdx startIdx = edge.from_idx;
-		VertexIdx endIdx = edge.to_idx;
-		glm::vec3 start = _structure.GetNodes()[startIdx]->GetPosition();
-		glm::vec3 end = _structure.GetNodes()[endIdx]->GetPosition();
+		const VertexIdx startIdx = edge.from_idx;
+		const VertexIdx endIdx = edge.to_idx;
+		glm::vec3 start = _structure.nodes[startIdx]->GetPosition();
+		glm::vec3 end = _structure.nodes[endIdx]->GetPosition();
 		cost += glm::distance(start, end);
 	}
 	return cost;
@@ -55,10 +55,10 @@ float LocalSearch::CalculateIncrementalCost(IStructure& _structure, uint _idx0, 
 	cost -= CalculateNodeCost(_structure, _idx0);
 	cost -= CalculateNodeCost(_structure, _idx1);
 	// Temporarily swap the positions of the two nodes
-	auto& node0 = _structure.GetNodes()[_idx0];
-	auto& node1 = _structure.GetNodes()[_idx1];
-	auto pos0 = node0->GetPosition();
-	auto pos1 = node1->GetPosition();
+	const auto& node0 = _structure.nodes[_idx0];
+	const auto& node1 = _structure.nodes[_idx1];
+	const auto pos0 = node0->GetPosition();
+	const auto pos1 = node1->GetPosition();
 	node0->SetPosition(pos1);
 	node1->SetPosition(pos0);
 	// Add cost of all edges after swap at both indices
@@ -70,11 +70,11 @@ float LocalSearch::CalculateIncrementalCost(IStructure& _structure, uint _idx0, 
 	return cost;
 }
 
-float LocalSearch::CalculateNodeCost(IStructure& _structure, uint _idx)
+float LocalSearch::CalculateNodeCost(const IStructure& _structure, uint _idx)
 {
 	float cost = 0;
-	auto& node = _structure.GetNodes()[_idx];
-	for (auto& neigbor : node->neighbors)
+	const auto& node = _structure.nodes[_idx];
+	for (const auto& neigbor : node->neighbors)
 	{
 		glm::vec3 start = node->GetPosition();
 		glm::vec3 end = neigbor->GetPosition();
@@ -85,7 +85,7 @@ float LocalSearch::CalculateNodeCost(IStructure& _structure, uint _idx)
 
 void LocalSearch::SwapPos(IStructure& _structure, float& _currCost)
 {
-	const auto& nodes = _structure.GetNodes();
+	const auto& nodes = _structure.nodes;
 	const int range = nodes.size() - 1;
 	const uint idx0 = Random::Range(range);
 	uint idx1 = Random::Range(range);
@@ -94,8 +94,8 @@ void LocalSearch::SwapPos(IStructure& _structure, float& _currCost)
 	if (costDif < 0)
 	{
 		// Swap the nodes
-		const auto& node0 = _structure.GetNodes()[idx0];
-		const auto& node1 = _structure.GetNodes()[idx1];
+		const auto& node0 = _structure.nodes[idx0];
+		const auto& node1 = _structure.nodes[idx1];
 		const auto pos0 = node0->GetPosition();
 		const auto pos1 = node1->GetPosition();
 		node0->SetPosition(pos1);

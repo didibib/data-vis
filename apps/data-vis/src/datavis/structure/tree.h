@@ -12,17 +12,17 @@ public:
 		float input_radial_delta_angle = 100;
 	} m_imgui_data;
 
-	class Node : public IStructure::Node
+	class TreeNode : public Node
 	{
 	public:
-		Node(std::string _vertex_id, VertexIdx _vertex_index, std::shared_ptr<Node> _parent = nullptr, glm::vec3 _current_position = glm::vec3(0))
-			: IStructure::Node(_vertex_id, _vertex_index, _current_position)
+		TreeNode(std::string _vertex_id, VertexIdx _vertex_index, std::shared_ptr<TreeNode> _parent = nullptr, const glm::vec3& _current_position = glm::vec3(0))
+			: Node(_vertex_id, _vertex_index, _current_position)
 		{
 			parent = _parent;
 		}
 
-		std::shared_ptr<Node> parent;
-		std::vector<std::shared_ptr<Node>> children;
+		std::shared_ptr<TreeNode> parent;
+		std::vector<std::shared_ptr<TreeNode>> children;
 	};
 
 	//--------------------------------------------------------------
@@ -30,10 +30,10 @@ public:
 	void Init(const std::shared_ptr<Dataset>) = 0;
 
 	//--------------------------------------------------------------
-	std::shared_ptr<Node> Root();
-	static uint Leaves(std::shared_ptr<Tree::Node>);
-	static uint Depth(std::shared_ptr<Tree::Node>);
-	void SwapRoot(std::shared_ptr<Tree::Node>);
+	std::shared_ptr<TreeNode> Root();
+	static uint Leaves(std::shared_ptr<TreeNode>);
+	static uint Depth(std::shared_ptr<TreeNode>);
+	void SwapRoot(std::shared_ptr<TreeNode>);
 
 	float speed = 5;
 
@@ -45,7 +45,7 @@ protected:
 	void NodeInfoGui() override;
 
 	void UpdateProperties();
-	std::shared_ptr<Tree::Node> m_root;
+	std::shared_ptr<TreeNode> m_root;
 };
 
 // Prim's Algorithm https://www.wikiwand.com/en/Prim%27s_algorithm

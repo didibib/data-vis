@@ -5,10 +5,10 @@ namespace DataVis
 //--------------------------------------------------------------
 // AABB
 //--------------------------------------------------------------
-void AABB::Draw(bool _is_focussed)
+void AABB::Draw()
 {
 	ofNoFill();
-	if (_is_focussed)
+	if (m_is_focussed)
 		ofSetColor(ofColor::green);
 	else
 		ofSetColor(ofColor::lightGray);
@@ -18,6 +18,12 @@ void AABB::Draw(bool _is_focussed)
 	ofSetColor(ofColor::black);
 	ofDrawRectangle(m_draggable);
 	ofNoFill();
+}
+	
+void AABB::Draw(bool _is_focussed)
+{
+	m_is_focussed = _is_focussed;
+	Draw();
 }
 
 //--------------------------------------------------------------
@@ -56,18 +62,18 @@ void AABB::OnStopAnimation()
 
 void AABB::Interpolate(float _p)
 {
-	glm::vec3 top_left = (1 - _p) * m_old_top_left + _p * m_new_top_left;
-	glm::vec3 bottom_right = (1 - _p) * m_old_bottom_right + _p * m_new_bottom_right;
+	const glm::vec3 top_left = (1 - _p) * m_old_top_left + _p * m_new_top_left;
+	const glm::vec3 bottom_right = (1 - _p) * m_old_bottom_right + _p * m_new_bottom_right;
 	m_bounds.set(top_left, bottom_right);
 
 	// Update draggable
 	auto bb_tl = m_bounds.getTopLeft();
-	m_draggable = { bb_tl, { bb_tl.x - m_draggable_size, bb_tl.y - m_draggable_size } };
+	m_draggable = { bb_tl, { bb_tl.x - static_cast<float>(m_draggable_size), bb_tl.y - static_cast<float>(m_draggable_size) } };
 }
 
-glm::vec3 AABB::Clamp( const glm::vec3 _position )
+glm::vec3 AABB::Clamp( const glm::vec3& _position ) const
 {
-	glm::vec3 out = max( _position, m_bounds.getTopLeft() );
+	const glm::vec3 out = max( _position, m_bounds.getTopLeft() );
 	return min( out, m_bounds.getBottomRight() );
 }
 

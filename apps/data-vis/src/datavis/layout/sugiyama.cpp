@@ -2,11 +2,10 @@
 
 namespace DataVis
 {
-
     Sugiyama::Sugiyama()
     {
-        m_oscm_heuristics.push_back({"Barycenter", Sugiyama::OSCMBarycenterHeuristic});
-        m_oscm_heuristics.push_back({"Median", Sugiyama::OSCMMedianHeuristic});
+        m_oscm_heuristics.emplace_back("Barycenter", Sugiyama::OSCMBarycenterHeuristic);
+        m_oscm_heuristics.emplace_back("Median", Sugiyama::OSCMMedianHeuristic);
         m_node_offset = {100, -200};
     }
 
@@ -56,7 +55,7 @@ namespace DataVis
     void Sugiyama::Apply(Graph& _graph, const OSCMHeuristic& _heuristic, const glm::vec2& _node_offset,
                          const int& _oscm_iterations)
     {
-        Dataset copy = _graph.GetDataset();
+        Dataset copy = *_graph.dataset;
         // Step 01
         Dataset new_dataset = BreakCycles(copy);
 
@@ -73,16 +72,45 @@ namespace DataVis
         // Step 04
         const auto x_per_vertex = VertexPositioning(new_dataset, vertices_per_layer, layer_per_vertex, _node_offset.x);
 
-        _graph.Load(std::make_shared<Dataset>(new_dataset));
+        _graph.Load(std::make_shared<Dataset>(std::move(new_dataset)));
+        std::vector<glm::vec3> new_positions(new_dataset.vertices.size());
         for (size_t y = 0; y < vertices_per_layer.size(); y++)
         {
             for (const int idx : vertices_per_layer[y])
             {
-                const auto& node = _graph.GetNodes()[idx];
-                const glm::vec3 new_position = glm::vec3(x_per_vertex[idx], _node_offset.y * y, 0);
-                node->SetNewPosition(new_position);
+                const auto new_pos = glm::vec3(x_per_vertex[idx], _node_offset.y * y, 0);
+                new_positions[idx] = new_pos;
+                const auto& node = _graph.nodes[idx];
+                node->SetNewPosition(new_pos);
             }
         }
+
+        _graph.edges.resize(copy.edges.size());
+        for (size_t i = 0; i < _graph.edges.size(); i++)
+        {
+            _graph.edges[i] = std::make_shared<EdgePath>();
+        }
+        const auto& vertices = new_dataset.vertices;
+        for(auto& edge : new_dataset.edges)
+        {
+            if(vertices[edge.from_idx].id == DUMMY_ID)
+                continue;
+            
+            // Add start vertex
+            _graph.edges[edge.idx]->AddPoint(new_positions[edge.from_idx]);
+
+            auto current_edge = edge;
+            while (vertices[current_edge.to_idx].id == DUMMY_ID)
+            {
+                _graph.edges[edge.idx]->AddPoint(new_positions[current_edge.to_idx]);
+                auto& next_node = vertices[current_edge.to_idx];
+                // Only 1 outgoing edge
+                current_edge = new_dataset.edges[next_node.neighbors[0].edge_idx];
+            } 
+            // Add end vertex
+            _graph.edges[edge.idx]->AddPoint(new_positions[current_edge.to_idx]);
+        }
+        
         _graph.UpdateAABB();
     }
 
@@ -246,7 +274,7 @@ namespace DataVis
         return new_dataset;
     }
 
-    bool Sugiyama::Has(std::function<bool(Vertex&)> _f, std::vector<Vertex> _vs, Vertex& _out)
+    bool Sugiyama::Has(const std::function<bool(Vertex&)>& _f, std::vector<Vertex> _vs, Vertex& _out)
     {
         for (auto& v : _vs)
         {

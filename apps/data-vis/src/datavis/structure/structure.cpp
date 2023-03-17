@@ -18,7 +18,7 @@ IStructure::~IStructure()
 
 void IStructure::Init(std::shared_ptr<Dataset> _dataset)
 {
-	m_dataset = _dataset;
+	dataset = _dataset;
 	m_layouts.clear();
 	m_layouts.push_back(std::make_unique<RandomLayout>());
 	m_layouts.push_back(std::make_unique<GridLayout>());
@@ -32,23 +32,10 @@ const int& IStructure::Idx() const
 void IStructure::Update(float _delta_time)
 {
 	m_aabb.Update(_delta_time);
-	for (const auto& node : m_nodes)
+	for (const auto& node : nodes)
 		node->Update(_delta_time, 0.2f);
 	if (m_active_layout)
 		m_active_layout->Update(_delta_time);
-}
-
-//--------------------------------------------------------------
-// Get
-//--------------------------------------------------------------
-Dataset& IStructure::GetDataset() const
-{
-	return *m_dataset;
-}
-
-IStructure::VectorOfNodes& IStructure::GetNodes()
-{
-	return m_nodes;
 }
 
 //--------------------------------------------------------------
@@ -65,31 +52,18 @@ void IStructure::SetPosition(const glm::vec3& _position)
 };
 
 //--------------------------------------------------------------
-// Displacement
-//--------------------------------------------------------------
-const glm::vec3& IStructure::Node::GetDisplacement()
-{
-	return m_displacement;
-}
-
-void IStructure::Node::SetDisplacement(glm::vec3 _displacement)
-{
-	m_displacement = _displacement;
-}
-
-//--------------------------------------------------------------
 // Interaction
 //--------------------------------------------------------------
-void IStructure::Move(glm::vec3 _offset)
+void IStructure::Move(const glm::vec3& _offset)
 {
 	m_position += _offset;
 };
 
 void IStructure::Select(const glm::vec3& _position)
 {
-	glm::vec3 transformed = _position - m_position;
+	const glm::vec3 transformed = _position - m_position;
 
-	for (auto& node : m_nodes)
+	for (const auto& node : nodes)
 	{
 		if (node->Inside(transformed))
 		{
@@ -116,7 +90,7 @@ void IStructure::UpdateAABB()
 	glm::vec3 tl{ 1e30 };
 	glm::vec3 br{ -1e30 };
 
-	for (const auto& node : GetNodes())
+	for (const auto& node : nodes)
 	{
 		tl.x = min(node->GetNewPosition().x - node->GetRadius(), tl.x);
 		tl.y = min(node->GetNewPosition().y - node->GetRadius(), tl.y);
@@ -173,14 +147,14 @@ void IStructure::Gui()
 		return;
 	}
 
-	m_dataset->InfoGui();
+	dataset->InfoGui();
 
 	if (ImGui::TreeNode("Node Settings"))
 	{
 		ImGui::Checkbox("Draw Label", &m_gui_data.checkbox_node_labels);
 		if (ImGui::SliderFloat("Radius", &m_gui_data.slider_radius, 10, 30))
 		{
-			for (auto& node : m_nodes)
+			for (auto& node : nodes)
 				node->SetRadius(m_gui_data.slider_radius);
 		}
 		ImGui::TreePop();
@@ -234,7 +208,7 @@ void IStructure::Draw(bool _is_focussed)
 	//ofSetDrawBitmapMode( );
 	if (m_gui_data.checkbox_node_labels)
 	{
-		for (auto& node : m_nodes)
+		for (const auto& node : nodes)
 			ofDrawBitmapStringHighlight(ofToString(node->GetVertexId()), node->GetPosition() + glm::vec3(10, 10, -1));
 	}
 	ofPopMatrix();

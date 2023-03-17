@@ -10,27 +10,37 @@ void Attributes::Init( Model::Attributes& _attributes )
 	for ( auto& it = _attributes.begin( ); it != _attributes.end( ); it++ ) {
 		try {
 			float value = std::stof( it->second );
-			m_attributes.insert( { it->first, value } );
+			map.insert( { it->first, value } );
 		} catch ( std::exception& ) {
-			m_attributes.insert( { it->first, it->second } );
+			map.insert( { it->first, it->second } );
 		}
 	}
 }
 
-float Attributes::FindFloat( std::string _key, float _default )
+float Attributes::FindFloat(const std::string& _key, float _default )
 {
-	auto& it = m_attributes.find( _key );
-	if ( it != m_attributes.end( ) ) {
+	auto& it = map.find( _key );
+	if ( it != map.end( ) ) {
 		return std::visit( VisitFloat{ _default }, it->second );
 	}
-	m_attributes[_key] = _default;
+	map[_key] = _default;
 	return _default;
 }
 
-std::string Attributes::FindString( std::string _key )
+int Attributes::FindInt(const std::string& _key, int _default )
 {
-	auto& it = m_attributes.find( _key );
-	if ( it != m_attributes.end( ) ) {
+	auto& it = map.find( _key );
+	if ( it != map.end( ) ) {
+		return std::visit( VisitInt{ _default }, it->second );
+	}
+	map[_key] = _default;
+	return _default;
+}
+
+std::string Attributes::FindString(const std::string& _key )
+{
+	auto& it = map.find( _key );
+	if ( it != map.end( ) ) {
 		return std::visit( VisitString{}, it->second );
 	}
 	return "";
@@ -50,10 +60,10 @@ Dataset::Dataset(const Dataset& _dataset)
 	edges = _dataset.edges;
 }
 
-Dataset& Dataset::operator=(const Dataset& _dataset) const
+Dataset& Dataset::operator=(const Dataset& _dataset)
 {
-	Dataset dataset = Dataset(_dataset);
-	return dataset;
+	*this = Dataset(_dataset);
+	return *this;
 }
 
 bool Dataset::Load(const std::string _filename )
@@ -166,10 +176,9 @@ void Dataset::InfoGui( )
 
 void Dataset::SetInfo( )
 {
-	m_info.push_back( { "filename", m_filename } );
-	m_info.push_back( { "# vertices", std::to_string( vertices.size( ) ) } );
-	m_info.push_back( { "# edges", std::to_string( edges.size( ) ) } );
-
+	m_info.emplace_back( "filename", m_filename  );
+	m_info.emplace_back( "# vertices", std::to_string( vertices.size( ) )  );
+	m_info.emplace_back( "# edges", std::to_string( edges.size( ) ) );
 }
 
 const std::string& Dataset::GetFilename( )
@@ -194,7 +203,7 @@ void Dataset::AddInfo(const std::string& _key, const std::string& _value){
 		return;
 	}
 	stored_val = m_info.size();
-	m_info.push_back({_key, _value});
+	m_info.emplace_back(_key, _value);
 }
 
 } // namespace DataVis

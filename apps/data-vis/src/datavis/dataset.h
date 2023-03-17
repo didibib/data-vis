@@ -3,53 +3,50 @@
 namespace DataVis
 {
 //--------------------------------------------------------------
-using AnyType = std::variant<float, std::string>;
+using AnyType = std::variant<int, float, std::string>;
 
 struct VisitFloat
 {
 	VisitFloat( float _f ) : default_value( _f ) {}
-	float operator()( float& _f ) { return CheckParam( _f, default_value ); }
-	float operator()( std::string& _s ) { return CheckParam( _s, default_value ); }
-	float CheckParam( const float& _f, float _default ) { return _f; }
-	float CheckParam( const std::string&, float _default ) { return _default; }
+	float operator()( const float& _f ) const { return CheckParam( _f, default_value ); }
+	float operator()( const std::string& _s ) const  { return CheckParam( _s, default_value ); }
+	float operator()(const int& _i) const {return CheckParam(_i, default_value); }
+	static float CheckParam( const float& _f, float _default ) { return _f; }
+	static float CheckParam( const std::string&, float _default ) { return _default; }
+	static float CheckParam( const int& _i, float ) { return static_cast<float>(_i); }
+	float default_value = 0;
+};
+
+struct VisitInt
+{
+	VisitInt( int _f ) : default_value( _f ) {}
+	float operator()( const float& _f ) const { return CheckParam( _f, default_value ); }
+	float operator()( const std::string& _s ) const  { return CheckParam( _s, default_value ); }
+	float operator()(const int& _i) const {return CheckParam(_i, default_value); }
+	static float CheckParam( const float& _f, int _default ) { return _default; }
+	static float CheckParam( const std::string&, int _default ) { return _default; }
+	static float CheckParam( const int& _i, int ) { return _i; }
 	float default_value = 0;
 };
 
 struct VisitString
 {
-	std::string operator()( float& _f ) { return std::to_string( _f ); }
-	std::string operator()( std::string& _s ) { return _s; }
+	std::string operator()( const float& _f ) const { return std::to_string( _f ); }
+	std::string operator()( const std::string& _s ) const { return _s; }
+	std::string operator()( const int& _i ) const { return std::to_string(_i); }
 };
 
 //--------------------------------------------------------------
 // Attributes
 //--------------------------------------------------------------
-class Attributes
+struct Attributes
 {
-public:
 	Attributes( ) = default;
 	void Init( Model::Attributes& _attributes );
-	const std::unordered_map<Model::Id, AnyType>& Get( ) { return m_attributes; }
-
-	/// <summary>
-	/// Find the float value for the given key. 
-	/// If the key is not present it will be inserted with the default value
-	/// </summary>
-	/// <param name="_key"></param>
-	/// <param name="_default">: The default value if the key is not present.</param>
-	/// <returns></returns>
-	float FindFloat( std::string _key, float _default );
-
-	/// <summary>
-	/// Find any value for the given key. Any value will be returned as string.
-	/// If the key is not present it will return a empty string;
-	/// </summary>
-	/// <param name="_key"></param>
-	/// <returns>Key value or empty string</returns>
-	std::string FindString( std::string _key );
-
-private:
-	std::unordered_map<Model::Id, AnyType> m_attributes;
+	std::unordered_map<Model::Id, AnyType> map;
+	float FindFloat(const std::string& key, float default );
+	int FindInt(const std::string& key, int default);
+	std::string FindString(const std::string& key );
 };
 
 //--------------------------------------------------------------
@@ -94,7 +91,7 @@ public:
 	Dataset( ) = default;
 	~Dataset() = default;
 	Dataset(const Dataset&);
-	Dataset& operator=(const Dataset&) const;
+	Dataset& operator=(const Dataset&);
 	bool Load(const std::string filename );
 	void InfoGui( );
 	const std::string& GetFilename( );
@@ -106,7 +103,7 @@ public:
 
 private:
 	void SetInfo( );
-	Kind m_kind;
+	Kind m_kind = Kind::Undirected;
 	std::string m_filename;
 	std::unordered_map<std::string, VertexIdx> m_vertex_idx;
 
