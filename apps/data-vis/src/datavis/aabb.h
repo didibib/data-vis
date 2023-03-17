@@ -6,12 +6,13 @@ class AABB : public Animator
 {
 public:
 	AABB() = default;
+	void Draw() override;
 	void Draw(bool is_focussed);
 	float GetArea() const;
 	bool Inside(const glm::vec3& position)  const;
 	bool InsideDraggable(const glm::vec3& position) const;
 	void SetNewBounds(const glm::vec3& top_left, const glm::vec3& bottom_right);
-	glm::vec3 Clamp( const glm::vec3 );
+	glm::vec3 Clamp( const glm::vec3& ) const;
 
 protected:
 	virtual void OnStopAnimation() override;
@@ -25,5 +26,6 @@ protected:
 
 	ofRectangle m_draggable;
 	int m_draggable_size = 50;
+	bool m_is_focussed = false;
 };
 } // namespace DataVis

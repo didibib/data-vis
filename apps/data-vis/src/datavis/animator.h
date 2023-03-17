@@ -6,7 +6,8 @@ class Animator
 {
 public:
 	Animator() = default;
-	virtual auto Update(float delta_time, float speed = 1.f) -> void;
+	virtual void Update(float delta_time, float speed = 1.f);
+	virtual void Draw() = 0;
 	virtual ~Animator() = default;
 
 protected:
@@ -14,7 +15,12 @@ protected:
 	void StartAnimation();
 	virtual void OnStopAnimation() = 0;
 	virtual void Interpolate(float percentage) = 0;
-
+	
+	struct InterpolateValue
+	{
+		float value = 0, old_value = 0, new_value = 0;
+	};
+	
 private:
 	void StopAnimation();
 	float m_time = 0;
@@ -25,7 +31,7 @@ class Rings : public Animator
 {
 public:
 	Rings() = default;
-	void Draw();
+	void Draw() override;
 	void Set(int amount, float start, float step);
 
 protected:
@@ -33,15 +39,8 @@ protected:
 	void Interpolate(float percentage) override;
 
 private:
-	struct Value
-	{
-		float value = 0, old_value = 0, new_value = 0;
-	};
 	int m_amount{};
-	std::vector<Value> m_alpha;
-	std::vector<Value> m_radius;
+	std::vector<InterpolateValue> m_alpha;
+	std::vector<InterpolateValue> m_radius;
 };
-
-
-
 } // DataVis

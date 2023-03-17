@@ -29,7 +29,7 @@ bool RandomLayout::Gui(IStructure& _structure)
 //--------------------------------------------------------------
 void RandomLayout::Apply(IStructure& _structure, int _width, int _height)
 {
-	auto& nodes = _structure.GetNodes();
+	auto& nodes = _structure.nodes;
 	for (size_t i = 0; i < nodes.size(); i++) {
 		float x = Random::RangeF(_width);
 		float y = Random::RangeF(_height);
@@ -68,7 +68,7 @@ bool GridLayout::Gui(IStructure& _structure)
 //--------------------------------------------------------------
 void GridLayout::Apply(IStructure& _layout, int _width, int _height, float _step)
 {
-	auto& nodes = _layout.GetNodes();
+	auto& nodes = _layout.nodes;
 	std::vector<glm::vec3> grid;
 	// Increment width and height if there are more nodes then positions
 	while (nodes.size() > _width * _height) _width++, _height++;
@@ -144,11 +144,11 @@ void RadialLayout::Apply(Tree& _tree, float _start, float _step)
 }
 
 //--------------------------------------------------------------
-void RadialLayout::SubTree(Tree::Node& _node, float _wedge_start, float _wedge_end, int _depth, float _start, float _step)
+void RadialLayout::SubTree(Tree::TreeNode& _node, float _wedge_start, float _wedge_end, int _depth, float _start, float _step)
 {
 	float new_wedge_start = _wedge_start;
 	float radius = _start + (_step * _depth);
-	float parent_leaves = Tree::Leaves(std::make_shared<Tree::Node>(_node));
+	float parent_leaves = Tree::Leaves(std::make_shared<Tree::TreeNode>(_node));
 	for (auto& child : _node.children) {
 		float child_leaves = Tree::Leaves(child);
 		float new_wedge_end = new_wedge_start + (child_leaves / parent_leaves * (_wedge_end - _wedge_start));
@@ -189,40 +189,40 @@ bool ForceDirectedLayout::Gui(IStructure& _structure)
 //--------------------------------------------------------------
 void ForceDirectedLayout::Apply(IStructure& _structure, float _C, float _t, int _iterations)
 {
-	float area = _structure.GetArea();
-	float k = _C * sqrtf(area / _structure.GetNodes().size());
-	float k2 = k * k;
+	const float area = _structure.GetArea();
+	const float k = _C * sqrtf(area / _structure.nodes.size());
+	const float k2 = k * k;
 
 	for (int i = 0; i < _iterations; i++)
 	{
 		// Repulsion
-		for (auto& v : _structure.GetNodes())
+		for (const auto& v : _structure.nodes)
 		{
 			v->SetDisplacement(glm::vec3(0));
-			for (auto& u : _structure.GetNodes())
+			for (const auto& u : _structure.nodes)
 			{
 				if (v->GetVertexIdx() == u->GetVertexIdx()) continue;
 
 				glm::vec3 delta = v->GetPosition() - u->GetPosition();
-				float delta_l = length(delta);
-				float fr = k2 / delta_l;
+				const float delta_l = length(delta);
+				const float fr = k2 / delta_l;
 				v->SetDisplacement(v->GetDisplacement() + (delta / delta_l) * fr);
 			}
 		}
 
 		// Attraction
-		for (auto& e : _structure.GetDataset().edges)
+		for (const auto& e : _structure.dataset->edges)
 		{
-			auto& v = _structure.GetNodes()[e.from_idx];
-			auto& u = _structure.GetNodes()[e.to_idx];
+			const auto& v = _structure.nodes[e.from_idx];
+			const auto& u = _structure.nodes[e.to_idx];
 			glm::vec3 delta = v->GetPosition() - u->GetPosition();
-			float delta_l = length(delta);
+			const float delta_l = length(delta);
 			glm::vec3 offset = (delta / delta_l) * (delta_l * delta_l / k);
 			v->SetDisplacement(v->GetDisplacement() - offset);
 			u->SetDisplacement(u->GetDisplacement() + offset);
 		}
 
-		for (auto& node : _structure.GetNodes())
+		for (const auto& node : _structure.nodes)
 		{
 			glm::vec3 new_pos = node->GetPosition() + node->GetDisplacement() * _t;
 			node->SetPosition( _structure.GetAABB().Clamp( new_pos ) );

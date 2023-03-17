@@ -90,6 +90,8 @@ namespace DataVis
 #include "dataset.h"
 #include "animator.h"
 #include "aabb.h"
+#include "structure/node.h"
+#include "structure/edge_path.h"
 #include "structure/structure.h"
 #include "structure/graph.h"
 #include "structure/tree.h"

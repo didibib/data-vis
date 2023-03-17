@@ -8,7 +8,7 @@ namespace DataVis
         m_layouts.push_back(std::make_unique<RadialLayout>());
     }
 
-    std::shared_ptr<Tree::Node> Tree::Root()
+    std::shared_ptr<Tree::TreeNode> Tree::Root()
     {
         return m_root;
     }
@@ -16,7 +16,7 @@ namespace DataVis
     //--------------------------------------------------------------
     // Properties
     //--------------------------------------------------------------
-    uint Tree::Leaves(std::shared_ptr<Node> node)
+    uint Tree::Leaves(std::shared_ptr<TreeNode> node)
     {
         uint leaves = 0;
         if (node->children.size() == 0) leaves++;
@@ -25,7 +25,7 @@ namespace DataVis
     }
 
     //--------------------------------------------------------------
-    uint Tree::Depth(std::shared_ptr<Node> node)
+    uint Tree::Depth(std::shared_ptr<TreeNode> node)
     {
         uint max = 0;
         for (auto& child : node->children)
@@ -37,9 +37,9 @@ namespace DataVis
     }
 
     //--------------------------------------------------------------
-    void Tree::SwapRoot(std::shared_ptr<Node> _new_root)
+    void Tree::SwapRoot(std::shared_ptr<TreeNode> _new_root)
     {
-        std::shared_ptr<Node> node = _new_root;
+        std::shared_ptr<TreeNode> node = _new_root;
         while (node->GetVertexIdx() != m_root->GetVertexIdx())
         {
             node->children.push_back(node->parent);
@@ -59,7 +59,7 @@ namespace DataVis
         }
 
         node = _new_root;
-        std::shared_ptr<Node> prev = nullptr;
+        std::shared_ptr<TreeNode> prev = nullptr;
         while (node != nullptr)
         {
             auto next = node->parent;
@@ -90,24 +90,19 @@ namespace DataVis
         ofDrawCircle(m_root->GetPosition(), m_root->GetRadius());
         ofDrawBitmapStringHighlight(ofToString(m_root->GetVertexId()), m_root->GetPosition() + glm::vec3(10, 10, -1));
 
-        std::stack<std::shared_ptr<Node>> stack;
+        std::stack<std::shared_ptr<TreeNode>> stack;
         for (auto& child : m_root->children) stack.push(child);
 
         while (stack.empty() == false)
         {
-            auto node = stack.top();
+            const auto& node = stack.top();
             stack.pop();
-            auto parent = node->parent;
-            static glm::vec3 sub = {0, 0, -1}; // To draw edge behind vertices
+            const auto& parent = node->parent;
+            static const glm::vec3 sub = {0, 0, -1}; // To draw edge behind vertices
             ofFill();
             ofSetColor(123);
             ofDrawLine(parent->GetPosition() + sub, node->GetPosition() + sub);
-
-            ofSetColor(node->color);
-            ofDrawCircle(node->GetPosition(), node->GetRadius());
-
-            //ofDrawBitmapStringHighlight(ofToString(node->GetVertexId()), node->GetPosition() + glm::vec3(10, 10, -1));
-
+            node->Draw();
             for (auto& child : node->children) stack.push(child);
         }
     }
@@ -125,7 +120,7 @@ namespace DataVis
 
             if (ImGui::Button("Make root"))
             {
-                SwapRoot(std::static_pointer_cast<Tree::Node>(m_selected_node));
+                SwapRoot(std::static_pointer_cast<TreeNode>(m_selected_node));
             }
 
             ImGui::EndChild();
@@ -139,14 +134,14 @@ namespace DataVis
     void MSP::Init(const std::shared_ptr<Dataset> _dataset)
     {
         Tree::Init(_dataset);
-        m_nodes.resize(_dataset->vertices.size());
+        nodes.resize(_dataset->vertices.size());
         Create(0);
     }
 
     //--------------------------------------------------------------
     void MSP::Create(VertexIdx _root)
     {
-        auto& vertices = m_dataset->vertices;
+        auto& vertices = dataset->vertices;
 
         // Keep track of the parent of each vertex so we can construct a tree after
         std::vector<VertexIdx> parents(vertices.size(), 0);
@@ -180,7 +175,7 @@ namespace DataVis
             for (const auto& neigbor : vertices[idx].neighbors)
             {
                 const uint v = neigbor.idx;
-                const float weight = m_dataset->edges[neigbor.edge_idx].attributes.FindFloat("weight", 1);
+                const float weight = dataset->edges[neigbor.edge_idx].attributes.FindFloat("weight", 1);
                 if (!included[v] && weight < costs[v])
                 {
                     // Found a cheaper edge to v
@@ -191,25 +186,25 @@ namespace DataVis
         }
 
         // Construct a tree
-        m_root = std::make_shared<Node>(vertices[_root].id, _root);
-        m_nodes[_root] = m_root;
+        m_root = std::make_shared<Tree::TreeNode>(vertices[_root].id, _root);
+        nodes[_root] = m_root;
 
         // Construct recursive lambda to create the tree
-        static std::function<void(const std::shared_ptr<Node>&, VectorOfNodes&)> make_tree =
-            [&](const std::shared_ptr<Node>& n, VectorOfNodes& nodes)
+        static std::function<void(const std::shared_ptr<Tree::TreeNode>&, VectorOfNodes&)> make_tree =
+            [&](const std::shared_ptr<Tree::TreeNode>& n, VectorOfNodes& nodes)
         {
             // Look through all vertices which have parent == n.vertex
             for (size_t i = 0; i < vertices.size(); i++)
                 if (parents[i] == n->GetVertexIdx())
                 {
                     // Add node to n.children
-                    auto child = std::make_shared<Node>(vertices[i].id, i, n);
+                    auto child = std::make_shared<Tree::TreeNode>(vertices[i].id, i, n);
                     nodes[i] = child;
                     n->children.push_back(child);
                     make_tree(child, nodes);
                 }
         };
-        make_tree(m_root, m_nodes);
+        make_tree(m_root, nodes);
         UpdateProperties();
         UpdateAABB();
     }
