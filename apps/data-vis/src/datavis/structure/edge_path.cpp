@@ -20,7 +20,6 @@ void EdgePath::Draw()
     }
 
     ofNoFill();
-    ofSetColor(123);
     m_path.draw();
 
     if (m_is_directed)
