@@ -36,7 +36,7 @@ uint Range(uint max)
 float Float() { return UInt() * 2.3283064365387e-10f; }
 float RangeF(float _range) { return Float() * _range; }
 
-}
+} // namespace Random
 
 namespace Curves
 {
@@ -46,6 +46,16 @@ float Bezier(float _t)
 }
 } // namespace Curves
 
+namespace ImGuiExtensions
+{
+	bool ColorEdit3(char* _label, glm::vec3& _color, int _flags)
+	{
+		_color /= 255.f;
+		bool val = ImGui::ColorEdit3(_label, (float*)&_color, _flags);
+		_color *= 255;
+		return val;
+	}
+} // namespace ImGuiExtensions
 
 
 } // namespace DataVis
