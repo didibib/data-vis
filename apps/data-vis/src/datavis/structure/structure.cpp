@@ -135,7 +135,7 @@ void IStructure::SetOnDeleteCallback(std::function<void(IStructure&)> _callback)
 
 void IStructure::SetNodesColor(ofColor _color)
 {
-	for (auto& node : m_nodes)
+	for (auto& node : nodes)
 	{
 		node->color = _color;
 	}
