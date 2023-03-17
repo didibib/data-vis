@@ -99,7 +99,7 @@ private:
 };
 
 //--------------------------------------------------------------
-// Force Directed
+// Sugiyama Framework
 //--------------------------------------------------------------
 class Sugiyama final : public Layout
 {

@@ -40,7 +40,7 @@ namespace DataVis
     void Graph::DrawNodes()
     {
         ofFill();
-        ofSetColor(123);
+        ofSetColor(m_gui_data.coloredit_edge_color.x, m_gui_data.coloredit_edge_color.y, m_gui_data.coloredit_edge_color.z);
 
         //for (const auto& edge : dataset->edges)
         //{
