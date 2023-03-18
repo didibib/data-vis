@@ -87,8 +87,8 @@ void IStructure::SetSelectedNode(std::shared_ptr<Node> _node)
 //--------------------------------------------------------------
 void IStructure::UpdateAABB()
 {
-	glm::vec3 tl{ 1e30 };
-	glm::vec3 br{ -1e30 };
+	glm::vec3 tl{ MAX_FLOAT };
+	glm::vec3 br{ -MAX_FLOAT };
 
 	for (const auto& node : nodes)
 	{
@@ -128,12 +128,12 @@ float IStructure::GetArea() const
 //--------------------------------------------------------------
 // Callback
 //--------------------------------------------------------------
-void IStructure::SetOnDeleteCallback(std::function<void(IStructure&)> _callback)
+void IStructure::SetOnDeleteCallback(const std::function<void(IStructure&)>& _callback)
 {
 	m_on_delete_callback = _callback;
 }
 
-void IStructure::SetNodesColor(ofColor _color)
+void IStructure::SetNodesColor(ofColor _color) const
 {
 	for (auto& node : nodes)
 	{
@@ -162,11 +162,11 @@ void IStructure::Gui()
 		ImGui::Checkbox("Draw Label", &m_gui_data.checkbox_node_labels);
 		if (ImGui::SliderFloat("Radius", &m_gui_data.slider_radius, 10, 30))
 		{
-			for (auto& node : nodes)
+			for (const auto& node : nodes)
 				node->SetRadius(m_gui_data.slider_radius);
 		}
 
-		const int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
+		constexpr int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
 		if (ImGuiExtensions::ColorEdit3("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
 		{
 			SetNodesColor(ofColor(m_gui_data.coloredit_node_color.x, m_gui_data.coloredit_node_color.y, m_gui_data.coloredit_node_color.z));
@@ -179,7 +179,7 @@ void IStructure::Gui()
 
 	ImGui::Separator();
 	// Loop over all layout gui's
-	for (auto& layout : m_layouts)
+	for (const auto& layout : m_layouts)
 	{
 		if (layout->Gui(*this)) m_active_layout = layout;
 	}

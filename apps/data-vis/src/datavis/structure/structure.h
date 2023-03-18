@@ -29,12 +29,12 @@ public:
 	virtual void Gui();
 	void Select(const glm::vec3&);
 	void Move(const glm::vec3& offset);
-	void SetOnDeleteCallback(std::function<void(IStructure&)> callback);
+	void SetOnDeleteCallback(const std::function<void(IStructure&)>& callback);
 	std::shared_ptr<Dataset> dataset;
 	VectorOfNodes nodes;
 	VectorOfEdgePaths edges;
 	
-	void SetNodesColor(ofColor color);
+	void SetNodesColor(ofColor color) const;
 
 protected:
 	virtual void DrawNodes() = 0;
