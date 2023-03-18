@@ -85,30 +85,47 @@ namespace DataVis
             }
         }
 
+        // Create curves
         _graph.edges.resize(copy.edges.size());
-        for (size_t i = 0; i < _graph.edges.size(); i++)
+        for (auto& edge : _graph.edges)
         {
-            _graph.edges[i] = std::make_shared<EdgePath>();
+            edge = std::make_shared<EdgePath>();
         }
         const auto& vertices = new_dataset.vertices;
-        for(auto& edge : new_dataset.edges)
+        for(const auto& edge : new_dataset.edges)
         {
             if(vertices[edge.from_idx].id == DUMMY_ID)
                 continue;
+
+            const auto& edge_path = _graph.edges[edge.idx];
+            
+            // Add first control point
+            const auto& incoming_neighbors = vertices[edge.from_idx].incoming_neighbors;
+            if(not incoming_neighbors.empty())
+                edge_path->AddCurvePoint(new_positions[incoming_neighbors[0].idx]);
+            else
+                edge_path->AddCurvePoint(new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
             
             // Add start vertex
-            _graph.edges[edge.idx]->AddPoint(new_positions[edge.from_idx]);
+            edge_path->AddCurvePoint(new_positions[edge.from_idx]);
 
             auto current_edge = edge;
             while (vertices[current_edge.to_idx].id == DUMMY_ID)
             {
-                _graph.edges[edge.idx]->AddPoint(new_positions[current_edge.to_idx]);
+                edge_path->AddCurvePoint(new_positions[current_edge.to_idx]);
                 auto& next_node = vertices[current_edge.to_idx];
                 // Only 1 outgoing edge
                 current_edge = new_dataset.edges[next_node.neighbors[0].edge_idx];
             } 
             // Add end vertex
-            _graph.edges[edge.idx]->AddPoint(new_positions[current_edge.to_idx]);
+            edge_path->AddCurvePoint(new_positions[current_edge.to_idx]);
+
+            // Add last control point
+            const auto& neighbors = vertices[current_edge.to_idx].neighbors;
+            if(not neighbors.empty())
+                edge_path->AddCurvePoint(new_positions[neighbors[0].idx]);
+            else
+                edge_path->AddCurvePoint(new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
         }
         
         _graph.UpdateAABB();
@@ -290,18 +307,18 @@ namespace DataVis
     //--------------------------------------------------------------
     // Layer Assignment
     //--------------------------------------------------------------
-    void Sugiyama::LayerAssignment(Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex)
+    void Sugiyama::LayerAssignment(const Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex)
     {
         int layer = 0;
         Dataset copy_dataset = _dataset;
-        int size = _dataset.vertices.size();
+        const int size = _dataset.vertices.size();
         _layer_per_vertex.resize(size);
 
         bool hasSources = false;
         do
         {
             hasSources = false;
-            _vertices_per_layer.push_back({});
+            _vertices_per_layer.emplace_back();
             for (auto& v : copy_dataset.vertices)
             {
                 if (v.idx == VISITED_IDX) continue;

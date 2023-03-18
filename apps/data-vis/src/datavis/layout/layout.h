@@ -123,7 +123,7 @@ private:
 
     // Sugiyama Framework
     static Dataset BreakCycles(Dataset&);
-    static void LayerAssignment(Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex);
+    static void LayerAssignment(const Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex);
     static void AddDummyVertices(Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex);
     static int CrossingMinimization(Dataset&, std::vector<Layer>& vertices_per_layer, const OSCMHeuristic& heuristic,
                                     int iterations);

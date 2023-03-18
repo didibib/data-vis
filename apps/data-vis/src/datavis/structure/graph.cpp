@@ -72,7 +72,7 @@ namespace DataVis
         
         for (const auto& node : nodes)
         {
-            //if (node->GetVertexId() == "dummy") continue;
+            if (node->GetVertexId() == "dummy") continue;
             node->Draw();
         }
     }

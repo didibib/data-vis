@@ -10,7 +10,8 @@ public:
     void Init(EdgeIdx);
     void SetIsDirected(bool);
     void Draw() override;
-    void AddPoint(const glm::vec3&);
+    void AddCurvePoint(const glm::vec3&);
+    void AddLinePoint(const glm::vec3&);
     void UpdatePoint(const size_t index, const glm::vec3&);
 
 protected:
