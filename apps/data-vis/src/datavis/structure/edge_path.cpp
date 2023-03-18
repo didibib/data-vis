@@ -20,11 +20,11 @@ void EdgePath::Draw()
         m_update_arrow = false;
     }
 
-    ofNoFill();
+    ofFill();
     m_path.draw();
 
     if (m_is_directed)
-        ofDrawArrow(m_start_arrow, m_end_arrow, 10);
+        ofDrawArrow(m_start_arrow, m_end_arrow, 12);
 }
 
 //--------------------------------------------------------------

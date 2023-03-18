@@ -113,23 +113,15 @@ bool Dataset::Load(const std::string _filename )
 				e.to_idx = v_to_idx;
 				e.idx = edges.size( );
 
-				Neighbor n_to;
-				n_to.idx = v_to_idx;
-				n_to.edge_idx = edges.size( );
+				Neighbor n_to(v_to_idx, edges.size( ));
+				vertices[v_from_idx].outgoing_neighbors.push_back( n_to );
 
-				vertices[v_from_idx].neighbors.push_back( n_to );
-
-				Neighbor n_from;
-				n_from.idx = v_from_idx;
-				n_from.edge_idx = edges.size( );
-
-				if ( m_kind == Kind::Undirected ) {
-					vertices[v_to_idx].neighbors.push_back( n_from );
-				}
-				else if ( m_kind == Kind::Directed ) {
-					vertices[v_to_idx].incoming_neighbors.push_back(  n_from );
-				}
+				Neighbor n_from(v_from_idx, edges.size( ));
+				vertices[v_to_idx].incoming_neighbors.push_back(  n_from );
 				
+				if ( m_kind == Kind::Undirected ) {
+					vertices[v_to_idx].outgoing_neighbors.push_back( n_from );
+				}
 				edges.push_back( std::move( e ) );
 			}
 		} else {

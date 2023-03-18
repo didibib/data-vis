@@ -172,7 +172,7 @@ namespace DataVis
             included[idx] = true;
 
             // Update outgoing edges from this vertex
-            for (const auto& neigbor : vertices[idx].neighbors)
+            for (const auto& neigbor : vertices[idx].outgoing_neighbors)
             {
                 const uint v = neigbor.idx;
                 const float weight = dataset->edges[neigbor.edge_idx].attributes.FindFloat("weight", 1);

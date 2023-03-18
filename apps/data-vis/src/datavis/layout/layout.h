@@ -122,7 +122,7 @@ private:
     glm::vec2 m_node_offset;
 
     // Sugiyama Framework
-    static Dataset BreakCycles(Dataset&);
+    static Dataset BreakCycles(Dataset&, std::vector<int>& reversed_edges);
     static void LayerAssignment(const Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex);
     static void AddDummyVertices(Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex);
     static int CrossingMinimization(Dataset&, std::vector<Layer>& vertices_per_layer, const OSCMHeuristic& heuristic,
@@ -135,10 +135,10 @@ private:
     //--------------------------------------------------------------
     static bool IsSink(const Vertex&);
     static bool IsSource(const Vertex&);
-    static bool Has(const std::function<bool(Vertex&)>&, std::vector<Vertex>, Vertex& out);
+    static bool HasUnvisited(const std::function<bool(Vertex&)>&, std::vector<Vertex>, Vertex& out);
     static void RemoveOutgoingNeighbors(Dataset&, Vertex&);
     static void RemoveIncomingNeighbors(Dataset&, Vertex&);
-    static void RemoveNeighbors(Dataset&, Edge&);
+    static void RemoveNeighbors(Dataset&, const Edge&);
     static void AddNeighbors(Dataset&, Edge&);
 
     //--------------------------------------------------------------
@@ -177,5 +177,8 @@ private:
         std::vector<int>& align,
         std::vector<float>& x_per_vertex,
         float delta);
+
+    static void ReverseEdges(Dataset&, const std::vector<int>& reversed_edges);
+    static void CreateCurves(Graph&, const std::vector<glm::vec3>& new_positions, const glm::vec2& _node_offset);
 };
 } // namespace DataVis
