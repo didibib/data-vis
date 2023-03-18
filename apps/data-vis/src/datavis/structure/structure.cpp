@@ -16,7 +16,7 @@ IStructure::~IStructure()
 	__idx--;
 }
 
-void IStructure::Init(std::shared_ptr<Dataset> _dataset)
+void IStructure::Init(const std::shared_ptr<Dataset> _dataset)
 {
 	dataset = _dataset;
 	m_layouts.clear();
@@ -29,7 +29,7 @@ const int& IStructure::Idx() const
 	return m_idx;
 }
 
-void IStructure::Update(float _delta_time)
+void IStructure::Update(const float _delta_time)
 {
 	m_aabb.Update(_delta_time);
 	for (const auto& node : nodes)
@@ -44,12 +44,12 @@ void IStructure::Update(float _delta_time)
 const glm::vec3& IStructure::GetPosition() const
 {
 	return m_position;
-};
+}
 
 void IStructure::SetPosition(const glm::vec3& _position)
 {
 	m_position = _position;
-};
+}
 
 //--------------------------------------------------------------
 // Interaction
@@ -57,7 +57,7 @@ void IStructure::SetPosition(const glm::vec3& _position)
 void IStructure::Move(const glm::vec3& _offset)
 {
 	m_position += _offset;
-};
+}
 
 void IStructure::Select(const glm::vec3& _position)
 {
@@ -74,7 +74,7 @@ void IStructure::Select(const glm::vec3& _position)
 	SetSelectedNode(nullptr);
 }
 
-void IStructure::SetSelectedNode(std::shared_ptr<Node> _node)
+void IStructure::SetSelectedNode(const std::shared_ptr<Node>& _node)
 {
 	if (m_selected_node != nullptr)
 		m_selected_node->color = ofColor::black;
@@ -154,6 +154,8 @@ void IStructure::Gui()
 		m_on_delete_callback(*this);
 		return;
 	}
+
+	ImGui::Checkbox("TEMP_SWITCH", &m_gui_data.TEMP_SWITCH);
 
 	dataset->InfoGui();
 

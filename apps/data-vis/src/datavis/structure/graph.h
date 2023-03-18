@@ -11,6 +11,7 @@ public:
 	void Init(const std::shared_ptr<Dataset>) override;
 	void Load(const std::shared_ptr<Dataset>);
 	void DrawNodes() override;
+	void DrawEdges() const;
 
 private:
 };

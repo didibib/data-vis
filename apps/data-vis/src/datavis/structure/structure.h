@@ -13,7 +13,7 @@ public:
 	virtual ~IStructure();
 	[[nodiscard]] const int& Idx() const;
 	virtual void Init(const std::shared_ptr<Dataset>);
-	virtual void Update(float delta_time);
+	virtual void Update(const float delta_time);
 	[[nodiscard]] const glm::vec3& GetPosition() const;
 	void SetPosition(const glm::vec3&);
 
@@ -39,7 +39,7 @@ public:
 protected:
 	virtual void DrawNodes() = 0;
 	virtual void NodeInfoGui();
-	void SetSelectedNode(std::shared_ptr<Node> _node);
+	void SetSelectedNode(const std::shared_ptr<Node>& _node);
 
 	std::vector<std::shared_ptr<Layout>> m_layouts;
 	std::shared_ptr<Layout> m_active_layout;
@@ -53,6 +53,7 @@ protected:
 		float slider_radius = 10;
 		glm::vec3 coloredit_node_color = glm::vec3(0);
 		glm::vec3 coloredit_edge_color = glm::vec3(123);
+		bool TEMP_SWITCH = false;
 	} m_gui_data;
 
 	std::function<void(IStructure&)> m_on_delete_callback;
