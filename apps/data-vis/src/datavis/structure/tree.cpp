@@ -205,7 +205,10 @@ namespace DataVis
                 }
         };
         make_tree(m_root, nodes);
+        
+        // Update
         UpdateProperties();
         UpdateAABB();
+        UpdateEdges();
     }
 } // DataVis

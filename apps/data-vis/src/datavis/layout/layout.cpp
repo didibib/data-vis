@@ -37,6 +37,7 @@ void RandomLayout::Apply(IStructure& _structure, int _width, int _height)
 		nodes[i]->SetNewPosition(glm::vec3(x, y, z));
 	}
 	_structure.UpdateAABB();
+	_structure.UpdateEdges();
 }
 #pragma endregion // Random
 
@@ -66,9 +67,9 @@ bool GridLayout::Gui(IStructure& _structure)
 }
 
 //--------------------------------------------------------------
-void GridLayout::Apply(IStructure& _layout, int _width, int _height, float _step)
+void GridLayout::Apply(IStructure& _structure, int _width, int _height, float _step)
 {
-	auto& nodes = _layout.nodes;
+	const auto& nodes = _structure.nodes;
 	std::vector<glm::vec3> grid;
 	// Increment width and height if there are more nodes then positions
 	while (nodes.size() > _width * _height) _width++, _height++;
@@ -87,7 +88,8 @@ void GridLayout::Apply(IStructure& _layout, int _width, int _height, float _step
 	for (size_t i = 0; i < nodes.size(); i++) {
 		nodes[i]->SetNewPosition(grid[i]);
 	}
-	_layout.UpdateAABB();
+	_structure.UpdateAABB();
+	_structure.UpdateEdges();
 }
 #pragma endregion // Grid
 
@@ -107,7 +109,7 @@ bool RadialLayout::Gui(IStructure& _structure)
 		if (ImGui::Button("Apply"))
 		{
 			try {
-				Tree& tree = dynamic_cast<Tree&>(_structure);
+				auto& tree = dynamic_cast<Tree&>(_structure);
 				Apply(tree, m_start, m_step);
 				m_rings.Set(tree.Depth(tree.Root()), m_start, m_step);
 				active = true;
@@ -140,21 +142,23 @@ void RadialLayout::Apply(Tree& _tree, float _start, float _step)
 	node->SetNewPosition(glm::vec3(0));
 	SubTree(*node, 0, TWO_PI, 0, _start, _step);
 	_tree.UpdateAABB();
-	
+	_tree.UpdateEdges();
 }
 
 //--------------------------------------------------------------
 void RadialLayout::SubTree(Tree::TreeNode& _node, float _wedge_start, float _wedge_end, int _depth, float _start, float _step)
 {
 	float new_wedge_start = _wedge_start;
-	float radius = _start + (_step * _depth);
-	float parent_leaves = Tree::Leaves(std::make_shared<Tree::TreeNode>(_node));
+	const float radius = _start + (_step * _depth);
+	const uint parent_leaves = Tree::Leaves(std::make_shared<Tree::TreeNode>(_node));
 	for (auto& child : _node.children) {
-		float child_leaves = Tree::Leaves(child);
-		float new_wedge_end = new_wedge_start + (child_leaves / parent_leaves * (_wedge_end - _wedge_start));
-		float angle = (new_wedge_start + new_wedge_end) * .5f;
+		const uint child_leaves = Tree::Leaves(child);
+		const float new_wedge_end = new_wedge_start +
+			static_cast<float>(child_leaves) / static_cast<float>(parent_leaves) *
+				(_wedge_end - _wedge_start);
+		const float angle = (new_wedge_start + new_wedge_end) * .5f;
 		child->SetNewPosition(glm::vec3(radius * glm::cos(angle), radius * glm::sin(angle), 0));
-		if (child->children.size() > 0)
+		if (not child->children.empty())
 			SubTree(*child, new_wedge_start, new_wedge_end, _depth + 1, _start, _step);
 		new_wedge_start = new_wedge_end;
 	}
@@ -230,6 +234,7 @@ void ForceDirectedLayout::Apply(IStructure& _structure, float _C, float _t, int 
 		}
 		_t *= 0.9999f;
 	}
+	_structure.UpdateEdges();
 }
 #pragma endregion // Force Directed
 

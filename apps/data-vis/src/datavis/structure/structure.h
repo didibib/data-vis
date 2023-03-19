@@ -16,13 +16,14 @@ public:
 	virtual void Update(const float delta_time);
 	[[nodiscard]] const glm::vec3& GetPosition() const;
 	void SetPosition(const glm::vec3&);
+	void UpdateEdges();
 
 	// AABB
 	AABB GetAABB();
 	void UpdateAABB();
-	bool Inside(const glm::vec3&) const;
-	bool InsideDraggable(const glm::vec3&) const;
-	float GetArea() const;
+	[[nodiscard]] bool Inside(const glm::vec3&) const;
+	[[nodiscard]] bool InsideDraggable(const glm::vec3&) const;
+	[[nodiscard]] float GetArea() const;
 
 	// Interaction
 	void Draw(bool is_focussed);
@@ -31,6 +32,7 @@ public:
 	void Move(const glm::vec3& offset);
 	void SetOnDeleteCallback(const std::function<void(IStructure&)>& callback);
 	std::shared_ptr<Dataset> dataset;
+
 	VectorOfNodes nodes;
 	VectorOfEdgePaths edges;
 	
@@ -53,7 +55,6 @@ protected:
 		float slider_radius = 10;
 		glm::vec3 coloredit_node_color = glm::vec3(0);
 		glm::vec3 coloredit_edge_color = glm::vec3(123);
-		bool TEMP_SWITCH = false;
 	} m_gui_data;
 
 	std::function<void(IStructure&)> m_on_delete_callback;
