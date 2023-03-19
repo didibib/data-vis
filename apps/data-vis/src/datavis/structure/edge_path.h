@@ -30,15 +30,17 @@ private:
     void UpdatePath();
     // Arrow can be updated after path has been build
     void UpdateArrow();
+    // Line path will be animated
     void BuildLinePath();
+    // Cuve path will not be animated
     void BuildCurvePath();
     
     EdgeIdx m_edge_idx = UNINIT_IDX;
     ofPolyline m_path;
-    std::vector<glm::vec3> m_points;
+    std::vector<InterpolateValue3> m_points;
     glm::vec3 m_start_arrow, m_end_arrow;
     float m_arrow_offset = 10;
-    glm::vec3 m_start_ctrl_point, m_end_ctrl_point;
+    InterpolateValue3 m_start_ctrl_point, m_end_ctrl_point;
 
     Style m_style = Style::Line;
     bool m_is_directed = false;
