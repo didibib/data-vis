@@ -8,8 +8,10 @@ int main( ){
 	settings.setGLVersion(3, 3);
 	settings.title = "Data Visualizer";
 	const auto window = ofCreateWindow(settings);
-	
+
+#ifdef _WIN32
 	const HWND hwnd = window->getWin32Window();
-	ShowWindow(hwnd, SW_MAXIMIZE);	
+	ShowWindow(hwnd, SW_MAXIMIZE);
+#endif
 	ofRunApp(make_shared<ofApp>());
 }

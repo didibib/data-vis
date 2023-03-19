@@ -62,9 +62,11 @@ using VertexIdx = int;
 using EdgeIdx = int;
 
 constexpr int VISITED_IDX = -1;
+constexpr int UNINIT_IDX = -1;
 constexpr const char* DUMMY_ID = "dummy";
 constexpr int REMOVE_IDX = -3;
 
+//--------------------------------------------------------------
 struct Neighbor
 {
     Neighbor() = default;
@@ -77,6 +79,7 @@ struct Neighbor
     EdgeIdx edge_idx = std::numeric_limits<EdgeIdx>::min();
 };
 
+//--------------------------------------------------------------
 struct Vertex
 {
     std::string id;
@@ -87,6 +90,7 @@ struct Vertex
     Attributes attributes;
 };
 
+//--------------------------------------------------------------
 struct Edge
 {
     EdgeIdx idx = std::numeric_limits<VertexIdx>::max();

@@ -137,6 +137,7 @@ namespace DataVis
 
     void Sugiyama::CreateCurves(Graph& _graph, const std::vector<glm::vec3>& _new_positions, const glm::vec2& _node_offset)
     {
+        const auto& nodes = _graph.nodes;
         const auto& dataset = *_graph.dataset;
         // Create curves
         for (auto& edge : _graph.edges)
@@ -150,34 +151,37 @@ namespace DataVis
                 continue;
 
             const auto& edge_path = _graph.edges[edge.idx];
-
+            edge_path->Clear();
+            edge_path->SetStyle(EdgePath::Style::Curve);
+            edge_path->SetEdgeIdx(edge.idx);
             // Add first control point
             const auto& incoming_neighbors = vertices[edge.from_idx].incoming_neighbors;
             if(not incoming_neighbors.empty())
-                edge_path->AddCurvePoint(_new_positions[incoming_neighbors[0].idx]);
+                edge_path->SetStartCtrlPoint(_new_positions[incoming_neighbors[0].idx]);
             else
-                edge_path->AddCurvePoint(_new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
+                edge_path->SetStartCtrlPoint(_new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
             
             // Add start vertex
-            edge_path->AddCurvePoint(_new_positions[edge.from_idx]);
+            edge_path->AddPoint(_new_positions[edge.from_idx]);
 
             auto current_edge = edge;
             while (vertices[current_edge.to_idx].id == DUMMY_ID)
             {
-                edge_path->AddCurvePoint(_new_positions[current_edge.to_idx]);
+                edge_path->AddPoint(_new_positions[current_edge.to_idx]);
                 auto& next_node = vertices[current_edge.to_idx];
                 // Only 1 outgoing edge
                 current_edge = dataset.edges[next_node.outgoing_neighbors[0].edge_idx];
             } 
             // Add end vertex
-            edge_path->AddCurvePoint(_new_positions[current_edge.to_idx]);
+            edge_path->AddPoint(_new_positions[current_edge.to_idx]);
+            edge_path->SetArrowOffset(nodes[current_edge.to_idx]->GetRadius() * 2);
 
             // Add last control point
             const auto& neighbors = vertices[current_edge.to_idx].outgoing_neighbors;
             if(not neighbors.empty()) 
-                edge_path->AddCurvePoint(_new_positions[neighbors[0].idx]);
+                edge_path->SetEndCtrlPoint(_new_positions[neighbors[0].idx]);
             else
-                edge_path->AddCurvePoint(_new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
+                edge_path->SetEndCtrlPoint(_new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
         }
     }
 
@@ -227,7 +231,7 @@ namespace DataVis
                         if (outgoing[i].edge_idx == neighbor.edge_idx)
                         {
                             outgoing[i] = outgoing[outgoing.size() - 1];
-                            outgoing.resize(outgoing.size() - 1);
+                            outgoing.pop_back();
                         }
                     }
                 }
@@ -259,7 +263,7 @@ namespace DataVis
                         if (incoming[i].edge_idx == neighbor.edge_idx)
                         {
                             incoming[i] = incoming[incoming.size() - 1];
-                            incoming.resize(incoming.size() - 1);
+                            incoming.pop_back();
                         }
                     }
                 }
@@ -303,7 +307,7 @@ namespace DataVis
                         if (incoming[i].edge_idx == neighbor.edge_idx)
                         {
                             incoming[i] = incoming[incoming.size() - 1];
-                            incoming.resize(incoming.size() - 1);
+                            incoming.pop_back();
                         }
                     }
                 }
@@ -330,7 +334,7 @@ namespace DataVis
                         if (outgoing[i].edge_idx == neighbor.edge_idx)
                         {
                             outgoing[i] = outgoing[outgoing.size() - 1];
-                            outgoing.resize(outgoing.size() - 1);
+                            outgoing.pop_back();
                         }
                     }
                 }
@@ -460,7 +464,7 @@ namespace DataVis
                 if (incoming[i].edge_idx == neighbor.edge_idx)
                 {
                     incoming[i] = incoming[incoming.size() - 1];
-                    incoming.resize(incoming.size() - 1);
+                    incoming.pop_back();
                 }
             }
         }
@@ -475,7 +479,7 @@ namespace DataVis
             if (outgoing[i].idx == _e.to_idx)
             {
                 outgoing[i] = outgoing[outgoing.size() - 1];
-                outgoing.resize(outgoing.size() - 1);
+                outgoing.pop_back();
                 break;
             }
         }
@@ -486,7 +490,7 @@ namespace DataVis
             if (incoming[i].idx == _e.from_idx)
             {
                 incoming[i] = incoming[incoming.size() - 1];
-                incoming.resize(incoming.size() - 1);
+                incoming.pop_back();
                 break;
             }
         }
@@ -495,9 +499,9 @@ namespace DataVis
     void Sugiyama::AddNeighbors(Dataset& _dataset, Edge& _e)
     {
         auto& outgoing = _dataset.vertices[_e.from_idx].outgoing_neighbors;
-        outgoing.push_back({_e.to_idx, _e.idx});
+        outgoing.emplace_back(_e.to_idx, _e.idx);
         auto& incoming = _dataset.vertices[_e.to_idx].incoming_neighbors;
-        incoming.push_back({_e.from_idx, _e.idx});
+        incoming.emplace_back(_e.from_idx, _e.idx);
     }
 
     void Sugiyama::RemoveIncomingNeighbors(Dataset& _dataset, Vertex& _v)
@@ -512,7 +516,7 @@ namespace DataVis
                 if (outgoing[i].edge_idx == neighbor.edge_idx)
                 {
                     outgoing[i] = outgoing[outgoing.size() - 1];
-                    outgoing.resize(outgoing.size() - 1);
+                    outgoing.pop_back();
                 }
             }
         }
@@ -696,7 +700,7 @@ namespace DataVis
             auto& neighbors = _dataset.vertices[vertex_idx].outgoing_neighbors;
 
             for (auto& n : neighbors)
-                open_edges.push_back({vertex_idx, n.idx});
+                open_edges.emplace_back(vertex_idx, n.idx);
         }
         flags.resize(open_edges.size(), false);
 

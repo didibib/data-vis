@@ -46,9 +46,33 @@ const glm::vec3& IStructure::GetPosition() const
 	return m_position;
 }
 
+//--------------------------------------------------------------
 void IStructure::SetPosition(const glm::vec3& _position)
 {
 	m_position = _position;
+}
+
+//--------------------------------------------------------------
+void IStructure::UpdateEdges()
+{
+	edges.clear();
+	edges.resize(dataset->edges.size());
+	for(int i = 0; i < dataset->edges.size(); i++)
+	{
+		const auto& edge = dataset->edges[i];
+		auto const& startIdx = edge.from_idx;
+		auto const& endIdx = edge.to_idx;
+		glm::vec3 start = nodes[startIdx]->GetNewPosition();
+		glm::vec3 end = nodes[endIdx]->GetNewPosition();
+	
+		edges[i] = std::make_shared<EdgePath>();
+		const auto& edge_path = edges[i];
+		edge_path->AddPoint(start);
+		edge_path->AddPoint(end);
+		edge_path->SetArrowOffset(nodes[endIdx]->GetRadius() * 2);
+		if(dataset->GetKind() == Dataset::Kind::Directed)
+			edge_path->SetIsDirected(true);
+	}
 }
 
 //--------------------------------------------------------------
@@ -154,8 +178,6 @@ void IStructure::Gui()
 		m_on_delete_callback(*this);
 		return;
 	}
-
-	ImGui::Checkbox("TEMP_SWITCH", &m_gui_data.TEMP_SWITCH);
 
 	dataset->InfoGui();
 

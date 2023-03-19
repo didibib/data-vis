@@ -34,6 +34,7 @@ void Graph::Load(const std::shared_ptr<Dataset> _dataset)
             nodes[i]->neighbors.push_back(nodes[n.idx]);
         }
     }
+    UpdateEdges();
 }
 
 //--------------------------------------------------------------
@@ -42,47 +43,14 @@ void Graph::DrawNodes()
     ofFill();
     ofSetColor(m_gui_data.coloredit_edge_color.x, m_gui_data.coloredit_edge_color.y, m_gui_data.coloredit_edge_color.z);
 
-    DrawEdges();
-
-    for (const auto& node : nodes)
-    {
-        if (node->GetVertexId() == "dummy") continue;
-        node->Draw();
-    }
-}
-
-void Graph::DrawEdges() const
-{
-    if(m_gui_data.TEMP_SWITCH)
     for (const auto& edge : edges)
     {
         edge->Draw();
     }
-
-    //if(not edges.empty()) return; 
-    else
-    for (const auto& edge : dataset->edges)
+    for (const auto& node : nodes)
     {
-        auto const& startIdx = edge.from_idx;
-        auto const& endIdx = edge.to_idx;
-        glm::vec3 start = nodes[startIdx]->GetPosition();
-        glm::vec3 end = nodes[endIdx]->GetPosition();
-        glm::vec3 dir = normalize(end - start);
-        start += dir * nodes[startIdx]->GetRadius();
-        end -= dir * nodes[endIdx]->GetRadius();
-
-        // Draw edge behind nodes
-        --start;
-        --end;
-        if (dataset->GetKind() == Dataset::Kind::Undirected)
-        {
-            ofDrawLine(start, end);
-        }
-        else if (dataset->GetKind() == Dataset::Kind::Directed)
-        {
-            end -= dir * nodes[endIdx]->GetRadius();
-            ofDrawArrow(start, end, nodes[endIdx]->GetRadius());
-        }
+        if (node->GetVertexId() == "dummy") continue;
+        node->Draw();
     }
 }
 

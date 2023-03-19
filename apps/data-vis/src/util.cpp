@@ -51,7 +51,7 @@ namespace ImGuiExtensions
 	bool ColorEdit3(char* _label, glm::vec3& _color, int _flags)
 	{
 		_color /= 255.f;
-		bool val = ImGui::ColorEdit3(_label, (float*)&_color, _flags);
+		const bool val = ImGui::ColorEdit3(_label, (float*)&_color, _flags);
 		_color *= 255;
 		return val;
 	}
