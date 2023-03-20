@@ -4,8 +4,59 @@ namespace DataVis
 {
 void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 {
+    dataset = _dataset;
+    dataset_clusters = std::dynamic_pointer_cast<DatasetClusters>(_dataset);
+    
+    for(const auto& cluster : dataset_clusters->clusters)
+    {
+        std::shared_ptr<Graph> graph = make_shared<Graph>();
+        graph->Init(cluster);
+        m_sub_graphs.emplace_back(graph);
 
+        for(auto& node : graph->nodes)
+        {
+            nodes.push_back(node);
+        }
+    }
+
+    // Add inter-edge neighbours
+
+    // Add edge bundling layout
 }
+
+void Clusters::Update(const float _delta_time)
+{
+    for(const auto& graph : m_sub_graphs)
+        graph->Update(_delta_time);
+    IStructure::Update(_delta_time);
+}
+
+void Clusters::UpdateEdges()
+{
+    edges.clear();
+    edges.resize(dataset->edges.size());
+    // Loop over inter edges
+    for (int i = 0; i < dataset->edges.size(); i++)
+    {
+        const auto& edge = dataset->edges[i];
+        auto const& start_vertex = dataset->vertices[edge.from_idx];
+        auto const& end_vertex = dataset->vertices[edge.to_idx];
+        auto const& start_graph = FindSubGraph(start_vertex->owner);
+        auto const& end_graph = FindSubGraph(end_vertex->owner);
+
+        glm::vec3 start = start_graph->nodes[start_vertex->idx]->GetNewPosition();
+        glm::vec3 end = end_graph->nodes[end_vertex->idx]->GetNewPosition();
+
+        edges[i] = std::make_shared<EdgePath>();
+        const auto& edge_path = edges[i];
+        edge_path->AddPoint(start);
+        edge_path->AddPoint(end);
+        edge_path->SetArrowOffset(end_graph->nodes[end_vertex->idx]->GetRadius() * 2);
+        if (dataset->GetKind() == Dataset::Kind::Directed)
+            edge_path->SetIsDirected(true);
+    }
+}
+
 
 bool Clusters::InsideDraggable(const glm::vec3& _pos)
 {
@@ -15,7 +66,6 @@ bool Clusters::InsideDraggable(const glm::vec3& _pos)
         m_focussed_graph = nullptr;
         return true;
     }
-        
 
     for(auto& graph : m_sub_graphs)
     {
@@ -57,6 +107,16 @@ void Clusters::Select(const glm::vec3& _pos)
     }
 }
 
+std::shared_ptr<Graph> Clusters::FindSubGraph(const std::string _id)
+{
+    for(auto& graph : m_sub_graphs)
+    {
+        if(graph->dataset->GetId() == _id) return graph;
+    }
+    return nullptr;
+}
+
+
 void Clusters::Gui()
 {
     if(m_focussed_graph)
@@ -79,6 +139,14 @@ void Clusters::Gui()
     if (ImGui::TreeNode("Settings"))
     {
         constexpr int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
+        if (ImGuiExtensions::ColorEdit3("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
+        {
+            SetNodesColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_node_color));
+        }
+        if (ImGuiExtensions::ColorEdit3("Intra Edge Color", m_gui_data.coloredit_intra_edge_color, color_edit_flags))
+        {
+            for(auto& graph : m_sub_graphs) graph->SetEdgeColor(m_gui_data.coloredit_intra_edge_color);
+        }
         ImGuiExtensions::ColorEdit3("Inter Edge Color", m_gui_data.coloredit_inter_edge_color, color_edit_flags);
 
         ImGui::TreePop();

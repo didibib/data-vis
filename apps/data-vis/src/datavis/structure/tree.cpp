@@ -172,7 +172,7 @@ namespace DataVis
             included[idx] = true;
 
             // Update outgoing edges from this vertex
-            for (const auto& neigbor : vertices[idx].outgoing_neighbors)
+            for (const auto& neigbor : vertices[idx]->outgoing_neighbors)
             {
                 const uint v = neigbor.idx;
                 const float weight = dataset->edges[neigbor.edge_idx].attributes.FindFloat("weight", 1);
@@ -186,7 +186,7 @@ namespace DataVis
         }
 
         // Construct a tree
-        m_root = std::make_shared<Tree::TreeNode>(vertices[_root].id, _root);
+        m_root = std::make_shared<Tree::TreeNode>(vertices[_root]->id, _root);
         nodes[_root] = m_root;
 
         // Construct recursive lambda to create the tree
@@ -198,7 +198,7 @@ namespace DataVis
                 if (parents[i] == n->GetVertexIdx())
                 {
                     // Add node to n.children
-                    auto child = std::make_shared<Tree::TreeNode>(vertices[i].id, i, n);
+                    auto child = std::make_shared<Tree::TreeNode>(vertices[i]->id, i, n);
                     nodes[i] = child;
                     n->children.push_back(child);
                     make_tree(child, nodes);

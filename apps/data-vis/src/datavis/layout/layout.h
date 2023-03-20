@@ -59,7 +59,7 @@ public:
 
 private:
     static float CalculateCost(const IStructure& _structure);
-    static float CalculateIncrementalCost(IStructure& _structure, uint _idx0, uint _idx1);
+    static float CalculateIncrementalCost(const IStructure& _structure, uint _idx0, uint _idx1);
     static float CalculateNodeCost(const IStructure& _structure, uint _idx);
     static void SwapPos(IStructure& _structure, float& _currCost);
     int m_iterations = 10000;
@@ -135,11 +135,11 @@ private:
     //--------------------------------------------------------------
     static bool IsSink(const Vertex&);
     static bool IsSource(const Vertex&);
-    static bool HasUnvisited(const std::function<bool(Vertex&)>&, std::vector<Vertex>, Vertex& out);
+    static bool HasUnvisited(const std::function<bool(Vertex&)>&, std::vector<std::shared_ptr<Vertex>>, Vertex& out);
     static void RemoveOutgoingNeighbors(Dataset&, Vertex&);
-    static void RemoveIncomingNeighbors(Dataset&, Vertex&);
+    static void RemoveIncomingNeighbors(const Dataset&, Vertex&);
     static void RemoveNeighbors(Dataset&, const Edge&);
-    static void AddNeighbors(Dataset&, Edge&);
+    static void AddNeighbors(const Dataset&, Edge&);
 
     //--------------------------------------------------------------
     // OSCM
@@ -149,7 +149,7 @@ private:
     static bool OSCMMedianHeuristic(Dataset&, const Layer& layer_fixed, Layer& layer, Layer& new_layer,
                                     const GetNeighbors& get_neighbors);
 
-    static int Crossings(Dataset&, Layer& layer_1, Layer& layer_2);
+    static int Crossings(const Dataset&, const Layer& layer_1, const Layer& layer_2);
 
     //--------------------------------------------------------------
     // Node Positioning
