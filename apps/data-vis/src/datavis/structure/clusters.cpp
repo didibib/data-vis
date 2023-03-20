@@ -2,7 +2,6 @@
 
 namespace DataVis
 {
-
 //--------------------------------------------------------------
 void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 {
@@ -44,11 +43,13 @@ void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 //--------------------------------------------------------------
 void Clusters::Update(const float _delta_time)
 {
-    for (const auto& edge : edges)
-        edge->Update(_delta_time);
+    m_aabb.Update(_delta_time);
     for (const auto& graph : m_sub_graphs)
         graph->Update(_delta_time);
-    IStructure::Update(_delta_time);
+    for (const auto& edge : edges)
+        edge->Update(_delta_time);
+    if (m_active_layout)
+        m_active_layout->Update(_delta_time);
 }
 
 //--------------------------------------------------------------
@@ -72,7 +73,7 @@ void Clusters::UpdateEdges(bool _force)
         const auto& edge_path = edges[i];
         edge_path->UpdateStartPoint(start);
         edge_path->UpdateStartPoint(end);
-        if(_force) edge_path->ForceUpdate();
+        if (_force) edge_path->ForceUpdate();
         edge_path->SetArrowOffset(end_graph->nodes[end_vertex->idx]->GetRadius() * 2);
     }
 }
@@ -82,7 +83,7 @@ void Clusters::InitEdges()
 {
     edges.clear();
     edges.resize(dataset->edges.size());
-    for(auto& edge : edges )
+    for (auto& edge : edges)
     {
         edge = std::make_shared<EdgePath>(dataset->GetKind());
     }
