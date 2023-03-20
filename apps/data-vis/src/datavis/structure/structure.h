@@ -16,7 +16,7 @@ public:
 	virtual void Update(const float delta_time);
 	[[nodiscard]] const glm::vec3& GetPosition() const;
 	void SetPosition(const glm::vec3&);
-	void UpdateEdges();
+	virtual void UpdateEdges();
 
 	// AABB
 	AABB GetAABB();
@@ -36,7 +36,8 @@ public:
 	VectorOfNodes nodes;
 	VectorOfEdgePaths edges;
 	
-	void SetNodesColor(ofColor color) const;
+	void SetNodesColor(ofColor color);
+	void SetEdgeColor(const glm::vec3& color);
 
 protected:
 	virtual void DrawNodes() = 0;

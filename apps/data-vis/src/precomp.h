@@ -16,9 +16,9 @@
 // OF header
 #include "ofMain.h"
 
-// Purple color palette: #635985 #443C68 #393053 #18122B
 namespace Color
 {
+    // Purple color palette: #635985 #443C68 #393053 #18122B
     const ofColor palettePurple_0(99, 89, 133);
     const ofColor palettePurple_1(68, 60, 104);
     const ofColor palettePurple_2(57, 48, 83);

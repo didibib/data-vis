@@ -159,12 +159,17 @@ void IStructure::SetOnDeleteCallback(const std::function<void(IStructure&)>& _ca
     m_on_delete_callback = _callback;
 }
 
-void IStructure::SetNodesColor(ofColor _color) const
+void IStructure::SetNodesColor(ofColor _color)
 {
     for (auto& node : nodes)
     {
         node->color = _color;
     }
+}
+
+void IStructure::SetEdgeColor(const glm::vec3& _color)
+{
+    m_gui_data.coloredit_edge_color = _color;
 }
 
 //--------------------------------------------------------------

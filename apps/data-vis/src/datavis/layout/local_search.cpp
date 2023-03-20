@@ -48,7 +48,7 @@ float LocalSearch::CalculateCost(const IStructure& _structure)
 	return cost;
 }
 
-float LocalSearch::CalculateIncrementalCost(IStructure& _structure, uint _idx0, uint _idx1)
+float LocalSearch::CalculateIncrementalCost(const IStructure& _structure, uint _idx0, uint _idx1)
 {
 	float cost = 0;
 	// Subtract cost of all edges before swap at both indices
