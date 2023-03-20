@@ -75,15 +75,16 @@ struct Neighbor
     {
     }
 
-    VertexIdx idx = std::numeric_limits<VertexIdx>::min();
-    EdgeIdx edge_idx = std::numeric_limits<EdgeIdx>::min();
+    VertexIdx idx = MIN_INT;
+    EdgeIdx edge_idx = MIN_INT;
 };
 
 //--------------------------------------------------------------
 struct Vertex
 {
     std::string id;
-    VertexIdx idx = std::numeric_limits<VertexIdx>::min();
+    std::string owner;
+    VertexIdx idx = MIN_INT;
     /// A neighbor is made out of a vertex index and a edge index
     std::vector<Neighbor> outgoing_neighbors;
     std::vector<Neighbor> incoming_neighbors;
@@ -100,6 +101,11 @@ struct Edge
 };
 
 //--------------------------------------------------------------
+namespace Parser
+{
+    static bool DotFile( const std::string& filename, Model::MainGraph& );
+};
+
 class Dataset
 {
 public:
@@ -109,22 +115,37 @@ public:
     ~Dataset() = default;
     Dataset(const Dataset&);
     Dataset& operator=(const Dataset&);
-    bool Load(const std::string filename);
+    void Load( const Model::MainGraph& );
     void InfoGui();
     const std::string& GetFilename();
     const Kind& GetKind();
     void SetKind(const Kind&);
-    std::vector<Vertex> vertices;
-    std::vector<Edge> edges;
     void AddInfo(const std::string& key, const std::string& value);
 
-private:
-    void SetInfo();
-    Kind m_kind = Kind::Undirected;
-    std::string m_filename;
-    std::unordered_map<std::string, VertexIdx> m_vertex_idx;
+    std::vector<Vertex> vertices;
+    std::vector<Edge> edges;
 
+protected:
+    virtual void Convert( const Model::MainGraph& );
+    virtual void SetInfo();
+    Kind m_kind = Kind::Undirected;
+    std::string m_id;
+
+    std::unordered_map<std::string, VertexIdx> m_vertex_idx;
     std::unordered_map<std::string, int> m_info_idx;
     std::vector<std::pair<std::string, std::string>> m_info;
+};
+
+class DatasetClusters final : public Dataset
+{
+public:
+    std::vector<Dataset> clusters;
+
+protected:
+    virtual void Convert( const Model::MainGraph& ) override;
+    virtual void SetInfo( ) override;
+
+    std::unordered_map<std::string, uint> m_dataset_idx;
+
 };
 } // namespace DataVis

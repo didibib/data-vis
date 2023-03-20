@@ -140,6 +140,7 @@
     <ClCompile Include="src\datavis\layout\layout.cpp" />
     <ClCompile Include="src\datavis\layout\local_search.cpp" />
     <ClCompile Include="src\datavis\layout\sugiyama.cpp" />
+    <ClCompile Include="src\datavis\structure\clusters.cpp" />
     <ClCompile Include="src\datavis\structure\edge_path.cpp" />
     <ClCompile Include="src\datavis\structure\graph.cpp" />
     <ClCompile Include="src\datavis\structure\node.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\datavis\dataset.h" />
     <ClInclude Include="src\datavis\external\spirit-graphviz.hpp" />
     <ClInclude Include="src\datavis\layout\layout.h" />
+    <ClInclude Include="src\datavis\structure\clusters.h" />
     <ClInclude Include="src\datavis\structure\edge_path.h" />
     <ClInclude Include="src\datavis\structure\graph.h" />
     <ClInclude Include="src\datavis\structure\node.h" />

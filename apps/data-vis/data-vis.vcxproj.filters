@@ -70,6 +70,10 @@
     <ClCompile Include="src\datavis\layout\sugiyama.cpp">
       <Filter>src\datavis\layout</Filter>
     </ClCompile>
+    <ClCompile Include="src\datavis\structure\edge_path.cpp" />
+    <ClCompile Include="src\datavis\structure\clusters.cpp">
+      <Filter>src\datavis\structure</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -157,6 +161,11 @@
     </ClInclude>
     <ClInclude Include="src\datavis\external\spirit-graphviz.hpp">
       <Filter>src\datavis\external</Filter>
+    </ClInclude>
+    <ClInclude Include="src\datavis\structure\edge_path.h" />
+    <ClInclude Include="src\datavis\structure\node.h" />
+    <ClInclude Include="src\datavis\structure\clusters.h">
+      <Filter>src\datavis\structure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

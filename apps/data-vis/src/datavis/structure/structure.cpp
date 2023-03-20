@@ -140,7 +140,7 @@ bool IStructure::Inside(const glm::vec3& _position) const
 }
 
 //--------------------------------------------------------------
-bool IStructure::InsideDraggable(const glm::vec3& _position) const
+bool IStructure::InsideDraggable(const glm::vec3& _position)
 {
     return m_aabb.InsideDraggable(_position - m_position);
 }
@@ -195,8 +195,7 @@ void IStructure::Gui()
         constexpr int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
         if (ImGuiExtensions::ColorEdit3("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
         {
-            SetNodesColor(ofColor(m_gui_data.coloredit_node_color.x, m_gui_data.coloredit_node_color.y,
-                                  m_gui_data.coloredit_node_color.z));
+            SetNodesColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_node_color));
         }
 
         ImGuiExtensions::ColorEdit3("Edge Color", m_gui_data.coloredit_edge_color, color_edit_flags);
