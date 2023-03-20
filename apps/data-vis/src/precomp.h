@@ -84,6 +84,7 @@ namespace DataVis
     {
         // Converts color from [0..255] to [0..1] for displaying and back
         bool ColorEdit3(char* label, glm::vec3& color, int flags);
+        ofColor Vec3ToOfColor(const glm::vec3& color);
     }
 } // namespace DataVis
 
@@ -101,4 +102,5 @@ namespace DataVis
 #include "structure/structure.h"
 #include "structure/graph.h"
 #include "structure/tree.h"
+#include "structure/clusters.h"
 #include "layout/layout.h"

@@ -22,14 +22,14 @@ public:
 	AABB GetAABB();
 	void UpdateAABB();
 	[[nodiscard]] bool Inside(const glm::vec3&) const;
-	[[nodiscard]] bool InsideDraggable(const glm::vec3&) const;
+	[[nodiscard]] virtual bool InsideDraggable(const glm::vec3&);
 	[[nodiscard]] float GetArea() const;
 
 	// Interaction
 	void Draw(bool is_focussed);
 	virtual void Gui();
-	void Select(const glm::vec3&);
-	void Move(const glm::vec3& offset);
+	virtual void Select(const glm::vec3&);
+	virtual void Move(const glm::vec3& offset);
 	void SetOnDeleteCallback(const std::function<void(IStructure&)>& callback);
 	std::shared_ptr<Dataset> dataset;
 

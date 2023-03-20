@@ -25,8 +25,8 @@ private:
 
 	glm::vec2 m_prev_mouse_drag = glm::vec2(1e30);
 	
-	std::shared_ptr<DataVis::IStructure> m_focussed_layout = nullptr;
-	std::shared_ptr<DataVis::IStructure> m_dragging_layout = nullptr;
+	std::shared_ptr<DataVis::IStructure> m_focussed_structure = nullptr;
+	std::shared_ptr<DataVis::IStructure> m_dragging_structure = nullptr;
 
 	void LoadDotFiles();
 	glm::vec3 ScreenToWorld(const glm::vec2& pos);

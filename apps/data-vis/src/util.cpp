@@ -48,13 +48,18 @@ float Bezier(float _t)
 
 namespace ImGuiExtensions
 {
-	bool ColorEdit3(char* _label, glm::vec3& _color, int _flags)
-	{
-		_color /= 255.f;
-		const bool val = ImGui::ColorEdit3(_label, (float*)&_color, _flags);
-		_color *= 255;
-		return val;
-	}
+bool ColorEdit3(char* _label, glm::vec3& _color, int _flags)
+{
+	_color /= 255.f;
+	const bool val = ImGui::ColorEdit3(_label, (float*)&_color, _flags);
+	_color *= 255;
+	return val;
+}
+
+ofColor Vec3ToOfColor(const glm::vec3& _color)
+{
+	return ofColor(_color.x, _color.y, _color.z);
+}
 } // namespace ImGuiExtensions
 
 

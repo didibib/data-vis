@@ -41,7 +41,7 @@ void Graph::Load(const std::shared_ptr<Dataset> _dataset)
 void Graph::DrawNodes()
 {
     ofFill();
-    ofSetColor(m_gui_data.coloredit_edge_color.x, m_gui_data.coloredit_edge_color.y, m_gui_data.coloredit_edge_color.z);
+    ofSetColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_edge_color));
 
     for (const auto& edge : edges)
     {

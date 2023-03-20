@@ -684,7 +684,7 @@ namespace DataVis
                   });
 
         _new_layer.resize(_layer.size());
-        for (int i = 0; i < _layer.size(); i++) _new_layer[i] = std::get<3>(medians[i]);
+        for (int i = 0; i < _layer.size(); i++) _new_layer[i] = _layer[std::get<3>(medians[i])];
         return changed;
     }
 
