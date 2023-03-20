@@ -16,7 +16,7 @@ public:
 	virtual void Update(const float delta_time);
 	[[nodiscard]] const glm::vec3& GetPosition() const;
 	void SetPosition(const glm::vec3&);
-	virtual void UpdateEdges();
+	virtual void UpdateEdges(bool force = false);
 
 	// AABB
 	AABB GetAABB();
@@ -41,6 +41,7 @@ public:
 
 protected:
 	virtual void DrawNodes() = 0;
+	virtual void InitEdges();
 	virtual void NodeInfoGui();
 	void SetSelectedNode(const std::shared_ptr<Node>& _node);
 

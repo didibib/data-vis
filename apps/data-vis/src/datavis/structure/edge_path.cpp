@@ -7,7 +7,7 @@ namespace DataVis
 //--------------------------------------------------------------
 void EdgePath::OnStopAnimation()
 {
-    for(auto& point : m_points)
+    for (auto& point : m_points)
     {
         point.value = point.new_value;
         point.old_value = point.new_value;
@@ -16,27 +16,17 @@ void EdgePath::OnStopAnimation()
     m_start_ctrl_point.old_value = m_start_ctrl_point.new_value;
     m_end_ctrl_point.value = m_start_ctrl_point.new_value;
     m_end_ctrl_point.old_value = m_start_ctrl_point.new_value;
+    BuildPath();
 }
 
 //--------------------------------------------------------------
 void EdgePath::Interpolate(float _p)
 {
-    for(auto& point : m_points)
+    for (auto& point : m_points)
         point.value = (1 - _p) * point.old_value + _p * point.new_value;
     m_start_ctrl_point.value = (1 - _p) * m_start_ctrl_point.old_value + _p * m_start_ctrl_point.new_value;
     m_end_ctrl_point.value = (1 - _p) * m_end_ctrl_point.old_value + _p * m_end_ctrl_point.new_value;
-    
-    switch (m_style)
-    {
-    case Style::Line:
-        BuildLinePath();
-        break;
-    case Style::Curve:
-        BuildCurvePath();
-        break;
-    }
-    m_path.translate(glm::vec3(0, 0, -1));
-    UpdateArrow();
+    BuildPath();
 }
 
 //--------------------------------------------------------------
@@ -55,9 +45,11 @@ void EdgePath::Draw()
 //--------------------------------------------------------------
 // CurvedPath
 //--------------------------------------------------------------
-EdgePath::EdgePath(const bool is_directed)
+EdgePath::EdgePath(const Dataset::Kind& _kind)
 {
-    m_is_directed = is_directed;
+    m_is_directed = false;
+    if (_kind == Dataset::Kind::Directed)
+        m_is_directed = true;
     m_edge_idx = -1;
 }
 
@@ -101,6 +93,21 @@ void EdgePath::UpdateArrow()
     m_start_arrow = m_path.getPointAtLength(length - 1);
 }
 
+void EdgePath::BuildPath()
+{
+    switch (m_style)
+    {
+    case Style::Line:
+        BuildLinePath();
+        break;
+    case Style::Curve:
+        BuildCurvePath();
+        break;
+    }
+    m_path.translate(glm::vec3(0, 0, -1));
+    UpdateArrow();
+}
+
 //--------------------------------------------------------------
 void EdgePath::BuildLinePath()
 {
@@ -125,7 +132,6 @@ void EdgePath::BuildCurvePath()
     if (m_end_ctrl_point_set)
         m_path.curveTo(m_end_ctrl_point.value);
     // else compute end ctrl point
-
 }
 
 void EdgePath::SetIsDirected(bool _directed)
@@ -168,6 +174,7 @@ void EdgePath::SetEndCtrlPoint(const glm::vec3& _point)
 void EdgePath::UpdateStartPoint(const glm::vec3& _point)
 {
     m_points[0].new_value = _point;
+    m_update_path = true;
     // TODO: Animate all other points
 }
 
@@ -175,6 +182,7 @@ void EdgePath::UpdateStartPoint(const glm::vec3& _point)
 void EdgePath::UpdateEndPoint(const glm::vec3& _point)
 {
     m_points.back().new_value = _point;
+    m_update_path = true;
     // TODO: Animate all other points
 }
 
@@ -186,4 +194,10 @@ void EdgePath::UpdatePoint(const size_t _index, const glm::vec3& _point)
     m_path[_index] = _point;
     m_update_path = true;
 }
+
+void EdgePath::ForceUpdate()
+{
+    StopAnimation();
+}
+
 }

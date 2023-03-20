@@ -31,6 +31,7 @@ void ofApp::setup()
                              {
                                  auto g = make_shared<Graph>();
                                  g->Init(_dataset);
+                                 RandomLayout::Apply(*g, 800, 800);
                                  return g;
                              });
     m_factories.emplace_back("MSP Tree",
@@ -38,6 +39,7 @@ void ofApp::setup()
                              {
                                  auto m = make_shared<MSP>();
                                  m->Init(_dataset);
+                                 RandomLayout::Apply(*m, 800, 800);
                                  return m;
                              });
 	m_factories.emplace_back("Clusters",
@@ -161,7 +163,6 @@ void ofApp::Gui()
                     auto new_dataset_file = m_datasets[m_imgui_data.combo_dataset_index];
                     auto factory = m_factories[m_imgui_data.combo_structure_index].second;
                     auto structure = factory(new_dataset_file);
-                    RandomLayout::Apply(*structure, 800, 800);
                     structure->SetOnDeleteCallback(std::bind(&ofApp::DeleteStructure, this, std::placeholders::_1));
                     m_structures.push_back(std::move(structure));
                 }

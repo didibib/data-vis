@@ -3,6 +3,14 @@
 namespace DataVis
 {
 //--------------------------------------------------------------
+// Parser
+//--------------------------------------------------------------
+namespace Parser
+{
+    bool DotFile( const std::string& filename, Model::MainGraph& );
+};
+
+//--------------------------------------------------------------
 using AnyType = std::variant<float, std::string>;
 
 struct VisitFloat
@@ -82,12 +90,6 @@ struct Edge
     Attributes attributes;
 };
 
-//--------------------------------------------------------------
-namespace Parser
-{
-    bool DotFile( const std::string& filename, Model::MainGraph& );
-};
-
 class Dataset
 {
 public:
@@ -121,6 +123,9 @@ protected:
     std::vector<std::pair<std::string, std::string>> m_info;
 };
 
+//--------------------------------------------------------------
+// DatasetClusters
+//--------------------------------------------------------------
 class DatasetClusters final : public Dataset
 {
 public:

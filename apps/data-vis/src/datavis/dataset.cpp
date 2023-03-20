@@ -3,46 +3,6 @@
 namespace DataVis
 {
 //--------------------------------------------------------------
-// Attributes
-//--------------------------------------------------------------
-void Attributes::Init(Model::Attributes& _attributes)
-{
-    for (auto& it = _attributes.begin(); it != _attributes.end(); it++)
-    {
-        try
-        {
-            float value = std::stof(it->second);
-            map.insert({it->first, value});
-        }
-        catch (std::exception&)
-        {
-            map.insert({it->first, it->second});
-        }
-    }
-}
-
-float Attributes::FindFloat(const std::string& _key, float _default)
-{
-    auto& it = map.find(_key);
-    if (it != map.end())
-    {
-        return std::visit(VisitFloat{_default}, it->second);
-    }
-    map[_key] = _default;
-    return _default;
-}
-
-std::string Attributes::FindString(const std::string& _key)
-{
-    auto& it = map.find(_key);
-    if (it != map.end())
-    {
-        return std::visit(VisitString{}, it->second);
-    }
-    return "";
-}
-
-//--------------------------------------------------------------
 // Parser
 //--------------------------------------------------------------
 namespace Parser
@@ -89,6 +49,48 @@ namespace Parser
         return ok;
     }
 } // namespace Parser
+
+//--------------------------------------------------------------
+// Attributes
+//--------------------------------------------------------------
+void Attributes::Init(Model::Attributes& _attributes)
+{
+    for (auto& it = _attributes.begin(); it != _attributes.end(); it++)
+    {
+        try
+        {
+            float value = std::stof(it->second);
+            map.insert({it->first, value});
+        }
+        catch (std::exception&)
+        {
+            map.insert({it->first, it->second});
+        }
+    }
+}
+
+float Attributes::FindFloat(const std::string& _key, float _default)
+{
+    auto& it = map.find(_key);
+    if (it != map.end())
+    {
+        return std::visit(VisitFloat{_default}, it->second);
+    }
+    map[_key] = _default;
+    return _default;
+}
+
+std::string Attributes::FindString(const std::string& _key)
+{
+    auto& it = map.find(_key);
+    if (it != map.end())
+    {
+        return std::visit(VisitString{}, it->second);
+    }
+    return "";
+}
+
+
 //--------------------------------------------------------------
 // Dataset
 //--------------------------------------------------------------
@@ -230,7 +232,7 @@ void Dataset::AddInfo(const std::string& _key, const std::string& _value)
 }
 
 //--------------------------------------------------------------
-// SubDataset
+// DatasetClusters
 //--------------------------------------------------------------
 void DatasetClusters::Convert(const Model::MainGraph& _graph)
 {

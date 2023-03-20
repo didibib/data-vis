@@ -13,6 +13,7 @@ public:
 protected:
     void EaseInEaseOut(float t, float speed = 1.f);
     void StartAnimation();
+    void StopAnimation();
     virtual void OnStopAnimation() = 0;
     virtual void Interpolate(float percentage) = 0;
 
@@ -27,7 +28,6 @@ protected:
     };
 
 private:
-    void StopAnimation();
     float m_time = 0;
     bool m_animate = false;
 };

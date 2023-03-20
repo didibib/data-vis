@@ -142,7 +142,7 @@ namespace DataVis
         // Create curves
         for (auto& edge : _graph.edges)
         {
-            edge = std::make_shared<EdgePath>(true);
+            edge = std::make_shared<EdgePath>(_graph.dataset->GetKind());
         }
         const auto& vertices = dataset.vertices;
         for(const auto& edge : dataset.edges)

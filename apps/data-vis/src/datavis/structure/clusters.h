@@ -10,7 +10,8 @@ public:
 	void DrawNodes() override;
     void Gui() override;
 	void Update(const float delta_time) override;
-	void UpdateEdges() override;
+	void UpdateEdges(bool force = false) override;
+	void InitEdges() override;
 	void UpdateAABB() override;
 
 	bool InsideDraggable(const glm::vec3& pos) override;

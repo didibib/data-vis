@@ -5,6 +5,7 @@ namespace DataVis
     void Tree::Init(const std::shared_ptr<Dataset> _dataset)
     {
         IStructure::Init(_dataset);
+        InitEdges();
         m_layouts.push_back(std::make_unique<RadialLayout>());
     }
 
