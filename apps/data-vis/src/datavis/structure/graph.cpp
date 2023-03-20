@@ -2,16 +2,19 @@
 
 namespace DataVis
 {
+
+//--------------------------------------------------------------
 void Graph::Init(const std::shared_ptr<Dataset> _dataset)
 {
     IStructure::Init(_dataset);
     Load(_dataset);
-
+    InitEdges();
     // Add layout
     m_layouts.push_back(std::make_unique<ForceDirectedLayout>());
     m_layouts.push_back(std::make_unique<Sugiyama>());
 }
 
+//--------------------------------------------------------------
 void Graph::Load(const std::shared_ptr<Dataset> _dataset)
 {
     dataset = _dataset;
@@ -24,7 +27,6 @@ void Graph::Load(const std::shared_ptr<Dataset> _dataset)
         const auto& vertex = vertices[i];
         nodes.push_back(std::make_shared<Node>(vertex->id, i));
     }
-    UpdateEdges();
 }
 
 //--------------------------------------------------------------
@@ -43,5 +45,4 @@ void Graph::DrawNodes()
         node->Draw();
     }
 }
-
 } // namespace DataVis

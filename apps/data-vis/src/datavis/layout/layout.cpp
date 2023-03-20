@@ -185,6 +185,7 @@ bool ForceDirectedLayout::Gui(IStructure& _structure)
 	}
 	if (m_enabled) {
 		Apply(_structure, m_C, m_T, m_iterations);
+		_structure.UpdateEdges(true);
 		active = true;
 	}
 	return active;
@@ -234,7 +235,6 @@ void ForceDirectedLayout::Apply(IStructure& _structure, float _C, float _t, int 
 		}
 		_t *= 0.9999f;
 	}
-	_structure.UpdateEdges();
 }
 #pragma endregion // Force Directed
 

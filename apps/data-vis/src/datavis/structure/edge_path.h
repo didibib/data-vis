@@ -8,7 +8,7 @@ public:
     enum class Style { Line, Curve };
 
     EdgePath() = default;
-    EdgePath(bool is_directed);
+    EdgePath(const Dataset::Kind&);
     void Draw() override;
     void SetEdgeIdx(EdgeIdx);
     void SetIsDirected(bool);
@@ -21,6 +21,7 @@ public:
     void UpdateStartPoint(const glm::vec3&);
     void UpdateEndPoint(const glm::vec3&);
     void UpdatePoint(const size_t index, const glm::vec3&);
+    void ForceUpdate();
 
 protected:
     void OnStopAnimation() override;
@@ -30,10 +31,12 @@ private:
     void UpdatePath();
     // Arrow can be updated after path has been build
     void UpdateArrow();
+    void BuildPath();
     // Line path will be animated
     void BuildLinePath();
     // Cuve path will not be animated
     void BuildCurvePath();
+
     
     EdgeIdx m_edge_idx = UNINIT_IDX;
     ofPolyline m_path;
