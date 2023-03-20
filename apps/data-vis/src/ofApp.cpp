@@ -50,13 +50,14 @@ void ofApp::LoadDotFiles( )
 		{
 			std::string filename = entry.path( ).filename( ).string( );
 			m_graph_file_names.push_back( filename );
-			std::unique_ptr<DataVis::Dataset> dataset = std::make_unique<DataVis::Dataset>( );
 			Model::MainGraph graph;
-			if ( DataVis::Parserr::DotFile( filename, graph ) )
+			if ( DataVis::Parser::DotFile( filename, graph ) )
 			{
+				std::unique_ptr<DataVis::Dataset> dataset = std::make_unique<DataVis::Dataset>( );
+				dataset->filename = filename;
 				dataset->Load( graph );
+				m_datasets.push_back( std::move( dataset ) );
 			}
-			m_datasets.push_back( std::move( dataset ) );
 		}
 	}
 	m_current_graph_file = m_graph_file_names[m_imgui_data.combo_graph_file_index];
@@ -119,13 +120,13 @@ void ofApp::Gui( )
 		{
 			if ( ImGui::BeginMenu( "Create" ) )
 			{
-				const char* select_dataset_preview = m_datasets[m_imgui_data.combo_dataset_index]->GetFilename( ).c_str( );
+				const char* select_dataset_preview = m_datasets[m_imgui_data.combo_dataset_index]->filename.c_str( );
 				if ( ImGui::BeginCombo( "Select Dataset", select_dataset_preview ) )
 				{
 					for ( int n = 0; n < m_datasets.size( ); n++ )
 					{
 						const bool is_selected = ( m_imgui_data.combo_dataset_index == n );
-						if ( ImGui::Selectable( m_datasets[n]->GetFilename( ).c_str( ), is_selected ) )
+						if ( ImGui::Selectable( m_datasets[n]->filename.c_str( ), is_selected ) )
 							m_imgui_data.combo_dataset_index = n;
 						if ( is_selected )
 							ImGui::SetItemDefaultFocus( );

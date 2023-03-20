@@ -103,7 +103,7 @@ struct Edge
 //--------------------------------------------------------------
 namespace Parser
 {
-    static bool DotFile( const std::string& filename, Model::MainGraph& );
+    bool DotFile( const std::string& filename, Model::MainGraph& );
 };
 
 class Dataset
@@ -117,7 +117,7 @@ public:
     Dataset& operator=(const Dataset&);
     void Load( const Model::MainGraph& );
     void InfoGui();
-    const std::string& GetFilename();
+    std::string filename;
     const Kind& GetKind();
     void SetKind(const Kind&);
     void AddInfo(const std::string& key, const std::string& value);
