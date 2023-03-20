@@ -24,16 +24,6 @@ void Graph::Load(const std::shared_ptr<Dataset> _dataset)
         const auto& vertex = vertices[i];
         nodes.push_back(std::make_shared<Node>(vertex->id, i));
     }
-    // Add neighbors
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        const auto& vertex = vertices[i];
-        if (vertex->outgoing_neighbors.empty()) continue;
-        for (const auto& n : vertex->outgoing_neighbors)
-        {
-            nodes[i]->neighbors.push_back(nodes[n.idx]);
-        }
-    }
     UpdateEdges();
 }
 
