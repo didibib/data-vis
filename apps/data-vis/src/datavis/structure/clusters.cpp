@@ -7,20 +7,22 @@ void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
     dataset = _dataset;
     dataset_clusters = std::dynamic_pointer_cast<DatasetClusters>(_dataset);
     
+    int count = 0;
     for(const auto& cluster : dataset_clusters->clusters)
     {
         std::shared_ptr<Graph> graph = make_shared<Graph>();
         graph->Init(cluster);
         m_sub_graphs.emplace_back(graph);
-
+        RandomLayout::Apply(*graph, 800, 600);
+        graph->SetPosition(glm::vec3(count * 800, count++ * 600, 0));
+        
         for(auto& node : graph->nodes)
         {
             nodes.push_back(node);
         }
     }
-
-    // Add inter-edge neighbours
-
+    UpdateEdges();
+    UpdateAABB();
     // Add edge bundling layout
 }
 
@@ -44,8 +46,8 @@ void Clusters::UpdateEdges()
         auto const& start_graph = FindSubGraph(start_vertex->owner);
         auto const& end_graph = FindSubGraph(end_vertex->owner);
 
-        glm::vec3 start = start_graph->nodes[start_vertex->idx]->GetNewPosition();
-        glm::vec3 end = end_graph->nodes[end_vertex->idx]->GetNewPosition();
+        glm::vec3 start = start_graph->nodes[start_vertex->idx]->GetNewPosition() + start_graph->GetPosition();
+        glm::vec3 end = end_graph->nodes[end_vertex->idx]->GetNewPosition() + end_graph->GetPosition();
 
         edges[i] = std::make_shared<EdgePath>();
         const auto& edge_path = edges[i];
@@ -57,13 +59,31 @@ void Clusters::UpdateEdges()
     }
 }
 
+void Clusters::UpdateAABB()
+{
+    glm::vec3 tl{MAX_FLOAT};
+    glm::vec3 br{-MAX_FLOAT};
+
+    for (const auto& node : nodes)
+    {
+        auto& owner = FindSubGraph(dataset_clusters->vertices[node->GetVertexIdx()]->owner);
+        glm::vec3 global_pos = node->GetNewPosition() + owner->GetPosition();
+        tl.x = min(global_pos.x - node->GetRadius(), tl.x);
+        tl.y = min(global_pos.y - node->GetRadius(), tl.y);
+        br.x = max(global_pos.x + node->GetRadius(), br.x);
+        br.y = max(global_pos.y + node->GetRadius(), br.y);
+    }
+    tl.z = 0;
+    br.z = 0;
+    m_aabb.SetNewBounds(tl, br);
+}
 
 bool Clusters::InsideDraggable(const glm::vec3& _pos)
 {
     glm::vec3 transformed = _pos - m_position;
     if(IStructure::InsideDraggable(transformed))
     {
-        m_focussed_graph = nullptr;
+        m_dragging_graph = nullptr;
         return true;
     }
 
@@ -91,12 +111,13 @@ void Clusters::Move(const glm::vec3& _offset)
 void Clusters::Select(const glm::vec3& _pos)
 {
     glm::vec3 transformed = _pos - m_position;
-    if(m_focussed_graph)
+    if(m_focussed_graph && m_focussed_graph->Inside(transformed))
     {
         m_focussed_graph->Select(transformed);
         return;
     }
     
+    m_focussed_graph = nullptr;
     for(auto& graph : m_sub_graphs)
     {
         if(graph->Inside(transformed))

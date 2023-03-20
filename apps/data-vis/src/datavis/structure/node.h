@@ -21,7 +21,6 @@ namespace DataVis
         [[nodiscard]] bool Inside(const glm::vec3& position) const;
 
         ofColor color = ofColor::black;
-        std::vector<std::shared_ptr<Node>> neighbors;
 
     protected:
         void OnStopAnimation() override;

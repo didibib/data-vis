@@ -74,10 +74,12 @@ float LocalSearch::CalculateNodeCost(const IStructure& _structure, uint _idx)
 {
 	float cost = 0;
 	const auto& node = _structure.nodes[_idx];
-	for (const auto& neigbor : node->neighbors)
+	auto& neighbors = _structure.dataset->vertices[node->GetVertexIdx()]->outgoing_neighbors;
+	for (const auto& neighbor : neighbors)
 	{
+		auto& neighbor_node = _structure.nodes[neighbor.idx];
 		glm::vec3 start = node->GetPosition();
-		glm::vec3 end = neigbor->GetPosition();
+		glm::vec3 end = neighbor_node->GetPosition();
 		cost += glm::distance(start, end);
 	}
 	return cost;

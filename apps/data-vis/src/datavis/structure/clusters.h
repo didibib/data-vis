@@ -11,6 +11,7 @@ public:
     void Gui() override;
 	void Update(const float delta_time) override;
 	void UpdateEdges() override;
+	void UpdateAABB() override;
 
 	bool InsideDraggable(const glm::vec3& pos) override;
 	void Move(const glm::vec3& offset) override;

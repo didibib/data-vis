@@ -20,7 +20,7 @@ public:
 
 	// AABB
 	AABB GetAABB();
-	void UpdateAABB();
+	virtual void UpdateAABB();
 	[[nodiscard]] bool Inside(const glm::vec3&) const;
 	[[nodiscard]] virtual bool InsideDraggable(const glm::vec3&);
 	[[nodiscard]] float GetArea() const;

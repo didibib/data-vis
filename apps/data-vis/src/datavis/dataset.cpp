@@ -271,23 +271,21 @@ void DatasetClusters::Convert(const Model::MainGraph& _graph)
 
         if(cluster_from_id == cluster_to_id)
         {
-            auto& cluster = *clusters[m_cluster_idx[cluster_from_id]];
-            cluster.edges.emplace_back();
-           
-            auto& e =  cluster.edges.emplace_back();
+            auto& cluster = *clusters[m_cluster_idx[cluster_from_id]];           
+            auto& e = cluster.edges.emplace_back();
             e.attributes.Init(edge.attributes);
             e.from_idx = vertex_from.idx;
             e.to_idx = vertex_to.idx;
             const int edge_idx = cluster.edges.size() - 1;
             e.idx = edge_idx;
 
-            vertices[v_from_idx]->outgoing_neighbors.emplace_back(v_to_idx, edge_idx);
-            vertices[v_to_idx]->incoming_neighbors.emplace_back(v_from_idx, edge_idx);
+            vertices[v_from_idx]->outgoing_neighbors.emplace_back(vertex_to.idx, edge_idx);
+            vertices[v_to_idx]->incoming_neighbors.emplace_back(vertex_from.idx, edge_idx);
 
             if (m_kind == Kind::Undirected)
             {
-                vertices[v_to_idx]->outgoing_neighbors.emplace_back(v_from_idx, edge_idx);
-                vertices[v_from_idx]->incoming_neighbors.emplace_back(v_to_idx, edge_idx);            
+                vertices[v_to_idx]->outgoing_neighbors.emplace_back(vertex_from.idx, edge_idx);
+                vertices[v_from_idx]->incoming_neighbors.emplace_back(vertex_to.idx, edge_idx);            
             }
         }
         else
