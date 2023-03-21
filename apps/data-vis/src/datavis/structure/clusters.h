@@ -18,9 +18,9 @@ public:
 	void Move(const glm::vec3& offset) override;
 	void Select(const glm::vec3& pos) override;
 
-	std::shared_ptr<DatasetClusters> dataset_clusters;
-
+	std::shared_ptr<ClusterDataset> dataset_clusters;
     VectorOfEdgePaths inter_edges;
+	
 private:
     std::vector<std::shared_ptr<Graph>> m_sub_graphs;
 	std::shared_ptr<Graph> m_focussed_graph;

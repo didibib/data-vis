@@ -44,7 +44,7 @@ protected:
     void Interpolate(float percentage) override;
 
 private:
-    int m_amount{};
+    float m_start, m_step;
     std::vector<InterpolateValue> m_alpha;
     std::vector<InterpolateValue> m_radius;
 };

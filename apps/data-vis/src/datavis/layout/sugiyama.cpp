@@ -32,13 +32,14 @@ namespace DataVis
                 }
                 ImGui::EndCombo();
             }
+            ImGui::Checkbox("Curved Edges", &m_curved_edges);
 
             if (ImGui::Button("Apply"))
             {
                 try
                 {
                     Graph& graph = dynamic_cast<Graph&>(_structure);
-                    Apply(graph, m_oscm_heuristics[m_oscm_heuristic_idx].second, m_node_offset, m_oscm_iterations);
+                    Apply(graph, m_oscm_heuristics[m_oscm_heuristic_idx].second, m_node_offset, m_oscm_iterations, m_curved_edges);
                     active = true;
                 }
                 catch (std::exception& e)
@@ -53,14 +54,10 @@ namespace DataVis
 
     //--------------------------------------------------------------
     void Sugiyama::Apply(Graph& _graph, const OSCMHeuristic& _heuristic, const glm::vec2& _node_offset,
-                         const int& _oscm_iterations)
+                         const int& _oscm_iterations, bool _curved_edges)
     {
         Dataset copy = *_graph.dataset;
 
-        // std::vector<int> reverse_test(1, 0);
-        // copy.vertices[1].id = DUMMY_ID;
-        // copy.vertices[2].id = DUMMY_ID;
-        // ReverseEdges(copy, reverse_test);
         // Step 01: Break cycles
         std::vector<int> reversed_edges;
         Dataset new_dataset = BreakCycles(copy, reversed_edges);
@@ -95,7 +92,7 @@ namespace DataVis
         }
 
         _graph.edges.resize(copy.edges.size());
-        CreateCurves(_graph, new_positions, _node_offset);
+        CreateEdges(_graph, new_positions, _node_offset);
             
         _graph.UpdateAABB();
     }
@@ -135,7 +132,7 @@ namespace DataVis
         }
     }
 
-    void Sugiyama::CreateCurves(Graph& _graph, const std::vector<glm::vec3>& _new_positions, const glm::vec2& _node_offset)
+    void Sugiyama::CreateEdges(Graph& _graph, const std::vector<glm::vec3>& _new_positions, const glm::vec2& _node_offset, bool _curved_edges)
     {
         const auto& nodes = _graph.nodes;
         const auto& dataset = *_graph.dataset;
@@ -152,14 +149,23 @@ namespace DataVis
 
             const auto& edge_path = _graph.edges[edge.idx];
             edge_path->Clear();
-            edge_path->SetStyle(EdgePath::Style::Curve);
             edge_path->SetEdgeIdx(edge.idx);
-            // Add first control point
-            const auto& incoming_neighbors = vertices[edge.from_idx]->incoming_neighbors;
-            if(not incoming_neighbors.empty())
-                edge_path->SetStartCtrlPoint(_new_positions[incoming_neighbors[0].idx]);
+            // Set line type
+            if(_curved_edges)
+            {
+                edge_path->SetStyle(EdgePath::Style::Curve);
+                // Add first control point
+            
+                const auto& incoming_neighbors = vertices[edge.from_idx]->incoming_neighbors;
+                if(not incoming_neighbors.empty())
+                    edge_path->SetStartCtrlPoint(_new_positions[incoming_neighbors[0].idx]);
+                else
+                    edge_path->SetStartCtrlPoint(_new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
+            }
             else
-                edge_path->SetStartCtrlPoint(_new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
+            {
+                edge_path->SetStyle(EdgePath::Style::Line);
+            }
             
             // Add start vertex
             edge_path->AddPoint(_new_positions[edge.from_idx]);
@@ -176,12 +182,15 @@ namespace DataVis
             edge_path->AddPoint(_new_positions[current_edge.to_idx]);
             edge_path->SetArrowOffset(nodes[current_edge.to_idx]->GetRadius() * 2);
 
-            // Add last control point
-            const auto& neighbors = vertices[current_edge.to_idx]->outgoing_neighbors;
-            if(not neighbors.empty()) 
-                edge_path->SetEndCtrlPoint(_new_positions[neighbors[0].idx]);
-            else
-                edge_path->SetEndCtrlPoint(_new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
+            if(_curved_edges)
+            {
+                // Add last control point
+                const auto& neighbors = vertices[current_edge.to_idx]->outgoing_neighbors;
+                if(not neighbors.empty()) 
+                    edge_path->SetEndCtrlPoint(_new_positions[neighbors[0].idx]);
+                else
+                    edge_path->SetEndCtrlPoint(_new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
+            }
         }
     }
 
@@ -737,7 +746,6 @@ namespace DataVis
 
         return count;
     }
-
 
     //--------------------------------------------------------------
     // Vertex Positioning

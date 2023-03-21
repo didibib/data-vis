@@ -42,6 +42,7 @@ public:
 protected:
 	virtual void DrawNodes() = 0;
 	virtual void InitEdges();
+	virtual void InitNodes();
 	virtual void NodeInfoGui();
 	void SetSelectedNode(const std::shared_ptr<Node>& _node);
 
