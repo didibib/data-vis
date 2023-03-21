@@ -19,7 +19,7 @@ public:
 	virtual void UpdateEdges(bool force = false);
 
 	// AABB
-	AABB GetAABB();
+	const AABB& GetAABB();
 	virtual void UpdateAABB();
 	[[nodiscard]] bool Inside(const glm::vec3&) const;
 	[[nodiscard]] virtual bool InsideDraggable(const glm::vec3&);
