@@ -104,7 +104,7 @@ void EdgePath::BuildPath()
         BuildCurvePath();
         break;
     }
-    m_path.translate(glm::vec3(0, 0, -1));
+    m_path.translate(glm::vec3(0, 0, -.1f));
     UpdateArrow();
 }
 
@@ -123,15 +123,25 @@ void EdgePath::BuildCurvePath()
     // https://github.com/openframeworks/openFrameworks/issues/6869
     m_path.addVertex(m_points[0].value);
     if (m_start_ctrl_point_set)
-        m_path.curveTo(m_start_ctrl_point.value);
-    // else compute start ctrl point
+    {
+        glm::vec3 dir = m_start_ctrl_point.value - m_points[0].value;
+        dir = glm::normalize(dir);
+        m_path.curveTo(m_points[0].value + dir);
+    }
+    else printf("No start control point set\n");
+    // TODO: Calculate control start point
 
     for (const auto& point : m_points)
         m_path.curveTo(point.value);
 
     if (m_end_ctrl_point_set)
-        m_path.curveTo(m_end_ctrl_point.value);
-    // else compute end ctrl point
+    {
+        glm::vec3 dir = m_end_ctrl_point.value - m_points.back().value;
+        dir = glm::normalize(dir);
+        m_path.curveTo(m_points.back().value + dir);
+    }
+    else printf("No end control point set\n");
+    // TODO: Calculate control end point
 }
 
 void EdgePath::SetIsDirected(bool _directed)

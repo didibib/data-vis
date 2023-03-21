@@ -129,6 +129,7 @@ const std::string& Dataset::GetFilename()
 
 void Dataset::Load(const Model::MainGraph& _graph, const std::string& _filename)
 {
+    m_id = _graph.graph.id;
     m_filename = _filename;
     m_kind = Kind::Undirected;
     if (_graph.kind == Model::GraphKind::directed)
@@ -209,6 +210,7 @@ void Dataset::InfoGui()
 
 void Dataset::SetInfo()
 {
+    m_info.emplace_back("filename", m_filename);
     m_info.emplace_back("id", m_id);
     m_info.emplace_back("# vertices", std::to_string(vertices.size()));
     m_info.emplace_back("# edges", std::to_string(edges.size()));

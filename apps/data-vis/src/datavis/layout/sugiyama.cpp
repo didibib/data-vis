@@ -70,7 +70,7 @@ namespace DataVis
 
         // Step 03: Crossing minimization
         const int crossings = CrossingMinimization(new_dataset, vertices_per_layer, _heuristic, _oscm_iterations);
-        new_dataset.AddInfo("Crossings", std::to_string(crossings));
+        new_dataset.AddInfo("# crossings", std::to_string(crossings));
 
         // Step 04: Vertex positioning
         const auto x_per_vertex = VertexPositioning(new_dataset, vertices_per_layer, layer_per_vertex, _node_offset.x);
