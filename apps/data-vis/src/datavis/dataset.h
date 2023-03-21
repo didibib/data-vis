@@ -126,7 +126,7 @@ protected:
 //--------------------------------------------------------------
 // DatasetClusters
 //--------------------------------------------------------------
-class DatasetClusters final : public Dataset
+class ClusterDataset final : public Dataset
 {
 public:
     std::vector<std::shared_ptr<Dataset>> clusters;

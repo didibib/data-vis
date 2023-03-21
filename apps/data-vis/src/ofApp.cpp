@@ -65,7 +65,7 @@ void ofApp::LoadDotFiles()
             {
                 auto dataset = std::make_unique<DataVis::Dataset>();
                 if (not graph.graph.subgraphs.empty())
-                    dataset = std::make_unique<DataVis::DatasetClusters>();
+                    dataset = std::make_unique<DataVis::ClusterDataset>();
                 dataset->Load(graph, filename);
                 m_datasets.push_back(std::move(dataset));
             }

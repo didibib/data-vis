@@ -19,6 +19,8 @@ IStructure::~IStructure()
 void IStructure::Init(const std::shared_ptr<Dataset> _dataset)
 {
     dataset = _dataset;
+    InitNodes();
+    InitEdges();
     m_layouts.clear();
     m_layouts.push_back(std::make_unique<RandomLayout>());
     m_layouts.push_back(std::make_unique<GridLayout>());
@@ -96,6 +98,19 @@ void IStructure::InitEdges()
         edge_path->AddPoint(start);
         edge_path->AddPoint(end);
         edge_path->SetArrowOffset(nodes[endIdx]->GetRadius() * 2);
+    }
+}
+
+void IStructure::InitNodes()
+{
+    nodes.clear();
+    nodes.reserve(dataset->vertices.size());
+    const auto& vertices = dataset->vertices;
+    // Add nodes
+    for (size_t i = 0; i < dataset->vertices.size(); i++)
+    {
+        const auto& vertex = vertices[i];
+        nodes.push_back(std::make_shared<Node>(vertex->id, i));
     }
 }
 

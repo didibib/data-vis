@@ -234,7 +234,7 @@ void Dataset::AddInfo(const std::string& _key, const std::string& _value)
 //--------------------------------------------------------------
 // DatasetClusters
 //--------------------------------------------------------------
-void DatasetClusters::Convert(const Model::MainGraph& _graph)
+void ClusterDataset::Convert(const Model::MainGraph& _graph)
 {
     // Create clusters
     for (const auto& [id, subgraph] : _graph.graph.subgraphs)
@@ -302,7 +302,7 @@ void DatasetClusters::Convert(const Model::MainGraph& _graph)
     }
 }
 
-void DatasetClusters::SetInfo()
+void ClusterDataset::SetInfo()
 {
 }
 } // namespace DataVis

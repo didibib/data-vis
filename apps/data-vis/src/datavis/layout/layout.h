@@ -111,15 +111,15 @@ public:
     Sugiyama();
     bool Gui(IStructure&) override;
     static void Apply(Graph&, const OSCMHeuristic& oscm_heuristic, const glm::vec2& node_offset,
-                      const int& oscm_iterations);
+                      const int& oscm_iterations, bool _curved_edges = true);
 
 private:
     std::vector<std::pair<std::string, OSCMHeuristic>> m_oscm_heuristics;
     OSCMHeuristic m_oscm_heuristic;
     int m_oscm_heuristic_idx = 0;
-
     int m_oscm_iterations = 100;
     glm::vec2 m_node_offset;
+    bool m_curved_edges = true;
 
     // Sugiyama Framework
     static Dataset BreakCycles(Dataset&, std::vector<int>& reversed_edges);
@@ -179,6 +179,10 @@ private:
         float delta);
 
     static void ReverseEdges(Dataset&, const std::vector<int>& reversed_edges);
-    static void CreateCurves(Graph&, const std::vector<glm::vec3>& new_positions, const glm::vec2& _node_offset);
+    static void CreateEdges(
+        Graph&,
+        const std::vector<glm::vec3>& new_positions,
+        const glm::vec2& _node_offset,
+        bool _curved_edges = true);
 };
 } // namespace DataVis

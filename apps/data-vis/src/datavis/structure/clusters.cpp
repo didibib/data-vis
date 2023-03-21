@@ -8,7 +8,7 @@ void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
     dataset = _dataset;
     try
     {
-        dataset_clusters = std::dynamic_pointer_cast<DatasetClusters>(_dataset);
+        dataset_clusters = std::dynamic_pointer_cast<ClusterDataset>(_dataset);
         // Add edge bundling layout
     }
     catch (std::exception& e)
@@ -87,23 +87,24 @@ void Clusters::InitEdges()
     {
         edge = std::make_shared<EdgePath>(dataset->GetKind());
     }
+    
     // Loop over inter edges
-    for (int i = 0; i < dataset->edges.size(); i++)
-    {
-        const auto& edge = dataset->edges[i];
-        auto const& start_vertex = dataset->vertices[edge.from_idx];
-        auto const& end_vertex = dataset->vertices[edge.to_idx];
-        auto const& start_graph = FindSubGraph(start_vertex->owner);
-        auto const& end_graph = FindSubGraph(end_vertex->owner);
-
-        glm::vec3 start = start_graph->nodes[start_vertex->idx]->GetNewPosition() + start_graph->GetPosition();
-        glm::vec3 end = end_graph->nodes[end_vertex->idx]->GetNewPosition() + end_graph->GetPosition();
-
-        const auto& edge_path = edges[i];
-        edge_path->AddPoint(start);
-        edge_path->AddPoint(end);
-        edge_path->SetArrowOffset(end_graph->nodes[end_vertex->idx]->GetRadius() * 2);
-    }
+    // for (int i = 0; i < dataset->edges.size(); i++)
+    // {
+    //     const auto& edge = dataset->edges[i];
+    //     auto const& start_vertex = dataset->vertices[edge.from_idx];
+    //     auto const& end_vertex = dataset->vertices[edge.to_idx];
+    //     auto const& start_graph = FindSubGraph(start_vertex->owner);
+    //     auto const& end_graph = FindSubGraph(end_vertex->owner);
+    //
+    //     glm::vec3 start = start_graph->nodes[start_vertex->idx]->GetNewPosition() + start_graph->GetPosition();
+    //     glm::vec3 end = end_graph->nodes[end_vertex->idx]->GetNewPosition() + end_graph->GetPosition();
+    //
+    //     const auto& edge_path = edges[i];
+    //     edge_path->AddPoint(start);
+    //     edge_path->AddPoint(end);
+    //     edge_path->SetArrowOffset(end_graph->nodes[end_vertex->idx]->GetRadius() * 2);
+    // }
 }
 
 //--------------------------------------------------------------
@@ -114,8 +115,8 @@ void Clusters::UpdateAABB()
 
     for (const auto& node : nodes)
     {
-        auto& owner = FindSubGraph(dataset_clusters->vertices[node->GetVertexIdx()]->owner);
-        glm::vec3 global_pos = node->GetNewPosition() + owner->GetPosition();
+        const auto& owner = FindSubGraph(dataset_clusters->vertices[node->GetVertexIdx()]->owner);
+        const glm::vec3 global_pos = node->GetNewPosition() + owner->GetPosition();
         tl.x = min(global_pos.x - node->GetRadius(), tl.x);
         tl.y = min(global_pos.y - node->GetRadius(), tl.y);
         br.x = max(global_pos.x + node->GetRadius(), br.x);
