@@ -165,7 +165,7 @@ void IStructure::UpdateAABB()
     m_aabb.SetNewBounds(tl, br);
 }
 
-AABB IStructure::GetAABB()
+const AABB& IStructure::GetAABB()
 {
     return m_aabb;
 }

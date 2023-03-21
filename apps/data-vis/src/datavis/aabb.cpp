@@ -32,6 +32,16 @@ float AABB::GetArea() const
 	return m_bounds.getArea();
 }
 
+const glm::vec3& AABB::GetTopLeft() const
+{
+	return m_bounds.getTopLeft();
+}
+
+const glm::vec3& AABB::GetBottomRight() const
+{
+	return m_bounds.getBottomRight();
+}
+
 //--------------------------------------------------------------
 bool AABB::Inside(const glm::vec3& _position) const
 {
