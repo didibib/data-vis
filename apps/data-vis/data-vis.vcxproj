@@ -137,6 +137,7 @@
     <ClCompile Include="src\datavis\aabb.cpp" />
     <ClCompile Include="src\datavis\animator.cpp" />
     <ClCompile Include="src\datavis\dataset.cpp" />
+    <ClCompile Include="src\datavis\layout\edge_bundling.cpp" />
     <ClCompile Include="src\datavis\layout\layout.cpp" />
     <ClCompile Include="src\datavis\layout\local_search.cpp" />
     <ClCompile Include="src\datavis\layout\sugiyama.cpp" />

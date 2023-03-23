@@ -62,5 +62,13 @@ ofColor Vec3ToOfColor(const glm::vec3& _color)
 }
 } // namespace ImGuiExtensions
 
+namespace Math
+{
+float Cross(const glm::vec2& p, const glm::vec2& q)
+{
+	return p.x * q.y - p.y * q.x;
+}
+}
+
 
 } // namespace DataVis

@@ -10,7 +10,7 @@ void Graph::Init(const std::shared_ptr<Dataset> _dataset)
     Load(_dataset);
     // Add layout
     m_layouts.push_back(std::make_unique<ForceDirectedLayout>());
-    m_layouts.push_back(std::make_unique<Sugiyama>());
+    m_layouts.push_back(std::make_unique<SugiyamaLayout>());
 }
 
 //--------------------------------------------------------------

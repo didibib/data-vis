@@ -2,6 +2,9 @@
 
 namespace DataVis
 {
+//--------------------------------------------------------------
+// Animator
+//--------------------------------------------------------------
 class Animator
 {
 public:
@@ -24,7 +27,48 @@ protected:
 
     struct InterpolateValue3
     {
+        InterpolateValue3() = default;
+        InterpolateValue3(const glm::vec3& _new_value)
+        {
+            value = _new_value;
+            new_value = _new_value;
+            old_value = {};
+        }
         glm::vec3 value, old_value, new_value;
+
+        //--------------------------------------------------------------
+        // Binary operators
+        //--------------------------------------------------------------
+        InterpolateValue3& operator+=(const InterpolateValue3& rhs)
+        {
+            value += rhs.value;
+            old_value += rhs.old_value;
+            new_value += rhs.new_value;
+            return *this;
+        }
+
+        //--------------------------------------------------------------
+        InterpolateValue3 operator+(const InterpolateValue3& rhs)
+        {
+            auto lhs = *this;
+            return lhs += rhs;
+        }
+
+        //--------------------------------------------------------------
+        InterpolateValue3& operator-=(const InterpolateValue3& rhs)
+        {
+            value -= rhs.value;
+            old_value -= rhs.old_value;
+            new_value -= rhs.new_value;
+            return *this;
+        }
+
+        //--------------------------------------------------------------
+        InterpolateValue3 operator-(const InterpolateValue3& rhs)
+        {
+            auto lhs = *this;
+            return lhs -= rhs;
+        }
     };
 
 private:
@@ -32,6 +76,9 @@ private:
     bool m_animate = false;
 };
 
+//--------------------------------------------------------------
+// Rings
+//--------------------------------------------------------------
 class Rings : public Animator
 {
 public:
