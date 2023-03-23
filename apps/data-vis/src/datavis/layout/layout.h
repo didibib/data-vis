@@ -101,14 +101,14 @@ private:
 //--------------------------------------------------------------
 // Sugiyama Framework
 //--------------------------------------------------------------
-class Sugiyama final : public Layout
+class SugiyamaLayout final : public Layout
 {
 public:
     using Layer = std::vector<int>;
     using GetNeighbors = std::function<std::vector<Neighbor>(Vertex&)>;
     using OSCMHeuristic = std::function<bool(Dataset&, Layer&, Layer&, Layer&, GetNeighbors)>;
 
-    Sugiyama();
+    SugiyamaLayout();
     bool Gui(IStructure&) override;
     static void Apply(Graph&, const OSCMHeuristic& oscm_heuristic, const glm::vec2& node_offset,
                       const int& oscm_iterations, bool _curved_edges = true);
@@ -185,4 +185,32 @@ private:
         const glm::vec2& _node_offset,
         bool _curved_edges = true);
 };
+
+//--------------------------------------------------------------
+// Edge Bundling
+//--------------------------------------------------------------
+class EdgeBundlingLayout : public Layout
+{
+public:
+    EdgeBundlingLayout() = default;
+    // Inherited via Layout
+    virtual bool Gui(IStructure&) override;
+    static void Apply(IStructure&, uint subdivisions);
+
+private:
+    using InteractionFunction = std::function<float(const EdgePath&, const EdgePath&)>;
+    static void BundleEdges(IStructure&, float K, int C, int l, int n, float s, InteractionFunction f);
+
+    //--------------------------------------------------------------
+    // Compatibility
+    //--------------------------------------------------------------
+    static float Compatibility(const EdgePath&, const EdgePath&);
+    static float AngleCompatibility(const EdgePath&, const EdgePath&);
+    static float ScaleCompatibility(const EdgePath&, const EdgePath&);
+    static float DistanceCompatibility(const EdgePath&, const EdgePath&);
+    static float VisibilityCompatibility(const EdgePath&, const EdgePath&);
+    static float Visibility(const EdgePath&, const EdgePath&);
+
+};
+
 } // namespace DataVis

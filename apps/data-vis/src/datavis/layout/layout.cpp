@@ -237,5 +237,4 @@ void ForceDirectedLayout::Apply(IStructure& _structure, float _C, float _t, int 
 	}
 }
 #pragma endregion // Force Directed
-
 } // namespace DataVis
