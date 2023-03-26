@@ -28,9 +28,9 @@ namespace DataVis
     uint Tree::Depth(std::shared_ptr<TreeNode> node)
     {
         uint max = 0;
-        for (auto& child : node->children)
+        for (const auto& child : node->children)
         {
-            uint child_depth = Depth(child);
+            const uint child_depth = Depth(child);
             if (child_depth > max) max = child_depth;
         }
         return max + 1;
@@ -62,7 +62,7 @@ namespace DataVis
         std::shared_ptr<TreeNode> prev = nullptr;
         while (node != nullptr)
         {
-            auto next = node->parent;
+            const auto next = node->parent;
             node->parent = prev;
             prev = node;
             node = next;
@@ -142,7 +142,7 @@ namespace DataVis
     //--------------------------------------------------------------
     void MSP::Create(VertexIdx _root)
     {
-        auto& vertices = dataset->vertices;
+        const auto& vertices = dataset->vertices;
 
         // Keep track of the parent of each vertex so we can construct a tree after
         std::vector<VertexIdx> parents(vertices.size(), 0);

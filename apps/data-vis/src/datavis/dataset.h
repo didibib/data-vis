@@ -105,7 +105,7 @@ public:
     // This overload assumes you will update the vertices and edges manually
     void Load( const std::string& id, const std::string& filename, const Kind&);
     void InfoGui();
-    const Kind& GetKind() const;
+    [[nodiscard]] const Kind& GetKind() const;
     void AddInfo(const std::string& key, const std::string& value);
 
     std::vector<std::shared_ptr<Vertex>> vertices;
@@ -126,6 +126,11 @@ protected:
 //--------------------------------------------------------------
 // DatasetClusters
 //--------------------------------------------------------------
+
+/**
+ * vertices: contain all the vertices, but their idx corresponds with their idx within a cluster
+ * edges: only contain the inter edges; the edges between clusters 
+ */
 class ClusterDataset final : public Dataset
 {
 public:

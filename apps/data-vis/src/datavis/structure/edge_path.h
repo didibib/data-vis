@@ -8,12 +8,13 @@ public:
     enum class Style { Line, Curve };
 
     EdgePath() = default;
-    EdgePath(const Dataset::Kind&);
+    EdgePath(const EdgeIdx& _edge_idx, const Dataset::Kind& _kind);
     void Draw() override;
     //--------------------------------------------------------------
     // Setters
     //--------------------------------------------------------------
-    void SetEdgeIdx(EdgeIdx);
+    const EdgeIdx& GetEdgeIdx() const;
+
     void SetIsDirected(bool);
     void SetStyle(const Style&);
     void SetArrowOffset(float);

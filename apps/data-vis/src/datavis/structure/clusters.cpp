@@ -6,6 +6,8 @@ namespace DataVis
 void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 {
 	dataset = _dataset;
+    m_layouts.push_back(std::make_unique<EdgeBundlingLayout>());
+	
 	try
 	{
 		dataset_clusters = std::dynamic_pointer_cast<ClusterDataset>(_dataset);
@@ -92,7 +94,7 @@ void Clusters::InitEdges()
 		glm::vec3 start = start_graph->nodes[start_vertex->idx]->GetNewPosition() + start_graph->GetPosition();
 		glm::vec3 end = end_graph->nodes[end_vertex->idx]->GetNewPosition() + end_graph->GetPosition();
 
-		const auto& edge_path = edges.emplace_back(std::make_shared<EdgePath>(dataset->GetKind()));
+		const auto& edge_path = edges.emplace_back(std::make_shared<EdgePath>(edge.idx, dataset->GetKind()));
 		edge_path->AddPoint(start);
 		edge_path->AddPoint(end);
 		edge_path->SetArrowOffset(end_graph->nodes[end_vertex->idx]->GetRadius() * 2);

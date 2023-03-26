@@ -48,10 +48,10 @@ float Bezier(float _t)
 
 namespace ImGuiExtensions
 {
-bool ColorEdit3(char* _label, glm::vec3& _color, int _flags)
+bool ColorEdit3(const char* _label, glm::vec3& _color, int _flags)
 {
 	_color /= 255.f;
-	const bool val = ImGui::ColorEdit3(_label, (float*)&_color, _flags);
+	const bool val = ImGui::ColorEdit3(_label, reinterpret_cast<float*>(&_color), _flags);
 	_color *= 255;
 	return val;
 }
@@ -69,6 +69,4 @@ float Cross(const glm::vec2& p, const glm::vec2& q)
 	return p.x * q.y - p.y * q.x;
 }
 }
-
-
 } // namespace DataVis

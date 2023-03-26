@@ -42,17 +42,22 @@ void EdgePath::Draw()
 		ofDrawArrow(m_start_arrow, m_end_arrow, 12);
 }
 
-//--------------------------------------------------------------
-// CurvedPath
-//--------------------------------------------------------------
-EdgePath::EdgePath(const Dataset::Kind& _kind)
+EdgePath::EdgePath(const EdgeIdx& _edge_idx, const Dataset::Kind& _kind)
 {
 	m_is_directed = false;
 	if (_kind == Dataset::Kind::Directed)
 		m_is_directed = true;
-	m_edge_idx = -1;
+	m_edge_idx = _edge_idx;
 }
 
+const EdgeIdx& EdgePath::GetEdgeIdx() const
+{
+	return m_edge_idx;
+}
+
+//--------------------------------------------------------------
+// Setters
+//--------------------------------------------------------------
 void EdgePath::SetStyle(const Style& _style)
 {
 	if (m_style == _style) return;
@@ -60,15 +65,6 @@ void EdgePath::SetStyle(const Style& _style)
 	m_update_path = true;
 }
 
-//--------------------------------------------------------------
-// Setters
-//--------------------------------------------------------------
-void EdgePath::SetEdgeIdx(EdgeIdx _edge_idx)
-{
-	m_edge_idx = _edge_idx;
-}
-
-//--------------------------------------------------------------
 void EdgePath::SetArrowOffset(float _offset)
 {
 	m_arrow_offset = _offset;

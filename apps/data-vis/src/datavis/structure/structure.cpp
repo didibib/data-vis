@@ -59,7 +59,7 @@ void IStructure::SetPosition(const glm::vec3& _position)
 //--------------------------------------------------------------
 // Edges
 //--------------------------------------------------------------
-void IStructure::UpdateEdges(bool _force)
+void IStructure::UpdateEdges(const bool _force)
 {
     for (int i = 0; i < dataset->edges.size(); i++)
     {
@@ -81,11 +81,7 @@ void IStructure::UpdateEdges(bool _force)
 void IStructure::InitEdges()
 {
     edges.clear();
-    edges.resize(dataset->edges.size());
-    for(auto& edge : edges )
-    {
-        edge = std::make_shared<EdgePath>(dataset->GetKind());
-    }
+    edges.reserve(dataset->edges.size());
     for (int i = 0; i < dataset->edges.size(); i++)
     {
         const auto& edge = dataset->edges[i];
@@ -94,7 +90,8 @@ void IStructure::InitEdges()
         glm::vec3 start = nodes[startIdx]->GetNewPosition();
         glm::vec3 end = nodes[endIdx]->GetNewPosition();
 
-        const auto& edge_path = edges[i];
+        const auto& edge_path = edges.emplace_back(
+            std::make_shared<EdgePath>(edge.idx, dataset->GetKind()));
         edge_path->AddPoint(start);
         edge_path->AddPoint(end);
         edge_path->SetArrowOffset(nodes[endIdx]->GetRadius() * 2);

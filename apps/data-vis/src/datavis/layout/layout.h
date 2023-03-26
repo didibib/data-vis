@@ -191,16 +191,20 @@ private:
 //--------------------------------------------------------------
 class EdgeBundlingLayout : public Layout
 {
+    using CompatibilityFunction = std::function<float(const EdgePath&, const EdgePath&)>;
 public:
     EdgeBundlingLayout() = default;
     // Inherited via Layout
-    virtual bool Gui(IStructure&) override;
-    static void Apply(IStructure&, uint subdivisions);
+    bool Gui(IStructure&) override;
+    static void Apply(IStructure&, int C, int l, float K, int n, float s, CompatibilityFunction f);
 
 private:
-    using InteractionFunction = std::function<float(const EdgePath&, const EdgePath&)>;
-    static void BundleEdges(IStructure&, float K, int C, int l, int n, float s, InteractionFunction f);
-
+    float m_K;          // Stiffnes
+    int m_C = 3;        // Cycles
+    int m_l = 50;       // Iterations
+    int m_n = 1;        // Initial subdivisions
+    float m_s = 0.004;   // Step size
+    
     //--------------------------------------------------------------
     // Compatibility
     //--------------------------------------------------------------
@@ -210,7 +214,5 @@ private:
     static float DistanceCompatibility(const EdgePath&, const EdgePath&);
     static float VisibilityCompatibility(const EdgePath&, const EdgePath&);
     static float Visibility(const EdgePath&, const EdgePath&);
-
 };
-
 } // namespace DataVis
