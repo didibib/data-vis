@@ -137,19 +137,15 @@ namespace DataVis
         const auto& nodes = _graph.nodes;
         const auto& dataset = *_graph.dataset;
         // Create curves
-        for (auto& edge : _graph.edges)
-        {
-            edge = std::make_shared<EdgePath>(_graph.dataset->GetKind());
-        }
         const auto& vertices = dataset.vertices;
         for(const auto& edge : dataset.edges)
         {
             if(vertices[edge.from_idx]->id == DUMMY_ID)
                 continue;
 
+            _graph.edges[edge.idx] = std::make_shared<EdgePath>(edge.idx, _graph.dataset->GetKind());
             const auto& edge_path = _graph.edges[edge.idx];
             edge_path->Clear();
-            edge_path->SetEdgeIdx(edge.idx);
             // Set line type
             if(_curved_edges)
             {

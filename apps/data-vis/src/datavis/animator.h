@@ -42,13 +42,11 @@ protected:
         InterpolateValue3& operator+=(const InterpolateValue3& rhs)
         {
             value += rhs.value;
-            old_value += rhs.old_value;
-            new_value += rhs.new_value;
             return *this;
         }
 
         //--------------------------------------------------------------
-        InterpolateValue3 operator+(const InterpolateValue3& rhs)
+        InterpolateValue3 operator+(const InterpolateValue3& rhs) const
         {
             auto lhs = *this;
             return lhs += rhs;
@@ -58,13 +56,11 @@ protected:
         InterpolateValue3& operator-=(const InterpolateValue3& rhs)
         {
             value -= rhs.value;
-            old_value -= rhs.old_value;
-            new_value -= rhs.new_value;
             return *this;
         }
 
         //--------------------------------------------------------------
-        InterpolateValue3 operator-(const InterpolateValue3& rhs)
+        InterpolateValue3 operator-(const InterpolateValue3& rhs) const
         {
             auto lhs = *this;
             return lhs -= rhs;

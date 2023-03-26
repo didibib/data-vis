@@ -83,8 +83,13 @@ namespace DataVis
     namespace ImGuiExtensions
     {
         // Converts color from [0..255] to [0..1] for displaying and back
-        bool ColorEdit3(char* label, glm::vec3& color, int flags);
+        bool ColorEdit3(const char* label, glm::vec3& color, int flags);
         ofColor Vec3ToOfColor(const glm::vec3& color);
+    }
+
+    namespace Math
+    {
+        float Cross(const glm::vec2& p, const glm::vec2& q);
     }
 } // namespace DataVis
 
