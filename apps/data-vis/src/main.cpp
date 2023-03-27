@@ -15,4 +15,5 @@ int main()
 	ShowWindow(hwnd, SW_MAXIMIZE);
 #endif
 	ofRunApp(make_shared<ofApp>());
+	// testing
 }
