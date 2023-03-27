@@ -627,7 +627,12 @@ namespace DataVis
         return changed;
     }
 
-    bool SugiyamaLayout::OSCMMedianHeuristic(const Dataset& _dataset, const Layer& _layer_fixed, const Layer& _layer, Layer& _new_layer, const GetNeighbors& _get_neighbors )
+    bool SugiyamaLayout::OSCMMedianHeuristic(
+        const Dataset& _dataset,
+        const Layer& _layer_fixed,
+        Layer& _layer,
+        Layer& _new_layer,
+        const GetNeighbors& _get_neighbors )
     {
         auto& vertices = _dataset.vertices;
 
@@ -848,7 +853,6 @@ namespace DataVis
             }
         }
     }
-
 
     void SugiyamaLayout::HorizontalCompaction(
         const Dataset& _dataset,

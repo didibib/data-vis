@@ -204,7 +204,7 @@ void IStructure::SetNodesColor(ofColor _color)
     }
 }
 
-void IStructure::SetEdgeColor(const glm::vec3& _color)
+void IStructure::SetEdgeColor(const glm::vec4& _color)
 {
     m_gui_data.coloredit_edge_color = _color;
 }
@@ -235,12 +235,12 @@ void IStructure::Gui()
         }
 
         constexpr int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
-        if (ImGuiExtensions::ColorEdit3("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
+        if (ImGuiExtensions::ColorEdit4("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
         {
-            SetNodesColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_node_color));
+            SetNodesColor(ImGuiExtensions::Vec4ToOfColor(m_gui_data.coloredit_node_color));
         }
 
-        ImGuiExtensions::ColorEdit3("Edge Color", m_gui_data.coloredit_edge_color, color_edit_flags);
+        ImGuiExtensions::ColorEdit4("Edge Color", m_gui_data.coloredit_edge_color, color_edit_flags);
 
         ImGui::TreePop();
     }

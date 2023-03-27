@@ -84,7 +84,9 @@ namespace DataVis
     {
         // Converts color from [0..255] to [0..1] for displaying and back
         bool ColorEdit3(const char* label, glm::vec3& color, int flags);
+        bool ColorEdit4(const char* label, glm::vec4& color, int flags);
         ofColor Vec3ToOfColor(const glm::vec3& color);
+        ofColor Vec4ToOfColor(const glm::vec4& color);
     }
 
     namespace Math

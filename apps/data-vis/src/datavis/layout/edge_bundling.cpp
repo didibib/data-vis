@@ -12,10 +12,25 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 		ImGui::InputFloat("Stiffnes", &m_K);
 		ImGui::InputInt("Initial Subdivisions", &m_n);
 		ImGui::InputFloat("Step Size", &m_s);
+		ImGui::InputFloat( "Compatibility Threshold", &m_comp_threshold );
 
 		if (ImGui::Button("Apply"))
 		{
-			Apply(_structure, m_C, m_l, m_K, m_n, m_s, Compatibility);
+			try
+			{
+				auto& clusters = dynamic_cast<Clusters&>(_structure);
+				for (auto& graph : clusters.sub_graphs)
+				{
+					ForceDirectedLayout::Apply(*graph, 0.5f, 0.002f, 500);
+					graph->UpdateEdges(true);
+				}
+			}
+			catch (std::exception& e)
+			{
+				std::cout << e.what() << std::endl;
+			}
+
+			Apply(_structure, m_C, m_l, m_K, m_n, m_s, m_comp_threshold, Compatibility);
 			for (const auto& edge : _structure.edges)
 				edge->ForceUpdate();
 			active = true;
@@ -27,7 +42,7 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 	return active;
 }
 
-void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K, int _n, float _s, CompatibilityFunction _f)
+void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K, int _n, float _s, float _threshold, CompatibilityFunction _f)
 {
 	const auto& vertices = _structure.dataset->vertices;
 	const auto& edges = _structure.dataset->edges;
@@ -40,7 +55,7 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 		// For l iterations calculate forces
 		for (int l = 0; l < _l; l++)
 		{
-			std::cout << "Cycle: " << c << " Iteration: " << l << std::endl;
+			std::cout << "Cycle: " << c << ", Iteration: " << l << std::endl;
 			for (auto& p : _structure.edges)
 			{
 				const glm::vec3 edge = p->points.back().value - p->points.front().value;
@@ -72,7 +87,7 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 						
 						float compatibility = _f(*p, *q);
 
-						// TODO: Add compatibility threshold
+						if (compatibility < _threshold) continue;
 		
 						glm::vec3 v = q->points[i].value - P.value;
 						sum_force += compatibility * v;
@@ -93,8 +108,8 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 				
 		}
 
+		// Update parameters for next cycle
 		_s *= .5f;
-		//_n = std::pow(2, c);
 		_l = _l * 2 / 3;
 	}
 }

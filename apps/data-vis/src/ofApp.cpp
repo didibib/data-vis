@@ -8,7 +8,7 @@ void ofApp::setup()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsLight();
-    ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ofGetWindowPtr()->getWindowContext(), true);
+    ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(ofGetWindowPtr()->getWindowContext()), true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
     // Set OpenGL 
