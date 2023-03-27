@@ -34,7 +34,6 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 	// For c cycles
 	for (int c = 0; c < _C; c++)
 	{
-		std::cout << "n: " << _n << std::endl;
 		for (auto& edge : _structure.edges)
 			edge->Subdivide(_n);
 
@@ -45,7 +44,7 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 			for (auto& p : _structure.edges)
 			{
 				const glm::vec3 edge = p->points.back().value - p->points.front().value;
-				const float k_p = _K / glm::length(edge) * (p->points.size() - 1);
+				const float k_p = (_K / glm::length(edge)) * (p->points.size() - 1);
 
 				// For each point in edge P
 				for (int i = 1; i < p->points.size() - 1; i++)
@@ -56,8 +55,7 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 					// Spring force of next segment
 					const auto k_next = p->points[i + 1] - P;
 					//
-					float force_p_i = k_p * (glm::length(k_prev.value) + glm::length(k_next.value));
-					glm::vec3 sum_dir(0);
+					glm::vec3 sum_force = k_p * (k_prev.value + k_next.value);
 
 					for (auto& q : _structure.edges)
 					{
@@ -68,20 +66,18 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 						const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
 						const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
 
-						if ((p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) ||
-							(p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
-						{
-							float compatibility = _f(*p, *q);
+						if (not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
+							not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
+							continue;
+						
+						float compatibility = _f(*p, *q);
 
-							for (int j = 1; j < q->points.size() - 1; j++)
-							{
-								glm::vec3 v = q->points[j].value - P.value;
-								force_p_i += compatibility / glm::length(v);
-								sum_dir += glm::normalize(v);
-							}
-						}						
+						// TODO: Add compatibility threshold
+		
+						glm::vec3 v = q->points[i].value - P.value;
+						sum_force += compatibility * v;
 					}
-					P.new_value = sum_dir * force_p_i;
+					P.new_value = sum_force;
 				}
 			}
 		}
@@ -90,11 +86,15 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 		for (auto& p : _structure.edges)
 		{
 			for (int i = 1; i < p->points.size() - 1; i++)
+			{
 				p->points[i].value += _s * p->points[i].new_value;
+				p->points[i].new_value = p->points[i].value;
+			}
+				
 		}
 
 		_s *= .5f;
-		_n = std::pow(2, c);
+		//_n = std::pow(2, c);
 		_l = _l * 2 / 3;
 	}
 }
