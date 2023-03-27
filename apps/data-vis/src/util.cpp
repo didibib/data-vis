@@ -58,7 +58,20 @@ bool ColorEdit3(const char* _label, glm::vec3& _color, int _flags)
 
 ofColor Vec3ToOfColor(const glm::vec3& _color)
 {
-	return ofColor(_color.x, _color.y, _color.z);
+	return ofColor(_color.r, _color.g, _color.b);
+}
+
+bool ColorEdit4(const char* _label, glm::vec4& _color, int _flags)
+{
+	_color /= 255.f;
+	const bool val = ImGui::ColorEdit4(_label, reinterpret_cast<float*>(&_color), _flags);
+	_color *= 255;
+	return val;
+}
+
+ofColor Vec4ToOfColor(const glm::vec4& _color)
+{
+	return ofColor(_color.r, _color.g, _color.b, _color.a);
 }
 } // namespace ImGuiExtensions
 

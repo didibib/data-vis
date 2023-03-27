@@ -6,12 +6,11 @@ namespace DataVis
 void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 {
 	dataset = _dataset;
-    m_layouts.push_back(std::make_unique<EdgeBundlingLayout>());
-	
+	m_layouts.push_back(std::make_unique<EdgeBundlingLayout>());
+
 	try
 	{
 		dataset_clusters = std::dynamic_pointer_cast<ClusterDataset>(_dataset);
-		// Add edge bundling layout
 	}
 	catch (std::exception& e)
 	{
@@ -23,9 +22,11 @@ void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 	int y = 0;
 	for (const auto& cluster : dataset_clusters->clusters)
 	{
-		auto& graph = m_sub_graphs.emplace_back(std::make_shared<Graph>());
+		auto& graph = sub_graphs.emplace_back(std::make_shared<Graph>());
 		graph->Init(cluster);
+
 		RandomLayout::Apply(*graph, 800, 600);
+
 		graph->SetPosition(glm::vec3(x++ * 820, y * 620, 0));
 		if (x not_eq 0 and x % 5 == 0)
 		{
@@ -46,7 +47,7 @@ void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 void Clusters::Update(const float _delta_time)
 {
 	m_aabb.Update(_delta_time);
-	for (const auto& graph : m_sub_graphs)
+	for (const auto& graph : sub_graphs)
 		graph->Update(_delta_time);
 	for (const auto& edge : edges)
 		edge->Update(_delta_time);
@@ -81,7 +82,7 @@ void Clusters::UpdateEdges(bool _force)
 //--------------------------------------------------------------
 void Clusters::InitEdges()
 {
-	edges.clear();	
+	edges.clear();
 	// Loop over inter edges
 	for (int i = 0; i < dataset->edges.size(); i++)
 	{
@@ -107,15 +108,15 @@ void Clusters::UpdateAABB()
 	glm::vec3 tl{ MAX_FLOAT };
 	glm::vec3 br{ -MAX_FLOAT };
 
-    for(const auto& graph : m_sub_graphs)
-    {
-        auto& aabb = graph->GetAABB();
-        auto& pos = graph->GetPosition();
-     	tl.x = min(aabb.GetTopLeft().x + pos.x, tl.x);
-	 	tl.y = min(aabb.GetTopLeft().y + pos.y, tl.y);
-	 	br.x = max(aabb.GetBottomRight().x + pos.x, br.x);
-	 	br.y = max(aabb.GetBottomRight().y + pos.y, br.y);
-    }
+	for (const auto& graph : sub_graphs)
+	{
+		auto& aabb = graph->GetAABB();
+		auto& pos = graph->GetPosition();
+		tl.x = min(aabb.GetTopLeft().x + pos.x, tl.x);
+		tl.y = min(aabb.GetTopLeft().y + pos.y, tl.y);
+		br.x = max(aabb.GetBottomRight().x + pos.x, br.x);
+		br.y = max(aabb.GetBottomRight().y + pos.y, br.y);
+	}
 	tl.z = 0;
 	br.z = 0;
 	m_aabb.SetNewBounds(tl, br);
@@ -131,7 +132,7 @@ bool Clusters::InsideDraggable(const glm::vec3& _pos)
 		return true;
 	}
 
-	for (auto& graph : m_sub_graphs)
+	for (auto& graph : sub_graphs)
 	{
 		if (graph->InsideDraggable(transformed))
 		{
@@ -148,7 +149,7 @@ void Clusters::Move(const glm::vec3& _offset)
 	if (m_dragging_graph)
 	{
 		m_dragging_graph->Move(_offset);
-        UpdateAABB();
+		UpdateAABB();
 		return;
 	}
 	IStructure::Move(_offset);
@@ -165,7 +166,7 @@ void Clusters::Select(const glm::vec3& _pos)
 	}
 
 	m_focussed_graph = nullptr;
-	for (auto& graph : m_sub_graphs)
+	for (auto& graph : sub_graphs)
 	{
 		if (graph->Inside(transformed))
 		{
@@ -178,7 +179,7 @@ void Clusters::Select(const glm::vec3& _pos)
 //--------------------------------------------------------------
 std::shared_ptr<Graph> Clusters::FindSubGraph(const std::string _id)
 {
-	for (auto& graph : m_sub_graphs)
+	for (auto& graph : sub_graphs)
 	{
 		if (graph->dataset->GetId() == _id) return graph;
 	}
@@ -188,12 +189,12 @@ std::shared_ptr<Graph> Clusters::FindSubGraph(const std::string _id)
 //--------------------------------------------------------------
 void Clusters::DrawNodes()
 {
-	for (auto& graph : m_sub_graphs)
+	for (auto& graph : sub_graphs)
 	{
 		graph->Draw(graph == m_focussed_graph);
 	}
 
-	ofSetColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_inter_edge_color));
+	ofSetColor(ImGuiExtensions::Vec4ToOfColor(m_gui_data.coloredit_inter_edge_color));
 	for (const auto& edge : edges)
 	{
 		edge->Draw();
@@ -223,15 +224,15 @@ void Clusters::Gui()
 	if (ImGui::TreeNode("Settings"))
 	{
 		constexpr int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
-		if (ImGuiExtensions::ColorEdit3("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
+		if (ImGuiExtensions::ColorEdit4("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
 		{
-			SetNodesColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_node_color));
+			SetNodesColor(ImGuiExtensions::Vec4ToOfColor(m_gui_data.coloredit_node_color));
 		}
-		if (ImGuiExtensions::ColorEdit3("Intra Edge Color", m_gui_data.coloredit_intra_edge_color, color_edit_flags))
+		if (ImGuiExtensions::ColorEdit4("Intra Edge Color", m_gui_data.coloredit_intra_edge_color, color_edit_flags))
 		{
-			for (auto& graph : m_sub_graphs) graph->SetEdgeColor(m_gui_data.coloredit_intra_edge_color);
+			for (auto& graph : sub_graphs) graph->SetEdgeColor(m_gui_data.coloredit_intra_edge_color);
 		}
-		ImGuiExtensions::ColorEdit3("Inter Edge Color", m_gui_data.coloredit_inter_edge_color, color_edit_flags);
+		ImGuiExtensions::ColorEdit4("Inter Edge Color", m_gui_data.coloredit_inter_edge_color, color_edit_flags);
 
 		ImGui::TreePop();
 	}

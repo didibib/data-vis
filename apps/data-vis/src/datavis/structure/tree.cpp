@@ -100,7 +100,7 @@ namespace DataVis
             const auto& parent = node->parent;
             static const glm::vec3 sub = {0, 0, -1}; // To draw edge behind vertices
             ofFill();
-            ofSetColor(m_gui_data.coloredit_edge_color.x, m_gui_data.coloredit_edge_color.y, m_gui_data.coloredit_edge_color.z);
+            ofSetColor(ImGuiExtensions::Vec4ToOfColor(m_gui_data.coloredit_edge_color));
             ofDrawLine(parent->GetPosition() + sub, node->GetPosition() + sub);
             node->Draw();
             for (auto& child : node->children) stack.push(child);

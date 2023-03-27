@@ -236,7 +236,7 @@ void EdgePath::Subdivide(uint _subdivisions)
         const float total_length = glm::length(dir);
         const float subdivision_length = total_length / static_cast<float>(_subdivisions + 1);
         dir /= total_length;
-        
+
         for(int j = 1; j <= _subdivisions; j++)
         {
             glm::vec3 new_point = start.value + subdivision_length * j * dir;

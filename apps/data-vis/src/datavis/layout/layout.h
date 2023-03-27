@@ -106,7 +106,7 @@ class SugiyamaLayout final : public Layout
 public:
     using Layer = std::vector<int>;
     using GetNeighbors = std::function<std::vector<Neighbor>(Vertex&)>;
-    using OSCMHeuristic = std::function<bool(Dataset&, Layer&, Layer&, Layer&, GetNeighbors)>;
+    using OSCMHeuristic = std::function<bool(const Dataset&, const Layer&, Layer&, Layer&, const GetNeighbors)>;
 
     SugiyamaLayout();
     bool Gui(IStructure&) override;
@@ -127,8 +127,12 @@ private:
     static void AddDummyVertices(Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex);
     static int CrossingMinimization(Dataset&, std::vector<Layer>& vertices_per_layer, const OSCMHeuristic& heuristic,
                                     int iterations);
-    static std::vector<float> VertexPositioning(const Dataset& _dataset, const std::vector<Layer>& vertices_per_layer,
-                                                Layer& layer_per_vertex, float delta_x);
+    
+    static std::vector<float> VertexPositioning(
+        const Dataset& dataset,
+        const std::vector<Layer>& vertices_per_layer,
+        Layer& layer_per_vertex,
+        float delta_x);
 
     //--------------------------------------------------------------
     // Layer Assignment
@@ -144,10 +148,19 @@ private:
     //--------------------------------------------------------------
     // OSCM
     //--------------------------------------------------------------
-    static bool OSCMBarycenterHeuristic(const Dataset&, const Layer& layer_fixed, Layer& layer, Layer& new_layer,
-                                        const GetNeighbors& get_neighbors);
-    static bool OSCMMedianHeuristic(const Dataset&, const Layer& layer_fixed, const Layer& layer, Layer& new_layer,
-                                    const GetNeighbors& get_neighbors);
+    static bool OSCMBarycenterHeuristic(
+        const Dataset& dataset,
+        const Layer& layer_fixed,
+        Layer& layer,
+        Layer& new_layer,
+        const GetNeighbors& get_neighbors);
+    
+    static bool OSCMMedianHeuristic(
+        const Dataset& dataset,
+        const Layer& layer_fixed,
+        Layer& layer,
+        Layer& new_layer,
+        const GetNeighbors& get_neighbors);
 
     static int Crossings(const Dataset&, const Layer& layer_1, const Layer& layer_2);
 
@@ -155,7 +168,8 @@ private:
     // Node Positioning
     //--------------------------------------------------------------
     static void FlagType1Conflicts(
-        const Dataset&, const std::vector<Layer>& vertices_per_layer,
+        const Dataset&,
+        const std::vector<Layer>& vertices_per_layer,
         Layer& layer_per_vertex,
         std::vector<std::pair<int, int>>& flags);
 
@@ -196,7 +210,7 @@ public:
     EdgeBundlingLayout() = default;
     // Inherited via Layout
     bool Gui(IStructure&) override;
-    static void Apply(IStructure&, int C, int l, float K, int n, float s, CompatibilityFunction f);
+    static void Apply(IStructure&, int C, int l, float K, int n, float s, float threshold, CompatibilityFunction f);
 
 private:
     float m_K = 0.1f;          // Stiffnes
@@ -204,6 +218,7 @@ private:
     int m_l = 50;       // Iterations
     int m_n = 1;        // Initial subdivisions
     float m_s = 0.04;   // Step size
+    float m_comp_threshold = 0.05f; // Compatibility threshold
     
     //--------------------------------------------------------------
     // Compatibility

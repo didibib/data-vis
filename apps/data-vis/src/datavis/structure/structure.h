@@ -37,7 +37,7 @@ public:
 	VectorOfEdgePaths edges;
 	
 	void SetNodesColor(ofColor color);
-	void SetEdgeColor(const glm::vec3& color);
+	void SetEdgeColor(const glm::vec4& color);
 
 protected:
 	virtual void DrawNodes() = 0;
@@ -56,8 +56,8 @@ protected:
 	{
 		bool checkbox_node_labels = false;
 		float slider_radius = 10;
-		glm::vec3 coloredit_node_color = glm::vec3(0);
-		glm::vec3 coloredit_edge_color = glm::vec3(123);
+		glm::vec4 coloredit_node_color = glm::vec4(0, 0, 0, 255);
+		glm::vec4 coloredit_edge_color = glm::vec4(123, 123, 123, 255);
 	} m_gui_data;
 
 	std::function<void(IStructure&)> m_on_delete_callback;
