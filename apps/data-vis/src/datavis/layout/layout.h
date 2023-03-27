@@ -127,7 +127,7 @@ private:
     static void AddDummyVertices(Dataset&, std::vector<Layer>& vertices_per_layer, Layer& layer_per_vertex);
     static int CrossingMinimization(Dataset&, std::vector<Layer>& vertices_per_layer, const OSCMHeuristic& heuristic,
                                     int iterations);
-    static std::vector<float> VertexPositioning(Dataset& _dataset, std::vector<Layer>& vertices_per_layer,
+    static std::vector<float> VertexPositioning(const Dataset& _dataset, const std::vector<Layer>& vertices_per_layer,
                                                 Layer& layer_per_vertex, float delta_x);
 
     //--------------------------------------------------------------
@@ -144,9 +144,9 @@ private:
     //--------------------------------------------------------------
     // OSCM
     //--------------------------------------------------------------
-    static bool OSCMBarycenterHeuristic(Dataset&, const Layer& layer_fixed, Layer& layer, Layer& new_layer,
+    static bool OSCMBarycenterHeuristic(const Dataset&, const Layer& layer_fixed, Layer& layer, Layer& new_layer,
                                         const GetNeighbors& get_neighbors);
-    static bool OSCMMedianHeuristic(Dataset&, const Layer& layer_fixed, Layer& layer, Layer& new_layer,
+    static bool OSCMMedianHeuristic(const Dataset&, const Layer& layer_fixed, const Layer& layer, Layer& new_layer,
                                     const GetNeighbors& get_neighbors);
 
     static int Crossings(const Dataset&, const Layer& layer_1, const Layer& layer_2);
@@ -155,26 +155,26 @@ private:
     // Node Positioning
     //--------------------------------------------------------------
     static void FlagType1Conflicts(
-        Dataset&, std::vector<Layer>& vertices_per_layer,
+        const Dataset&, const std::vector<Layer>& vertices_per_layer,
         Layer& layer_per_vertex,
         std::vector<std::pair<int, int>>& flags);
 
     static void VerticalAlignment(
-        Dataset&,
-        std::vector<Layer>& vertices_per_layer,
+        const Dataset&,
+        const std::vector<Layer>& vertices_per_layer,
         Layer& layer_per_vertex,
-        Layer& pos_per_vertex,
+        const Layer& pos_per_vertex,
         std::vector<int>& root,
         std::vector<int>& align,
         std::vector<std::pair<int, int>>& flags);
 
     static void HorizontalCompaction(
-        Dataset&,
-        std::vector<Layer>& vertices_per_layer,
-        Layer& layer_per_vertex,
-        Layer& pos_per_vertex,
-        std::vector<int>& root,
-        std::vector<int>& align,
+        const Dataset&,
+        const std::vector<Layer>& vertices_per_layer,
+        const Layer& layer_per_vertex,
+        const Layer& pos_per_vertex,
+        const std::vector<int>& root,
+        const std::vector<int>& align,
         std::vector<float>& x_per_vertex,
         float delta);
 
@@ -199,11 +199,11 @@ public:
     static void Apply(IStructure&, int C, int l, float K, int n, float s, CompatibilityFunction f);
 
 private:
-    float m_K;          // Stiffnes
+    float m_K = 0.1f;          // Stiffnes
     int m_C = 3;        // Cycles
     int m_l = 50;       // Iterations
     int m_n = 1;        // Initial subdivisions
-    float m_s = 0.004;   // Step size
+    float m_s = 0.04;   // Step size
     
     //--------------------------------------------------------------
     // Compatibility

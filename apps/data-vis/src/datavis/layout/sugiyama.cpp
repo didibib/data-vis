@@ -592,8 +592,8 @@ namespace DataVis
         return best_crossings;
     }
 
-    bool SugiyamaLayout::OSCMBarycenterHeuristic(Dataset& _dataset, const Layer& _layer_fixed, Layer& _layer, Layer& _new_layer,
-                                           const GetNeighbors& _get_neighbors)
+    bool SugiyamaLayout::OSCMBarycenterHeuristic(const Dataset& _dataset, const Layer& _layer_fixed, Layer& _layer, Layer& _new_layer,
+                                                 const GetNeighbors& _get_neighbors)
     {
         auto& vertices = _dataset.vertices;
 
@@ -627,71 +627,68 @@ namespace DataVis
         return changed;
     }
 
-    bool SugiyamaLayout::OSCMMedianHeuristic(Dataset& _dataset, const Layer& _layer_fixed, Layer& _layer, Layer& _new_layer,
-                                       const GetNeighbors& _get_neighbors)
+    bool SugiyamaLayout::OSCMMedianHeuristic(const Dataset& _dataset, const Layer& _layer_fixed, const Layer& _layer, Layer& _new_layer, const GetNeighbors& _get_neighbors )
     {
         auto& vertices = _dataset.vertices;
 
-        std::vector<int> pos_per_vertex(_layer_fixed.size());
-        for (size_t i = 0; i < _layer_fixed.size(); i++)
+        std::unordered_map<int, int> pos_per_vertex;
+        for (int i = 0; i < _layer_fixed.size(); i++)
         {
             pos_per_vertex[_layer_fixed[i]] = i;
         }
 
         // tuple: position, degree, parity, idx
-        std::vector<std::tuple<int, int, int, int>> medians(_layer.size());
-        for (size_t i = 0; i < _layer.size(); i++)
+        std::vector<std::tuple<int, int, int, int>> medians( _layer.size() );
+        for (int i = 0; i < _layer.size(); i++)
         {
-            auto& neighbors = _get_neighbors(*vertices[_layer[i]]);
-            // sort neighbors in position in _layer_fixed
-            std::vector<int> neighbor_positions(neighbors.size());
-            for (const auto& neighbor : neighbors)
-            {
-                neighbor_positions.push_back(pos_per_vertex[neighbor.idx]);
-            }
-            std::sort(neighbor_positions.begin(), neighbor_positions.end());
-
+            auto& neighbors = _get_neighbors( *vertices[_layer[i]] );
             int degree = neighbors.size();
             if (degree == 0)
             {
-                medians.emplace_back(0, 0, 0, _layer[i]);
+                medians[i] = { 0, 0, 0, i };
                 continue;
             }
 
-            const int median_idx = static_cast<int>(std::ceil(.5f * degree) - 1);
-            medians.emplace_back(neighbor_positions[median_idx], degree, degree % 2, i);
+            // sort neighbors in position in _layer_fixed
+            std::vector<int> neighbor_positions( neighbors.size() );
+            for (int j = 0; j < neighbors.size(); j++)
+            {
+                neighbor_positions[j] = pos_per_vertex[neighbors[j].idx];
+            }
+            std::sort( neighbor_positions.begin(), neighbor_positions.end() );
+
+            int median_idx = std::ceil( degree * .5f ) - 1;
+            medians[i] = { neighbor_positions[median_idx], degree, degree % 2, i };
         }
 
         bool changed = false;
-        std::sort(medians.begin(), medians.end(),
-                  [&](std::tuple<int, int, int, int> lhs, std::tuple<int, int, int, int> rhs)
-                  {
-                      bool eval;
-                      // if o(v_1) == o(v_2)
-                      if (std::get<0>(lhs) == std::get<0>(rhs))
-                      {
-                          // check if they have the same degree
-                          if (std::get<1>(lhs) == std::get<1>(rhs))
-                          {
-                              // arbitrary so just false
-                              eval = false;
-                          }
-                          else
-                          {
-                              // different degree, so odd parity to the left
-                              eval = std::get<2>(lhs) > std::get<2>(rhs);
-                          }
-                      }
-                      else
-                      {
-                          eval = std::get<0>(lhs) < std::get<0>(rhs);
-                      }
-                      changed |= eval;
-                      return eval;
-                  });
+        std::sort( medians.begin(), medians.end(), [&]( std::tuple<int, int, int, int> lhs, std::tuple<int, int, int, int> rhs ) {
+            bool eval;
+            // if o(v_1) == o(v_2)
+            if (std::get<0>( lhs ) == std::get<0>( rhs ))
+            {
+                // check if they have the same degree
+                if (std::get<1>( lhs ) == std::get<1>( rhs ))
+                {
+                    // arbitrary so just false
+                    eval = false;
+                }
+                else
+                {
+                    // different degree, so odd parity to the left
+                    eval = std::get<2>( lhs ) > std::get<2>( rhs );
+                }
+            }
+            else
+            {
+                eval = std::get<0>( lhs ) < std::get<0>( rhs );
+            }
+            changed |= eval;
+            return eval;
+            } );
 
-        _new_layer.resize(_layer.size());
-        for (int i = 0; i < _layer.size(); i++) _new_layer[i] = _layer[std::get<3>(medians[i])];
+        _new_layer.resize( _layer.size() );
+        for (int i = 0; i < _layer.size(); i++) _new_layer[i] = _layer[std::get<3>( medians[i] )];
         return changed;
     }
 
@@ -747,12 +744,12 @@ namespace DataVis
     // Vertex Positioning
     //--------------------------------------------------------------
     std::vector<float> SugiyamaLayout::VertexPositioning(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
         Layer& _layer_per_vertex,
         float _delta)
     {
-        auto& vertices = _dataset.vertices;
+        const auto& vertices = _dataset.vertices;
         std::vector<int> pos_per_vertex(vertices.size());
         for (auto& layer : _vertices_per_layer)
         {
@@ -775,8 +772,8 @@ namespace DataVis
     }
 
     void SugiyamaLayout::FlagType1Conflicts(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
         Layer& _layer_per_vertex,
         std::vector<std::pair<int, int>>& _flags)
     {
@@ -795,15 +792,15 @@ namespace DataVis
     }
 
     void SugiyamaLayout::VerticalAlignment(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
         Layer& _layer_per_vertex,
-        Layer& _pos_per_vertex,
+        const Layer& _pos_per_vertex,
         std::vector<int>& _root,
         std::vector<int>& _align,
         std::vector<std::pair<int, int>>& _flags)
     {
-        auto& vertices = _dataset.vertices;
+        const auto& vertices = _dataset.vertices;
         _root.resize(vertices.size());
         _align.resize(vertices.size());
         for (int i = 0; i < vertices.size(); i++)
@@ -854,18 +851,18 @@ namespace DataVis
 
 
     void SugiyamaLayout::HorizontalCompaction(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
-        Layer& _layer_per_vertex,
-        Layer& _pos_per_vertex,
-        std::vector<int>& _root,
-        std::vector<int>& _align,
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
+        const Layer& _layer_per_vertex,
+        const Layer& _pos_per_vertex,
+        const std::vector<int>& _root,
+        const std::vector<int>& _align,
         std::vector<float>& _x_per_vertex,
         float _delta)
     {
-        const float undefined = std::numeric_limits<float>::min();
-        const float infinite = std::numeric_limits<float>::max();
-        auto& vertices = _dataset.vertices;
+        constexpr float undefined = MIN_FLOAT;
+        constexpr float infinite = MAX_FLOAT;
+        const auto& vertices = _dataset.vertices;
         std::vector<float> sink(vertices.size());
         for (int i = 0; i < vertices.size(); i++)
             sink[i] = i;
@@ -879,11 +876,11 @@ namespace DataVis
             int w = v;
             do
             {
-                int w_pos = _pos_per_vertex[w];
+                const int w_pos = _pos_per_vertex[w];
                 if (w_pos > 0)
                 {
-                    int layer = _layer_per_vertex[w];
-                    int pred_w = _vertices_per_layer[layer][w_pos - 1];
+                    const int layer = _layer_per_vertex[w];
+                    const int pred_w = _vertices_per_layer[layer][w_pos - 1];
                     int u = _root[pred_w];
                     place_block(u);
                     if (sink[v] == v) sink[v] = sink[u];
@@ -904,13 +901,13 @@ namespace DataVis
 
         for (size_t i = 0; i < vertices.size(); i++)
         {
-            int vertex_idx = vertices[i]->idx;
+            const int vertex_idx = vertices[i]->idx;
             if (_root[vertex_idx] == vertex_idx) place_block(vertex_idx);
         }
 
         for (size_t i = 0; i < _vertices_per_layer.size(); i++)
         {
-            int v_1 = _vertices_per_layer[i][0];
+            const int v_1 = _vertices_per_layer[i][0];
             if (sink[v_1] != v_1) continue;
             if (shift[sink[v_1]] == infinite) shift[sink[v_1]] = 0;
 
@@ -926,8 +923,8 @@ namespace DataVis
                     j--;
                     if (_pos_per_vertex[v] > 0)
                     {
-                        int layer = _layer_per_vertex[v];
-                        int u = _vertices_per_layer[layer][_pos_per_vertex[v] - 1];
+                        const int layer = _layer_per_vertex[v];
+                        const int u = _vertices_per_layer[layer][_pos_per_vertex[v] - 1];
                         shift[sink[u]] = std::min(shift[sink[u]],
                                                   shift[sink[v]] + _x_per_vertex[v] - (_x_per_vertex[u] + _delta));
                     }
