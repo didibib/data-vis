@@ -231,4 +231,17 @@ private:
     static float VisibilityCompatibility(const EdgePath&, const EdgePath&);
     static float Visibility(const EdgePath&, const EdgePath&);
 };
+
+//--------------------------------------------------------------
+// Dimensionality Reduction
+//--------------------------------------------------------------
+class DimReductionLayout : public Layout
+{
+public:
+    DimReductionLayout() = default;
+    bool Gui(IStructure&) override;
+    static void Apply(IStructure&);
+};
+
+
 } // namespace DataVis

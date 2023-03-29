@@ -24,6 +24,7 @@ void IStructure::Init(const std::shared_ptr<Dataset> _dataset)
     m_layouts.clear();
     m_layouts.push_back(std::make_unique<RandomLayout>());
     m_layouts.push_back(std::make_unique<GridLayout>());
+    m_layouts.push_back(std::make_unique<DimReductionLayout>());
 }
 
 const int& IStructure::Idx() const
