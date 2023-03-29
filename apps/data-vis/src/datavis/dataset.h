@@ -3,35 +3,26 @@
 namespace DataVis
 {
 //--------------------------------------------------------------
-using AnyType = std::variant<int, float, std::string>;
+// Parser
+//--------------------------------------------------------------
+namespace Parser
+{
+    bool DotFile( const std::string& filename, Model::MainGraph& );
+};
+
+//--------------------------------------------------------------
+using AnyType = std::variant<float, std::string>;
 
 struct VisitFloat
 {
-    VisitFloat(float _f) : default_value(_f)
+    VisitFloat(const float _f) : default_value(_f)
     {
     }
 
     float operator()(const float& _f) const { return CheckParam(_f, default_value); }
     float operator()(const std::string& _s) const { return CheckParam(_s, default_value); }
-    float operator()(const int& _i) const { return CheckParam(_i, default_value); }
-    static float CheckParam(const float& _f, float _default) { return _f; }
-    static float CheckParam(const std::string&, float _default) { return _default; }
-    static float CheckParam(const int& _i, float) { return static_cast<float>(_i); }
-    float default_value = 0;
-};
-
-struct VisitInt
-{
-    VisitInt(int _f) : default_value(_f)
-    {
-    }
-
-    float operator()(const float& _f) const { return CheckParam(_f, default_value); }
-    float operator()(const std::string& _s) const { return CheckParam(_s, default_value); }
-    float operator()(const int& _i) const { return CheckParam(_i, default_value); }
-    static float CheckParam(const float& _f, int _default) { return _default; }
-    static float CheckParam(const std::string&, int _default) { return _default; }
-    static float CheckParam(const int& _i, int) { return _i; }
+    static float CheckParam(const float& _f, float) { return _f; }
+    static float CheckParam(const std::string&, const float _default) { return _default; }
     float default_value = 0;
 };
 
@@ -39,7 +30,6 @@ struct VisitString
 {
     std::string operator()(const float& _f) const { return std::to_string(_f); }
     std::string operator()(const std::string& _s) const { return _s; }
-    std::string operator()(const int& _i) const { return std::to_string(_i); }
 };
 
 //--------------------------------------------------------------
@@ -50,8 +40,8 @@ struct Attributes
     Attributes() = default;
     void Init(Model::Attributes& _attributes);
     std::unordered_map<Model::Id, AnyType> map;
-    float FindFloat(const std::string& key, float default);
-    int FindInt(const std::string& key, int default);
+    float FindFloat(const std::string& key, float default_value);
+    int FindInt(const std::string& key, int default_value);
     std::string FindString(const std::string& key);
 };
 
@@ -100,29 +90,25 @@ struct Edge
     Attributes attributes;
 };
 
-//--------------------------------------------------------------
-namespace Parser
-{
-    bool DotFile( const std::string& filename, Model::MainGraph& );
-};
-
 class Dataset
 {
 public:
     enum class Kind { Undirected, Directed };
 
     Dataset() = default;
-    ~Dataset() = default;
+    virtual ~Dataset() = default;
     Dataset(const Dataset&);
     Dataset& operator=(const Dataset&);
-    void Load( const Model::MainGraph& );
+    const std::string& GetId();
+    const std::string& GetFilename();
+    void Load( const Model::MainGraph&, const std::string& filename );
+    // This overload assumes you will update the vertices and edges manually
+    void Load( const std::string& id, const std::string& filename, const Kind&);
     void InfoGui();
-    std::string filename;
-    const Kind& GetKind();
-    void SetKind(const Kind&);
+    [[nodiscard]] const Kind& GetKind() const;
     void AddInfo(const std::string& key, const std::string& value);
 
-    std::vector<Vertex> vertices;
+    std::vector<std::shared_ptr<Vertex>> vertices;
     std::vector<Edge> edges;
 
 protected:
@@ -130,22 +116,31 @@ protected:
     virtual void SetInfo();
     Kind m_kind = Kind::Undirected;
     std::string m_id;
+    std::string m_filename;
 
     std::unordered_map<std::string, VertexIdx> m_vertex_idx;
     std::unordered_map<std::string, int> m_info_idx;
     std::vector<std::pair<std::string, std::string>> m_info;
 };
 
-class DatasetClusters final : public Dataset
+//--------------------------------------------------------------
+// DatasetClusters
+//--------------------------------------------------------------
+
+/**
+ * vertices: contain all the vertices, but their idx corresponds with their idx within a cluster
+ * edges: only contain the inter edges; the edges between clusters 
+ */
+class ClusterDataset final : public Dataset
 {
 public:
-    std::vector<Dataset> clusters;
+    std::vector<std::shared_ptr<Dataset>> clusters;
 
 protected:
-    virtual void Convert( const Model::MainGraph& ) override;
-    virtual void SetInfo( ) override;
+    void Convert( const Model::MainGraph& ) override;
+    void SetInfo( ) override;
 
-    std::unordered_map<std::string, uint> m_dataset_idx;
+    std::unordered_map<std::string, uint> m_cluster_idx;
 
 };
 } // namespace DataVis

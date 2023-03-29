@@ -19,6 +19,8 @@ IStructure::~IStructure()
 void IStructure::Init(const std::shared_ptr<Dataset> _dataset)
 {
     dataset = _dataset;
+    InitNodes();
+    InitEdges();
     m_layouts.clear();
     m_layouts.push_back(std::make_unique<RandomLayout>());
     m_layouts.push_back(std::make_unique<GridLayout>());
@@ -55,10 +57,10 @@ void IStructure::SetPosition(const glm::vec3& _position)
 }
 
 //--------------------------------------------------------------
-void IStructure::UpdateEdges()
+// Edges
+//--------------------------------------------------------------
+void IStructure::UpdateEdges(const bool _force)
 {
-    edges.clear();
-    edges.resize(dataset->edges.size());
     for (int i = 0; i < dataset->edges.size(); i++)
     {
         const auto& edge = dataset->edges[i];
@@ -67,13 +69,48 @@ void IStructure::UpdateEdges()
         glm::vec3 start = nodes[startIdx]->GetNewPosition();
         glm::vec3 end = nodes[endIdx]->GetNewPosition();
 
-        edges[i] = std::make_shared<EdgePath>();
         const auto& edge_path = edges[i];
+        edge_path->UpdateStartPoint(start);
+        edge_path->UpdateEndPoint(end);
+        if(_force) edge_path->ForceUpdate();
+        edge_path->SetArrowOffset(nodes[endIdx]->GetRadius() * 2);
+    }
+}
+
+//--------------------------------------------------------------
+void IStructure::InitEdges()
+{
+    edges.clear();
+    edges.reserve(dataset->edges.size());
+    for (int i = 0; i < dataset->edges.size(); i++)
+    {
+        const auto& edge = dataset->edges[i];
+        auto const& startIdx = edge.from_idx;
+        auto const& endIdx = edge.to_idx;
+        glm::vec3 start = nodes[startIdx]->GetNewPosition();
+        glm::vec3 end = nodes[endIdx]->GetNewPosition();
+
+        const auto& edge_path = edges.emplace_back(
+            std::make_shared<EdgePath>(edge.idx, dataset->GetKind()));
         edge_path->AddPoint(start);
         edge_path->AddPoint(end);
         edge_path->SetArrowOffset(nodes[endIdx]->GetRadius() * 2);
-        if (dataset->GetKind() == Dataset::Kind::Directed)
-            edge_path->SetIsDirected(true);
+    }
+}
+
+//--------------------------------------------------------------
+// Nodes
+//--------------------------------------------------------------
+void IStructure::InitNodes()
+{
+    nodes.clear();
+    nodes.reserve(dataset->vertices.size());
+    const auto& vertices = dataset->vertices;
+    // Add nodes
+    for (size_t i = 0; i < dataset->vertices.size(); i++)
+    {
+        const auto& vertex = vertices[i];
+        nodes.push_back(std::make_shared<Node>(vertex->id, i));
     }
 }
 
@@ -128,7 +165,7 @@ void IStructure::UpdateAABB()
     m_aabb.SetNewBounds(tl, br);
 }
 
-AABB IStructure::GetAABB()
+const AABB& IStructure::GetAABB()
 {
     return m_aabb;
 }
@@ -159,12 +196,17 @@ void IStructure::SetOnDeleteCallback(const std::function<void(IStructure&)>& _ca
     m_on_delete_callback = _callback;
 }
 
-void IStructure::SetNodesColor(ofColor _color) const
+void IStructure::SetNodesColor(ofColor _color)
 {
     for (auto& node : nodes)
     {
         node->color = _color;
     }
+}
+
+void IStructure::SetEdgeColor(const glm::vec4& _color)
+{
+    m_gui_data.coloredit_edge_color = _color;
 }
 
 //--------------------------------------------------------------
@@ -174,7 +216,7 @@ void IStructure::Gui()
 {
     ImGui::Begin("Structure Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-    if (ImGui::Button("Delete"))
+    if (m_on_delete_callback && ImGui::Button("Delete"))
     {
         ImGui::End();
         m_on_delete_callback(*this);
@@ -193,12 +235,12 @@ void IStructure::Gui()
         }
 
         constexpr int color_edit_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoDragDrop;
-        if (ImGuiExtensions::ColorEdit3("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
+        if (ImGuiExtensions::ColorEdit4("Node Color", m_gui_data.coloredit_node_color, color_edit_flags))
         {
-            SetNodesColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_node_color));
+            SetNodesColor(ImGuiExtensions::Vec4ToOfColor(m_gui_data.coloredit_node_color));
         }
 
-        ImGuiExtensions::ColorEdit3("Edge Color", m_gui_data.coloredit_edge_color, color_edit_flags);
+        ImGuiExtensions::ColorEdit4("Edge Color", m_gui_data.coloredit_edge_color, color_edit_flags);
 
         ImGui::TreePop();
     }
@@ -244,7 +286,8 @@ void IStructure::Draw(bool _is_focussed)
     // Draw the bounds
     m_aabb.Draw(_is_focussed);
 
-    if (m_active_layout) m_active_layout->Draw();
+    if (m_active_layout)
+        m_active_layout->Draw();
 
     // Draw the actual nodes and edges
     DrawNodes();

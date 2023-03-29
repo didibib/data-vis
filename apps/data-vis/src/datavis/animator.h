@@ -2,6 +2,9 @@
 
 namespace DataVis
 {
+//--------------------------------------------------------------
+// Animator
+//--------------------------------------------------------------
 class Animator
 {
 public:
@@ -13,6 +16,7 @@ public:
 protected:
     void EaseInEaseOut(float t, float speed = 1.f);
     void StartAnimation();
+    void StopAnimation();
     virtual void OnStopAnimation() = 0;
     virtual void Interpolate(float percentage) = 0;
 
@@ -23,15 +27,54 @@ protected:
 
     struct InterpolateValue3
     {
+        InterpolateValue3() = default;
+        InterpolateValue3(const glm::vec3& _new_value)
+        {
+            value = _new_value;
+            new_value = _new_value;
+            old_value = {};
+        }
         glm::vec3 value, old_value, new_value;
+
+        //--------------------------------------------------------------
+        // Binary operators
+        //--------------------------------------------------------------
+        InterpolateValue3& operator+=(const InterpolateValue3& rhs)
+        {
+            value += rhs.value;
+            return *this;
+        }
+
+        //--------------------------------------------------------------
+        InterpolateValue3 operator+(const InterpolateValue3& rhs) const
+        {
+            auto lhs = *this;
+            return lhs += rhs;
+        }
+
+        //--------------------------------------------------------------
+        InterpolateValue3& operator-=(const InterpolateValue3& rhs)
+        {
+            value -= rhs.value;
+            return *this;
+        }
+
+        //--------------------------------------------------------------
+        InterpolateValue3 operator-(const InterpolateValue3& rhs) const
+        {
+            auto lhs = *this;
+            return lhs -= rhs;
+        }
     };
 
 private:
-    void StopAnimation();
     float m_time = 0;
     bool m_animate = false;
 };
 
+//--------------------------------------------------------------
+// Rings
+//--------------------------------------------------------------
 class Rings : public Animator
 {
 public:
@@ -44,7 +87,7 @@ protected:
     void Interpolate(float percentage) override;
 
 private:
-    int m_amount{};
+    float m_start, m_step;
     std::vector<InterpolateValue> m_alpha;
     std::vector<InterpolateValue> m_radius;
 };

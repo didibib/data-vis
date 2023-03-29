@@ -9,10 +9,12 @@ public:
 	void Draw() override;
 	void Draw(bool is_focussed);
 	float GetArea() const;
+	const glm::vec3& GetTopLeft() const;
+	const glm::vec3& GetBottomRight()  const;
 	bool Inside(const glm::vec3& position)  const;
 	bool InsideDraggable(const glm::vec3& position) const;
 	void SetNewBounds(const glm::vec3& top_left, const glm::vec3& bottom_right);
-	glm::vec3 Clamp( const glm::vec3& ) const;
+	glm::vec3 Clamp(const glm::vec3&) const;
 
 protected:
 	virtual void OnStopAnimation() override;

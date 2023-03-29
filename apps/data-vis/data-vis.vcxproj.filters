@@ -74,6 +74,7 @@
     <ClCompile Include="src\datavis\structure\clusters.cpp">
       <Filter>src\datavis\structure</Filter>
     </ClCompile>
+    <ClCompile Include="src\datavis\layout\edge_bundling.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
