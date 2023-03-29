@@ -72,6 +72,7 @@ void Node::SetPosition(const glm::vec3& _new_position)
 {
     m_position.value = _new_position;
     m_position.old_value = _new_position;
+    m_position.new_value = _new_position;
 }
 
 const glm::vec3& Node::GetNewPosition()

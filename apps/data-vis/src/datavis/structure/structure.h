@@ -16,11 +16,11 @@ public:
 	virtual void Update(const float delta_time);
 	[[nodiscard]] const glm::vec3& GetPosition() const;
 	void SetPosition(const glm::vec3&);
-	void UpdateEdges();
+	virtual void UpdateEdges(bool force = false);
 
 	// AABB
-	AABB GetAABB();
-	void UpdateAABB();
+	const AABB& GetAABB();
+	virtual void UpdateAABB();
 	[[nodiscard]] bool Inside(const glm::vec3&) const;
 	[[nodiscard]] virtual bool InsideDraggable(const glm::vec3&);
 	[[nodiscard]] float GetArea() const;
@@ -36,10 +36,13 @@ public:
 	VectorOfNodes nodes;
 	VectorOfEdgePaths edges;
 	
-	void SetNodesColor(ofColor color) const;
+	void SetNodesColor(ofColor color);
+	void SetEdgeColor(const glm::vec4& color);
 
 protected:
 	virtual void DrawNodes() = 0;
+	virtual void InitEdges();
+	virtual void InitNodes();
 	virtual void NodeInfoGui();
 	void SetSelectedNode(const std::shared_ptr<Node>& _node);
 
@@ -53,8 +56,8 @@ protected:
 	{
 		bool checkbox_node_labels = false;
 		float slider_radius = 10;
-		glm::vec3 coloredit_node_color = glm::vec3(0);
-		glm::vec3 coloredit_edge_color = glm::vec3(123);
+		glm::vec4 coloredit_node_color = glm::vec4(0, 0, 0, 255);
+		glm::vec4 coloredit_edge_color = glm::vec4(123, 123, 123, 255);
 	} m_gui_data;
 
 	std::function<void(IStructure&)> m_on_delete_callback;

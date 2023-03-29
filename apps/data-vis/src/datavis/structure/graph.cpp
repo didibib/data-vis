@@ -2,46 +2,30 @@
 
 namespace DataVis
 {
+
+//--------------------------------------------------------------
 void Graph::Init(const std::shared_ptr<Dataset> _dataset)
 {
     IStructure::Init(_dataset);
     Load(_dataset);
-
     // Add layout
     m_layouts.push_back(std::make_unique<ForceDirectedLayout>());
-    m_layouts.push_back(std::make_unique<Sugiyama>());
+    m_layouts.push_back(std::make_unique<SugiyamaLayout>());
 }
 
+//--------------------------------------------------------------
 void Graph::Load(const std::shared_ptr<Dataset> _dataset)
 {
     dataset = _dataset;
-    nodes.clear();
-    nodes.reserve(_dataset->vertices.size());
-    auto& vertices = _dataset->vertices;
-    // Add nodes
-    for (size_t i = 0; i < _dataset->vertices.size(); i++)
-    {
-        auto& vertex = vertices[i];
-        nodes.push_back(std::make_shared<Node>(vertex.id, i));
-    }
-    // Add neighbors
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        auto& vertex = vertices[i];
-        if (vertex.outgoing_neighbors.empty()) continue;
-        for (const auto& n : vertex.outgoing_neighbors)
-        {
-            nodes[i]->neighbors.push_back(nodes[n.idx]);
-        }
-    }
-    UpdateEdges();
+    InitNodes();
+    InitEdges();
 }
 
 //--------------------------------------------------------------
 void Graph::DrawNodes()
 {
     ofFill();
-    ofSetColor(ImGuiExtensions::Vec3ToOfColor(m_gui_data.coloredit_edge_color));
+    ofSetColor(ImGuiExtensions::Vec4ToOfColor(m_gui_data.coloredit_edge_color));
 
     for (const auto& edge : edges)
     {
@@ -53,5 +37,4 @@ void Graph::DrawNodes()
         node->Draw();
     }
 }
-
 } // namespace DataVis

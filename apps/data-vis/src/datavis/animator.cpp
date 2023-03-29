@@ -20,7 +20,7 @@ void Animator::EaseInEaseOut(float _t, float _speed)
 		m_time += _t * _speed;
 		float p = Curves::Bezier(m_time);
 		Interpolate(p);
-		if (p >= .999f) 
+		if (p >= .999f)
 			StopAnimation();
 	}
 }
@@ -28,8 +28,8 @@ void Animator::EaseInEaseOut(float _t, float _speed)
 //--------------------------------------------------------------
 void Animator::StartAnimation()
 {
+	if (not m_animate) m_time = 0;
 	m_animate = true;
-	m_time = 0;
 }
 
 //--------------------------------------------------------------
@@ -47,7 +47,7 @@ void Rings::Draw()
 {
 	ofNoFill();
 	ofSetCircleResolution(50);
-	for (int i = 0; i < m_amount; i++)
+	for (int i = 0; i < m_radius.size(); i++)
 	{
 		ofSetColor(ofColor::lightGrey, m_alpha[i].value);
 		ofDrawCircle(glm::vec3(0, 0, -1), m_radius[i].value);
@@ -57,34 +57,49 @@ void Rings::Draw()
 //--------------------------------------------------------------
 void Rings::Set(int _new_amount, float _start, float _step)
 {
-	if (_new_amount > m_amount)
+	int current_amount = m_radius.size();
+	if (m_start != _start or m_step != _step)
+	{
+		// Update existing circles
+		for (int i = 0; i < current_amount; i++)
+		{
+			m_alpha[i].new_value = 255;
+			m_radius[i].old_value = m_radius[i].value;
+			m_radius[i].new_value = _start + i * _step;
+		}
+	}
+
+	// Create new circles
+	if (_new_amount > current_amount)
 	{
 		m_alpha.resize(_new_amount);
 		m_radius.resize(_new_amount);
 
-		for (int i = m_amount; i < _new_amount; i++)
+		for (int i = current_amount; i < _new_amount; i++)
 		{
 			m_alpha[i].new_value = 255;
-			m_radius[i].old_value = std::max(0, i - 1) * _step;
-			m_radius[i].new_value = i * _step;
+			m_radius[i].old_value = m_start + std::max(0, i - 1) * m_step;
+			m_radius[i].new_value = _start + i * _step;
 		}
 	}
-	else
+	else // Delete circles
 	{
-		for (int i = m_amount - 1; i > _new_amount; i--)
+		for (int i = current_amount - 1; i >= _new_amount; i--)
 		{
 			m_alpha[i].new_value = 0;
-			m_radius[i].new_value = std::max(0, i - 1) * _step;
+			m_radius[i].new_value = _start + std::max(0, i - 1) * _step;
 		}
 	}
-	m_amount = _new_amount;
+
+	m_start = _start;
+	m_step = _step;
 	StartAnimation();
 }
 
 //--------------------------------------------------------------
 void Rings::OnStopAnimation()
 {
-	for (int i = 0; i < m_amount; i++)
+	for (int i = 0; i < m_radius.size(); i++)
 	{
 		m_alpha[i].value = m_alpha[i].new_value;
 		m_alpha[i].old_value = m_alpha[i].new_value;
@@ -96,7 +111,7 @@ void Rings::OnStopAnimation()
 //--------------------------------------------------------------
 void Rings::Interpolate(float _p)
 {
-	for (int i = 0; i < m_amount; i++)
+	for (int i = 0; i < m_radius.size(); i++)
 	{
 		m_alpha[i].value = (1 - _p) * m_alpha[i].old_value + _p * m_alpha[i].new_value;
 		m_radius[i].value = (1 - _p) * m_radius[i].old_value + _p * m_radius[i].new_value;

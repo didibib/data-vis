@@ -28,9 +28,9 @@ namespace DataVis
     uint Tree::Depth(std::shared_ptr<TreeNode> node)
     {
         uint max = 0;
-        for (auto& child : node->children)
+        for (const auto& child : node->children)
         {
-            uint child_depth = Depth(child);
+            const uint child_depth = Depth(child);
             if (child_depth > max) max = child_depth;
         }
         return max + 1;
@@ -62,7 +62,7 @@ namespace DataVis
         std::shared_ptr<TreeNode> prev = nullptr;
         while (node != nullptr)
         {
-            auto next = node->parent;
+            const auto next = node->parent;
             node->parent = prev;
             prev = node;
             node = next;
@@ -100,7 +100,7 @@ namespace DataVis
             const auto& parent = node->parent;
             static const glm::vec3 sub = {0, 0, -1}; // To draw edge behind vertices
             ofFill();
-            ofSetColor(m_gui_data.coloredit_edge_color.x, m_gui_data.coloredit_edge_color.y, m_gui_data.coloredit_edge_color.z);
+            ofSetColor(ImGuiExtensions::Vec4ToOfColor(m_gui_data.coloredit_edge_color));
             ofDrawLine(parent->GetPosition() + sub, node->GetPosition() + sub);
             node->Draw();
             for (auto& child : node->children) stack.push(child);
@@ -135,13 +135,14 @@ namespace DataVis
     {
         Tree::Init(_dataset);
         nodes.resize(_dataset->vertices.size());
+        InitEdges();
         Create(0);
     }
 
     //--------------------------------------------------------------
     void MSP::Create(VertexIdx _root)
     {
-        auto& vertices = dataset->vertices;
+        const auto& vertices = dataset->vertices;
 
         // Keep track of the parent of each vertex so we can construct a tree after
         std::vector<VertexIdx> parents(vertices.size(), 0);
@@ -172,7 +173,7 @@ namespace DataVis
             included[idx] = true;
 
             // Update outgoing edges from this vertex
-            for (const auto& neigbor : vertices[idx].outgoing_neighbors)
+            for (const auto& neigbor : vertices[idx]->outgoing_neighbors)
             {
                 const uint v = neigbor.idx;
                 const float weight = dataset->edges[neigbor.edge_idx].attributes.FindFloat("weight", 1);
@@ -186,7 +187,7 @@ namespace DataVis
         }
 
         // Construct a tree
-        m_root = std::make_shared<Tree::TreeNode>(vertices[_root].id, _root);
+        m_root = std::make_shared<Tree::TreeNode>(vertices[_root]->id, _root);
         nodes[_root] = m_root;
 
         // Construct recursive lambda to create the tree
@@ -198,7 +199,7 @@ namespace DataVis
                 if (parents[i] == n->GetVertexIdx())
                 {
                     // Add node to n.children
-                    auto child = std::make_shared<Tree::TreeNode>(vertices[i].id, i, n);
+                    auto child = std::make_shared<Tree::TreeNode>(vertices[i]->id, i, n);
                     nodes[i] = child;
                     n->children.push_back(child);
                     make_tree(child, nodes);

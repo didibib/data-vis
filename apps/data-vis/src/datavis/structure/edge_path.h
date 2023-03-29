@@ -8,19 +8,32 @@ public:
     enum class Style { Line, Curve };
 
     EdgePath() = default;
-    EdgePath(bool is_directed);
+    EdgePath(const EdgeIdx& _edge_idx, const Dataset::Kind& _kind);
     void Draw() override;
-    void SetEdgeIdx(EdgeIdx);
+    //--------------------------------------------------------------
+    // Setters
+    //--------------------------------------------------------------
+    const EdgeIdx& GetEdgeIdx() const;
+
     void SetIsDirected(bool);
     void SetStyle(const Style&);
     void SetArrowOffset(float);
     void Clear();
+    //--------------------------------------------------------------
+    // Points
+    //--------------------------------------------------------------
     void AddPoint(const glm::vec3&);
     void SetStartCtrlPoint(const glm::vec3&);
     void SetEndCtrlPoint(const glm::vec3&);
     void UpdateStartPoint(const glm::vec3&);
     void UpdateEndPoint(const glm::vec3&);
     void UpdatePoint(const size_t index, const glm::vec3&);
+    void ForceUpdate();
+    //--------------------------------------------------------------
+    // Operations
+    //--------------------------------------------------------------
+    void Subdivide(uint subdivisions);
+    std::vector<InterpolateValue3> points;
 
 protected:
     void OnStopAnimation() override;
@@ -30,14 +43,15 @@ private:
     void UpdatePath();
     // Arrow can be updated after path has been build
     void UpdateArrow();
-    // Line path will be animated
+    //--------------------------------------------------------------
+    // Build paths
+    //--------------------------------------------------------------
+    void BuildPath();
     void BuildLinePath();
-    // Cuve path will not be animated
     void BuildCurvePath();
     
     EdgeIdx m_edge_idx = UNINIT_IDX;
     ofPolyline m_path;
-    std::vector<InterpolateValue3> m_points;
     glm::vec3 m_start_arrow, m_end_arrow;
     float m_arrow_offset = 10;
     InterpolateValue3 m_start_ctrl_point, m_end_ctrl_point;

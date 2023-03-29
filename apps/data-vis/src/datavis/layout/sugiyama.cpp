@@ -2,15 +2,15 @@
 
 namespace DataVis
 {
-    Sugiyama::Sugiyama()
+    SugiyamaLayout::SugiyamaLayout()
     {
-        m_oscm_heuristics.emplace_back("Barycenter", Sugiyama::OSCMBarycenterHeuristic);
-        m_oscm_heuristics.emplace_back("Median", Sugiyama::OSCMMedianHeuristic);
+        m_oscm_heuristics.emplace_back("Barycenter", SugiyamaLayout::OSCMBarycenterHeuristic);
+        m_oscm_heuristics.emplace_back("Median", SugiyamaLayout::OSCMMedianHeuristic);
         m_node_offset = {100, -200};
     }
 
     //--------------------------------------------------------------
-    bool Sugiyama::Gui(IStructure& _structure)
+    bool SugiyamaLayout::Gui(IStructure& _structure)
     {
         bool active = false;
         if (ImGui::TreeNode("Sugiyama Layout"))
@@ -32,13 +32,14 @@ namespace DataVis
                 }
                 ImGui::EndCombo();
             }
+            ImGui::Checkbox("Curved Edges", &m_curved_edges);
 
             if (ImGui::Button("Apply"))
             {
                 try
                 {
                     Graph& graph = dynamic_cast<Graph&>(_structure);
-                    Apply(graph, m_oscm_heuristics[m_oscm_heuristic_idx].second, m_node_offset, m_oscm_iterations);
+                    Apply(graph, m_oscm_heuristics[m_oscm_heuristic_idx].second, m_node_offset, m_oscm_iterations, m_curved_edges);
                     active = true;
                 }
                 catch (std::exception& e)
@@ -52,15 +53,11 @@ namespace DataVis
     }
 
     //--------------------------------------------------------------
-    void Sugiyama::Apply(Graph& _graph, const OSCMHeuristic& _heuristic, const glm::vec2& _node_offset,
-                         const int& _oscm_iterations)
+    void SugiyamaLayout::Apply(Graph& _graph, const OSCMHeuristic& _heuristic, const glm::vec2& _node_offset,
+                         const int& _oscm_iterations, bool _curved_edges)
     {
         Dataset copy = *_graph.dataset;
 
-        // std::vector<int> reverse_test(1, 0);
-        // copy.vertices[1].id = DUMMY_ID;
-        // copy.vertices[2].id = DUMMY_ID;
-        // ReverseEdges(copy, reverse_test);
         // Step 01: Break cycles
         std::vector<int> reversed_edges;
         Dataset new_dataset = BreakCycles(copy, reversed_edges);
@@ -73,7 +70,7 @@ namespace DataVis
 
         // Step 03: Crossing minimization
         const int crossings = CrossingMinimization(new_dataset, vertices_per_layer, _heuristic, _oscm_iterations);
-        new_dataset.AddInfo("Crossings", std::to_string(crossings));
+        new_dataset.AddInfo("# crossings", std::to_string(crossings));
 
         // Step 04: Vertex positioning
         const auto x_per_vertex = VertexPositioning(new_dataset, vertices_per_layer, layer_per_vertex, _node_offset.x);
@@ -95,14 +92,14 @@ namespace DataVis
         }
 
         _graph.edges.resize(copy.edges.size());
-        CreateCurves(_graph, new_positions, _node_offset);
+        CreateEdges(_graph, new_positions, _node_offset);
             
         _graph.UpdateAABB();
     }
 
-    void Sugiyama::ReverseEdges(Dataset& _dataset, const std::vector<int>& _reversed_edges)
+    void SugiyamaLayout::ReverseEdges(Dataset& _dataset, const std::vector<int>& _reversed_edges)
     {
-        auto& vertices = _dataset.vertices;
+        const auto& vertices = _dataset.vertices;
         for(const int edge_idx : _reversed_edges)
         {
             auto& edge = _dataset.edges[edge_idx];
@@ -112,22 +109,22 @@ namespace DataVis
             
             // Reverse first edge
             RemoveNeighbors(_dataset, edge);
-            vertices[from_idx].incoming_neighbors.emplace_back(to_idx, edge.idx);
-            vertices[to_idx].outgoing_neighbors.emplace_back(from_idx, edge.idx);
+            vertices[from_idx]->incoming_neighbors.emplace_back(to_idx, edge.idx);
+            vertices[to_idx]->outgoing_neighbors.emplace_back(from_idx, edge.idx);
             edge.from_idx = to_idx;
             edge.to_idx = from_idx;
             
             // v0 -> dum -> v1
-            while(vertices[to_idx].id == DUMMY_ID)
+            while(vertices[to_idx]->id == DUMMY_ID)
             {
-                const auto& outgoing_neigbors = vertices[to_idx].outgoing_neighbors;
+                const auto& outgoing_neigbors = vertices[to_idx]->outgoing_neighbors;
                 auto& edge = _dataset.edges[outgoing_neigbors[0].edge_idx];
                 from_idx = edge.from_idx;
                 to_idx = edge.to_idx;
                 
                 RemoveNeighbors(_dataset, edge);
-                vertices[from_idx].incoming_neighbors.emplace_back(to_idx, edge.idx);
-                vertices[to_idx].outgoing_neighbors.emplace_back(from_idx, edge.idx);
+                vertices[from_idx]->incoming_neighbors.emplace_back(to_idx, edge.idx);
+                vertices[to_idx]->outgoing_neighbors.emplace_back(from_idx, edge.idx);
                 edge.from_idx = to_idx;
                 edge.to_idx = from_idx;
                 edge.idx = old_idx;
@@ -135,77 +132,85 @@ namespace DataVis
         }
     }
 
-    void Sugiyama::CreateCurves(Graph& _graph, const std::vector<glm::vec3>& _new_positions, const glm::vec2& _node_offset)
+    void SugiyamaLayout::CreateEdges(Graph& _graph, const std::vector<glm::vec3>& _new_positions, const glm::vec2& _node_offset, bool _curved_edges)
     {
         const auto& nodes = _graph.nodes;
         const auto& dataset = *_graph.dataset;
         // Create curves
-        for (auto& edge : _graph.edges)
-        {
-            edge = std::make_shared<EdgePath>(true);
-        }
         const auto& vertices = dataset.vertices;
         for(const auto& edge : dataset.edges)
         {
-            if(vertices[edge.from_idx].id == DUMMY_ID)
+            if(vertices[edge.from_idx]->id == DUMMY_ID)
                 continue;
 
+            _graph.edges[edge.idx] = std::make_shared<EdgePath>(edge.idx, _graph.dataset->GetKind());
             const auto& edge_path = _graph.edges[edge.idx];
             edge_path->Clear();
-            edge_path->SetStyle(EdgePath::Style::Curve);
-            edge_path->SetEdgeIdx(edge.idx);
-            // Add first control point
-            const auto& incoming_neighbors = vertices[edge.from_idx].incoming_neighbors;
-            if(not incoming_neighbors.empty())
-                edge_path->SetStartCtrlPoint(_new_positions[incoming_neighbors[0].idx]);
+            // Set line type
+            if(_curved_edges)
+            {
+                edge_path->SetStyle(EdgePath::Style::Curve);
+                // Add first control point
+            
+                const auto& incoming_neighbors = vertices[edge.from_idx]->incoming_neighbors;
+                if(not incoming_neighbors.empty())
+                    edge_path->SetStartCtrlPoint(_new_positions[incoming_neighbors[0].idx]);
+                else
+                    edge_path->SetStartCtrlPoint(_new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
+            }
             else
-                edge_path->SetStartCtrlPoint(_new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
+            {
+                edge_path->SetStyle(EdgePath::Style::Line);
+            }
             
             // Add start vertex
             edge_path->AddPoint(_new_positions[edge.from_idx]);
 
             auto current_edge = edge;
-            while (vertices[current_edge.to_idx].id == DUMMY_ID)
+            while (vertices[current_edge.to_idx]->id == DUMMY_ID)
             {
                 edge_path->AddPoint(_new_positions[current_edge.to_idx]);
                 auto& next_node = vertices[current_edge.to_idx];
                 // Only 1 outgoing edge
-                current_edge = dataset.edges[next_node.outgoing_neighbors[0].edge_idx];
+                current_edge = dataset.edges[next_node->outgoing_neighbors[0].edge_idx];
             } 
             // Add end vertex
             edge_path->AddPoint(_new_positions[current_edge.to_idx]);
             edge_path->SetArrowOffset(nodes[current_edge.to_idx]->GetRadius() * 2);
 
-            // Add last control point
-            const auto& neighbors = vertices[current_edge.to_idx].outgoing_neighbors;
-            if(not neighbors.empty()) 
-                edge_path->SetEndCtrlPoint(_new_positions[neighbors[0].idx]);
-            else
-                edge_path->SetEndCtrlPoint(_new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
+            if(_curved_edges)
+            {
+                // Add last control point
+                const auto& neighbors = vertices[current_edge.to_idx]->outgoing_neighbors;
+                if(not neighbors.empty()) 
+                    edge_path->SetEndCtrlPoint(_new_positions[neighbors[0].idx]);
+                else
+                    edge_path->SetEndCtrlPoint(_new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
+            }
         }
     }
 
     //--------------------------------------------------------------
     // Break Cycles
     //--------------------------------------------------------------
-    Dataset Sugiyama::BreakCycles(Dataset& _dataset, std::vector<int>& _reversed_edges )
+    Dataset SugiyamaLayout::BreakCycles(Dataset& _dataset, std::vector<int>& _reversed_edges )
     {
         // Make a copy
         auto& vertices = _dataset.vertices;
 
         // Create a new dataset without any edges
         Dataset new_dataset;
-        new_dataset.SetKind(_dataset.GetKind());
-        new_dataset.edges = _dataset.edges;
+        new_dataset = _dataset;
+        new_dataset.vertices.clear();        
         auto& new_vertices = new_dataset.vertices;
 
         for (auto& vertex : vertices)
         {
-            Vertex v;
-            v.id = vertex.id;
-            v.idx = vertex.idx;
-            v.attributes = vertex.attributes;
-            new_vertices.push_back(std::move(v));
+            new_vertices.emplace_back(std::make_shared<Vertex>());
+            auto& v = *new_vertices.back();
+            v.id = vertex->id;
+            v.idx = vertex->idx;
+            v.attributes = vertex->attributes;
         }
 
         // While there are unvisited vertices
@@ -214,18 +219,18 @@ namespace DataVis
         {
             // Remove sinks
             Vertex sink;
-            while (HasUnvisited(Sugiyama::IsSink, vertices, sink))
+            while (HasUnvisited(SugiyamaLayout::IsSink, vertices, sink))
             {
                 for (auto& neighbor : sink.incoming_neighbors)
                 {
                     // Add edge to new dataset
-                    new_vertices[sink.idx].incoming_neighbors.push_back(neighbor);
+                    new_vertices[sink.idx]->incoming_neighbors.push_back(neighbor);
                     Neighbor rev_neighbor = neighbor;
                     rev_neighbor.idx = sink.idx;
-                    new_vertices[neighbor.idx].outgoing_neighbors.push_back(rev_neighbor);
+                    new_vertices[neighbor.idx]->outgoing_neighbors.push_back(rev_neighbor);
 
                     // Remove edge from old dataset
-                    auto& outgoing = vertices[neighbor.idx].outgoing_neighbors;
+                    auto& outgoing = vertices[neighbor.idx]->outgoing_neighbors;
                     for (int i = 0; i < outgoing.size(); i++)
                     {
                         if (outgoing[i].edge_idx == neighbor.edge_idx)
@@ -235,29 +240,29 @@ namespace DataVis
                         }
                     }
                 }
-                vertices[sink.idx].incoming_neighbors.clear();
-                vertices[sink.idx].idx = VISITED_IDX;
+                vertices[sink.idx]->incoming_neighbors.clear();
+                vertices[sink.idx]->idx = VISITED_IDX;
             }
 
             // Delete all isolated nodes
             for (auto& v : vertices)
-                if (v.incoming_neighbors.empty() && v.outgoing_neighbors.empty())
-                    v.idx = VISITED_IDX;
+                if (v->incoming_neighbors.empty() && v->outgoing_neighbors.empty())
+                    v->idx = VISITED_IDX;
 
             // Remove sources
             Vertex source;
-            while (HasUnvisited(Sugiyama::IsSource, vertices, source))
+            while (HasUnvisited(SugiyamaLayout::IsSource, vertices, source))
             {
                 for (auto& neighbor : source.outgoing_neighbors)
                 {
                     // Add edge to new dataset
-                    new_vertices[source.idx].outgoing_neighbors.push_back(neighbor);
+                    new_vertices[source.idx]->outgoing_neighbors.push_back(neighbor);
                     Neighbor rev_neighbor = neighbor;
                     rev_neighbor.idx = source.idx;
-                    new_vertices[neighbor.idx].incoming_neighbors.push_back(rev_neighbor);
+                    new_vertices[neighbor.idx]->incoming_neighbors.push_back(rev_neighbor);
 
                     // Remove edge from old dataset
-                    auto& incoming = vertices[neighbor.idx].incoming_neighbors;
+                    auto& incoming = vertices[neighbor.idx]->incoming_neighbors;
                     for (int i = 0; i < incoming.size(); i++)
                     {
                         if (incoming[i].edge_idx == neighbor.edge_idx)
@@ -267,8 +272,8 @@ namespace DataVis
                         }
                     }
                 }
-                vertices[source.idx].outgoing_neighbors.clear();
-                vertices[source.idx].idx = VISITED_IDX;
+                vertices[source.idx]->outgoing_neighbors.clear();
+                vertices[source.idx]->idx = VISITED_IDX;
             }
 
             // Check if vertices is empty
@@ -276,9 +281,9 @@ namespace DataVis
             int max_difference = INT_MIN;
             for (int i = 0; i < vertices.size(); i++)
             {
-                if (vertices[i].idx != VISITED_IDX)
+                if (vertices[i]->idx != VISITED_IDX)
                 {
-                    int difference = vertices[i].outgoing_neighbors.size() - vertices[i].incoming_neighbors.size();
+                    int difference = vertices[i]->outgoing_neighbors.size() - vertices[i]->incoming_neighbors.size();
                     if (difference > max_difference)
                     {
                         max_vertex_idx = i;
@@ -290,18 +295,18 @@ namespace DataVis
             // Remove max vertex with outgoing edges
             if (max_difference > INT_MIN && max_vertex_idx != VISITED_IDX)
             {
-                Vertex& max_vertex = vertices[max_vertex_idx];
+                Vertex& max_vertex = *vertices[max_vertex_idx];
                 // Add outgoing to new dataset and remove from neighbors
                 for (auto& neighbor : max_vertex.outgoing_neighbors)
                 {
                     // Add edge to new dataset
-                    new_vertices[max_vertex.idx].outgoing_neighbors.push_back(neighbor);
+                    new_vertices[max_vertex.idx]->outgoing_neighbors.push_back(neighbor);
                     Neighbor rev_neighbor = neighbor;
                     rev_neighbor.idx = max_vertex.idx;
-                    new_vertices[neighbor.idx].incoming_neighbors.push_back(rev_neighbor);
+                    new_vertices[neighbor.idx]->incoming_neighbors.push_back(rev_neighbor);
 
                     // Remove edge from old dataset
-                    auto& incoming = vertices[neighbor.idx].incoming_neighbors;
+                    auto& incoming = vertices[neighbor.idx]->incoming_neighbors;
                     for (int i = 0; i < incoming.size(); i++)
                     {
                         if (incoming[i].edge_idx == neighbor.edge_idx)
@@ -318,8 +323,8 @@ namespace DataVis
                     // Add flipped edge to new dataset
                     Neighbor rev_neighbor = neighbor;
                     rev_neighbor.idx = max_vertex.idx;
-                    new_vertices[max_vertex.idx].outgoing_neighbors.push_back(neighbor);
-                    new_vertices[neighbor.idx].incoming_neighbors.push_back(rev_neighbor);
+                    new_vertices[max_vertex.idx]->outgoing_neighbors.push_back(neighbor);
+                    new_vertices[neighbor.idx]->incoming_neighbors.push_back(rev_neighbor);
                     
                     auto& edge = new_dataset.edges[neighbor.edge_idx];
                     VertexIdx temp = edge.to_idx;
@@ -328,7 +333,7 @@ namespace DataVis
                     _reversed_edges.push_back(edge.idx);
 
                     // Remove edge from old dataset
-                    auto& outgoing = vertices[neighbor.idx].outgoing_neighbors;
+                    auto& outgoing = vertices[neighbor.idx]->outgoing_neighbors;
                     for (int i = 0; i < outgoing.size(); i++)
                     {
                         if (outgoing[i].edge_idx == neighbor.edge_idx)
@@ -346,13 +351,13 @@ namespace DataVis
         return new_dataset;
     }
 
-    bool Sugiyama::HasUnvisited(const std::function<bool(Vertex&)>& _f, std::vector<Vertex> _vs, Vertex& _out)
+    bool SugiyamaLayout::HasUnvisited(const std::function<bool(Vertex&)>& _f, std::vector<std::shared_ptr<Vertex>> _vs, Vertex& _out)
     {
         for (auto& v : _vs)
         {
-            if (v.idx != VISITED_IDX && _f(v))
+            if (v->idx != VISITED_IDX && _f(*v))
             {
-                _out = v;
+                _out = *v;
                 return true;
             }
         }
@@ -362,7 +367,7 @@ namespace DataVis
     //--------------------------------------------------------------
     // Layer Assignment
     //--------------------------------------------------------------
-    void Sugiyama::LayerAssignment(const Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex)
+    void SugiyamaLayout::LayerAssignment(const Dataset& _dataset, std::vector<Layer>& _vertices_per_layer, Layer& _layer_per_vertex)
     {
         int layer = 0;
         Dataset copy_dataset = _dataset;
@@ -376,24 +381,24 @@ namespace DataVis
             _vertices_per_layer.emplace_back();
             for (auto& v : copy_dataset.vertices)
             {
-                if (v.idx == VISITED_IDX) continue;
+                if (v->idx == VISITED_IDX) continue;
 
-                if (IsSource(v))
+                if (IsSource(*v))
                 {
                     hasSources = true;
                     // Assign layer to sink
-                    _layer_per_vertex[v.idx] = layer;
-                    _vertices_per_layer[layer].push_back(v.idx);
-                    v.idx = REMOVE_IDX;
+                    _layer_per_vertex[v->idx] = layer;
+                    _vertices_per_layer[layer].push_back(v->idx);
+                    v->idx = REMOVE_IDX;
                 }
             }
             for (auto& v : copy_dataset.vertices)
             {
-                if (v.idx == REMOVE_IDX)
+                if (v->idx == REMOVE_IDX)
                 {
                     // Remove sink from copy_dataset (including incoming edges)
-                    RemoveOutgoingNeighbors(copy_dataset, v);
-                    v.idx = VISITED_IDX;
+                    RemoveOutgoingNeighbors(copy_dataset, *v);
+                    v->idx = VISITED_IDX;
                 }
             }
             layer++;
@@ -403,7 +408,7 @@ namespace DataVis
     }
 
     //--------------------------------------------------------------
-    void Sugiyama::AddDummyVertices(Dataset& _dataset, std::vector<Layer>& _vertices_per_layer,
+    void SugiyamaLayout::AddDummyVertices(Dataset& _dataset, std::vector<Layer>& _vertices_per_layer,
                                     Layer& _layer_per_vertex)
     {
         auto& vertices = _dataset.vertices;
@@ -420,10 +425,12 @@ namespace DataVis
             {
                 auto& e = _dataset.edges[current_edge_idx];
                 RemoveNeighbors(_dataset, e);
-                Vertex dummy_vertex;
+
+                vertices.emplace_back(std::make_shared<Vertex>());
+                Vertex& dummy_vertex = *vertices.back();
                 dummy_vertex.id = DUMMY_ID;
-                dummy_vertex.idx = _dataset.vertices.size();
-                vertices.emplace_back(dummy_vertex);
+                dummy_vertex.idx = _dataset.vertices.size() - 1;
+                
                 _layer_per_vertex.emplace_back(i + 1);
                 _vertices_per_layer[i + 1].emplace_back(dummy_vertex.idx);
 
@@ -442,23 +449,23 @@ namespace DataVis
         }
     }
 
-    bool Sugiyama::IsSink(const Vertex& _v)
+    bool SugiyamaLayout::IsSink(const Vertex& _v)
     {
         return _v.outgoing_neighbors.empty();
     }
 
-    bool Sugiyama::IsSource(const Vertex& _v)
+    bool SugiyamaLayout::IsSource(const Vertex& _v)
     {
         return _v.incoming_neighbors.empty();
     }
 
-    void Sugiyama::RemoveOutgoingNeighbors(Dataset& _dataset, Vertex& _v)
+    void SugiyamaLayout::RemoveOutgoingNeighbors(Dataset& _dataset, Vertex& _v)
     {
         // Add outgoing to new dataset and remove from neighbors
         for (const auto& neighbor : _v.outgoing_neighbors)
         {
             // Remove edge from dataset
-            auto& incoming = _dataset.vertices[neighbor.idx].incoming_neighbors;
+            auto& incoming = _dataset.vertices[neighbor.idx]->incoming_neighbors;
             for (size_t i = 0; i < incoming.size(); i++)
             {
                 if (incoming[i].edge_idx == neighbor.edge_idx)
@@ -471,9 +478,9 @@ namespace DataVis
         _v.outgoing_neighbors.clear();
     }
 
-    void Sugiyama::RemoveNeighbors(Dataset& _dataset, const Edge& _e)
+    void SugiyamaLayout::RemoveNeighbors(Dataset& _dataset, const Edge& _e)
     {
-        auto& outgoing = _dataset.vertices[_e.from_idx].outgoing_neighbors;
+        auto& outgoing = _dataset.vertices[_e.from_idx]->outgoing_neighbors;
         for (size_t i = 0; i < outgoing.size(); i++)
         {
             if (outgoing[i].idx == _e.to_idx)
@@ -484,7 +491,7 @@ namespace DataVis
             }
         }
 
-        auto& incoming = _dataset.vertices[_e.to_idx].incoming_neighbors;
+        auto& incoming = _dataset.vertices[_e.to_idx]->incoming_neighbors;
         for (size_t i = 0; i < incoming.size(); i++)
         {
             if (incoming[i].idx == _e.from_idx)
@@ -496,21 +503,21 @@ namespace DataVis
         }
     }
 
-    void Sugiyama::AddNeighbors(Dataset& _dataset, Edge& _e)
+    void SugiyamaLayout::AddNeighbors(const Dataset& _dataset, Edge& _e)
     {
-        auto& outgoing = _dataset.vertices[_e.from_idx].outgoing_neighbors;
+        auto& outgoing = _dataset.vertices[_e.from_idx]->outgoing_neighbors;
         outgoing.emplace_back(_e.to_idx, _e.idx);
-        auto& incoming = _dataset.vertices[_e.to_idx].incoming_neighbors;
+        auto& incoming = _dataset.vertices[_e.to_idx]->incoming_neighbors;
         incoming.emplace_back(_e.from_idx, _e.idx);
     }
 
-    void Sugiyama::RemoveIncomingNeighbors(Dataset& _dataset, Vertex& _v)
+    void SugiyamaLayout::RemoveIncomingNeighbors(const Dataset& _dataset, Vertex& _v)
     {
         // Remove incoming from neighbors
         for (const auto& neighbor : _v.incoming_neighbors)
         {
             // Remove edge from old dataset
-            auto& outgoing = _dataset.vertices[neighbor.idx].outgoing_neighbors;
+            auto& outgoing = _dataset.vertices[neighbor.idx]->outgoing_neighbors;
             for (int i = 0; i < outgoing.size(); i++)
             {
                 if (outgoing[i].edge_idx == neighbor.edge_idx)
@@ -526,7 +533,7 @@ namespace DataVis
     //--------------------------------------------------------------
     // Crossing Minimization
     //--------------------------------------------------------------
-    int Sugiyama::CrossingMinimization(Dataset& _dataset, std::vector<Layer>& _vertices_per_layer,
+    int SugiyamaLayout::CrossingMinimization(Dataset& _dataset, std::vector<Layer>& _vertices_per_layer,
                                        const OSCMHeuristic& _heuristic, int _iterations)
     {
         auto& vertices = _dataset.vertices;
@@ -585,8 +592,8 @@ namespace DataVis
         return best_crossings;
     }
 
-    bool Sugiyama::OSCMBarycenterHeuristic(Dataset& _dataset, const Layer& _layer_fixed, Layer& _layer, Layer& _new_layer,
-                                           const GetNeighbors& _get_neighbors)
+    bool SugiyamaLayout::OSCMBarycenterHeuristic(const Dataset& _dataset, const Layer& _layer_fixed, Layer& _layer, Layer& _new_layer,
+                                                 const GetNeighbors& _get_neighbors)
     {
         auto& vertices = _dataset.vertices;
 
@@ -601,7 +608,7 @@ namespace DataVis
         for (int i = 0; i < _layer.size(); i++)
         {
             float coor = 0;
-            auto& neighbors = _get_neighbors(vertices[_layer[i]]);
+            auto& neighbors = _get_neighbors(*vertices[_layer[i]]);
             for (auto& neighbor : neighbors)
                 coor += pos_per_vertex[neighbor.idx];
             coor /= static_cast<float>(neighbors.size());
@@ -620,75 +627,77 @@ namespace DataVis
         return changed;
     }
 
-    bool Sugiyama::OSCMMedianHeuristic(Dataset& _dataset, const Layer& _layer_fixed, Layer& _layer, Layer& _new_layer,
-                                       const GetNeighbors& _get_neighbors)
+    bool SugiyamaLayout::OSCMMedianHeuristic(
+        const Dataset& _dataset,
+        const Layer& _layer_fixed,
+        Layer& _layer,
+        Layer& _new_layer,
+        const GetNeighbors& _get_neighbors )
     {
         auto& vertices = _dataset.vertices;
 
-        std::vector<int> pos_per_vertex(_layer_fixed.size());
-        for (size_t i = 0; i < _layer_fixed.size(); i++)
+        std::unordered_map<int, int> pos_per_vertex;
+        for (int i = 0; i < _layer_fixed.size(); i++)
         {
             pos_per_vertex[_layer_fixed[i]] = i;
         }
 
         // tuple: position, degree, parity, idx
-        std::vector<std::tuple<int, int, int, int>> medians(_layer.size());
-        for (size_t i = 0; i < _layer.size(); i++)
+        std::vector<std::tuple<int, int, int, int>> medians( _layer.size() );
+        for (int i = 0; i < _layer.size(); i++)
         {
-            auto& neighbors = _get_neighbors(vertices[_layer[i]]);
-            // sort neighbors in position in _layer_fixed
-            std::vector<int> neighbor_positions(neighbors.size());
-            for (const auto& neighbor : neighbors)
-            {
-                neighbor_positions.push_back(pos_per_vertex[neighbor.idx]);
-            }
-            std::sort(neighbor_positions.begin(), neighbor_positions.end());
-
+            auto& neighbors = _get_neighbors( *vertices[_layer[i]] );
             int degree = neighbors.size();
             if (degree == 0)
             {
-                medians.emplace_back(0, 0, 0, _layer[i]);
+                medians[i] = { 0, 0, 0, i };
                 continue;
             }
 
-            const int median_idx = static_cast<int>(std::ceil(.5f * degree) - 1);
-            medians.emplace_back(neighbor_positions[median_idx], degree, degree % 2, i);
+            // sort neighbors in position in _layer_fixed
+            std::vector<int> neighbor_positions( neighbors.size() );
+            for (int j = 0; j < neighbors.size(); j++)
+            {
+                neighbor_positions[j] = pos_per_vertex[neighbors[j].idx];
+            }
+            std::sort( neighbor_positions.begin(), neighbor_positions.end() );
+
+            int median_idx = std::ceil( degree * .5f ) - 1;
+            medians[i] = { neighbor_positions[median_idx], degree, degree % 2, i };
         }
 
         bool changed = false;
-        std::sort(medians.begin(), medians.end(),
-                  [&](std::tuple<int, int, int, int> lhs, std::tuple<int, int, int, int> rhs)
-                  {
-                      bool eval;
-                      // if o(v_1) == o(v_2)
-                      if (std::get<0>(lhs) == std::get<0>(rhs))
-                      {
-                          // check if they have the same degree
-                          if (std::get<1>(lhs) == std::get<1>(rhs))
-                          {
-                              // arbitrary so just false
-                              eval = false;
-                          }
-                          else
-                          {
-                              // different degree, so odd parity to the left
-                              eval = std::get<2>(lhs) > std::get<2>(rhs);
-                          }
-                      }
-                      else
-                      {
-                          eval = std::get<0>(lhs) < std::get<0>(rhs);
-                      }
-                      changed |= eval;
-                      return eval;
-                  });
+        std::sort( medians.begin(), medians.end(), [&]( std::tuple<int, int, int, int> lhs, std::tuple<int, int, int, int> rhs ) {
+            bool eval;
+            // if o(v_1) == o(v_2)
+            if (std::get<0>( lhs ) == std::get<0>( rhs ))
+            {
+                // check if they have the same degree
+                if (std::get<1>( lhs ) == std::get<1>( rhs ))
+                {
+                    // arbitrary so just false
+                    eval = false;
+                }
+                else
+                {
+                    // different degree, so odd parity to the left
+                    eval = std::get<2>( lhs ) > std::get<2>( rhs );
+                }
+            }
+            else
+            {
+                eval = std::get<0>( lhs ) < std::get<0>( rhs );
+            }
+            changed |= eval;
+            return eval;
+            } );
 
-        _new_layer.resize(_layer.size());
-        for (int i = 0; i < _layer.size(); i++) _new_layer[i] = _layer[std::get<3>(medians[i])];
+        _new_layer.resize( _layer.size() );
+        for (int i = 0; i < _layer.size(); i++) _new_layer[i] = _layer[std::get<3>( medians[i] )];
         return changed;
     }
 
-    int Sugiyama::Crossings(Dataset& _dataset, Layer& _layer_1, Layer& _layer_2)
+    int SugiyamaLayout::Crossings(const Dataset& _dataset, const Layer& _layer_1, const Layer& _layer_2)
     {
         std::vector<bool> flags;
         std::vector<std::pair<int, int>> open_edges;
@@ -697,7 +706,7 @@ namespace DataVis
         for (int i = 0; i < _layer_1.size(); i++)
         {
             int vertex_idx = _layer_1[i];
-            auto& neighbors = _dataset.vertices[vertex_idx].outgoing_neighbors;
+            auto& neighbors = _dataset.vertices[vertex_idx]->outgoing_neighbors;
 
             for (auto& n : neighbors)
                 open_edges.emplace_back(vertex_idx, n.idx);
@@ -708,7 +717,7 @@ namespace DataVis
         for (int i = _layer_2.size() - 1; i >= 0; i--)
         {
             int vertex_idx = _layer_2[i];
-            auto& neighbors = _dataset.vertices[vertex_idx].incoming_neighbors;
+            auto& neighbors = _dataset.vertices[vertex_idx]->incoming_neighbors;
             for (auto& n : neighbors)
             {
                 std::pair<int, int> edge(n.idx, vertex_idx);
@@ -736,17 +745,16 @@ namespace DataVis
         return count;
     }
 
-
     //--------------------------------------------------------------
     // Vertex Positioning
     //--------------------------------------------------------------
-    std::vector<float> Sugiyama::VertexPositioning(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
+    std::vector<float> SugiyamaLayout::VertexPositioning(
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
         Layer& _layer_per_vertex,
         float _delta)
     {
-        auto& vertices = _dataset.vertices;
+        const auto& vertices = _dataset.vertices;
         std::vector<int> pos_per_vertex(vertices.size());
         for (auto& layer : _vertices_per_layer)
         {
@@ -768,9 +776,9 @@ namespace DataVis
         return x_per_vertex;
     }
 
-    void Sugiyama::FlagType1Conflicts(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
+    void SugiyamaLayout::FlagType1Conflicts(
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
         Layer& _layer_per_vertex,
         std::vector<std::pair<int, int>>& _flags)
     {
@@ -788,16 +796,16 @@ namespace DataVis
         }
     }
 
-    void Sugiyama::VerticalAlignment(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
+    void SugiyamaLayout::VerticalAlignment(
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
         Layer& _layer_per_vertex,
-        Layer& _pos_per_vertex,
+        const Layer& _pos_per_vertex,
         std::vector<int>& _root,
         std::vector<int>& _align,
         std::vector<std::pair<int, int>>& _flags)
     {
-        auto& vertices = _dataset.vertices;
+        const auto& vertices = _dataset.vertices;
         _root.resize(vertices.size());
         _align.resize(vertices.size());
         for (int i = 0; i < vertices.size(); i++)
@@ -813,7 +821,7 @@ namespace DataVis
             for (size_t k = 0; k < current_layer.size(); k++)
             {
                 int vertex_idx = current_layer[k];
-                int d = vertices[vertex_idx].outgoing_neighbors.size();
+                int d = vertices[vertex_idx]->outgoing_neighbors.size();
                 if (d <= 0) continue;
                 int ms[2] = {
                     static_cast<int>(std::floorf((d + 1) * 0.5)),
@@ -821,7 +829,7 @@ namespace DataVis
                 };
 
                 // Sort neighbors on horizontal position
-                auto& neighbors = vertices[vertex_idx].outgoing_neighbors;
+                auto& neighbors = vertices[vertex_idx]->outgoing_neighbors;
                 std::sort(neighbors.begin(), neighbors.end(), [&](Neighbor lhs, Neighbor rhs)
                 {
                     return _pos_per_vertex[lhs.idx] < _pos_per_vertex[rhs.idx];
@@ -829,7 +837,7 @@ namespace DataVis
 
                 for (int m : ms)
                 {
-                    int u_m = vertices[vertex_idx].outgoing_neighbors[m - 1].idx;
+                    int u_m = vertices[vertex_idx]->outgoing_neighbors[m - 1].idx;
 
                     if (_align[vertex_idx] not_eq vertex_idx) continue;
                     // If not flagged
@@ -846,20 +854,19 @@ namespace DataVis
         }
     }
 
-
-    void Sugiyama::HorizontalCompaction(
-        Dataset& _dataset,
-        std::vector<Layer>& _vertices_per_layer,
-        Layer& _layer_per_vertex,
-        Layer& _pos_per_vertex,
-        std::vector<int>& _root,
-        std::vector<int>& _align,
+    void SugiyamaLayout::HorizontalCompaction(
+        const Dataset& _dataset,
+        const std::vector<Layer>& _vertices_per_layer,
+        const Layer& _layer_per_vertex,
+        const Layer& _pos_per_vertex,
+        const std::vector<int>& _root,
+        const std::vector<int>& _align,
         std::vector<float>& _x_per_vertex,
         float _delta)
     {
-        const float undefined = std::numeric_limits<float>::min();
-        const float infinite = std::numeric_limits<float>::max();
-        auto& vertices = _dataset.vertices;
+        constexpr float undefined = MIN_FLOAT;
+        constexpr float infinite = MAX_FLOAT;
+        const auto& vertices = _dataset.vertices;
         std::vector<float> sink(vertices.size());
         for (int i = 0; i < vertices.size(); i++)
             sink[i] = i;
@@ -873,11 +880,11 @@ namespace DataVis
             int w = v;
             do
             {
-                int w_pos = _pos_per_vertex[w];
+                const int w_pos = _pos_per_vertex[w];
                 if (w_pos > 0)
                 {
-                    int layer = _layer_per_vertex[w];
-                    int pred_w = _vertices_per_layer[layer][w_pos - 1];
+                    const int layer = _layer_per_vertex[w];
+                    const int pred_w = _vertices_per_layer[layer][w_pos - 1];
                     int u = _root[pred_w];
                     place_block(u);
                     if (sink[v] == v) sink[v] = sink[u];
@@ -898,13 +905,13 @@ namespace DataVis
 
         for (size_t i = 0; i < vertices.size(); i++)
         {
-            int vertex_idx = vertices[i].idx;
+            const int vertex_idx = vertices[i]->idx;
             if (_root[vertex_idx] == vertex_idx) place_block(vertex_idx);
         }
 
         for (size_t i = 0; i < _vertices_per_layer.size(); i++)
         {
-            int v_1 = _vertices_per_layer[i][0];
+            const int v_1 = _vertices_per_layer[i][0];
             if (sink[v_1] != v_1) continue;
             if (shift[sink[v_1]] == infinite) shift[sink[v_1]] = 0;
 
@@ -920,8 +927,8 @@ namespace DataVis
                     j--;
                     if (_pos_per_vertex[v] > 0)
                     {
-                        int layer = _layer_per_vertex[v];
-                        int u = _vertices_per_layer[layer][_pos_per_vertex[v] - 1];
+                        const int layer = _layer_per_vertex[v];
+                        const int u = _vertices_per_layer[layer][_pos_per_vertex[v] - 1];
                         shift[sink[u]] = std::min(shift[sink[u]],
                                                   shift[sink[v]] + _x_per_vertex[v] - (_x_per_vertex[u] + _delta));
                     }

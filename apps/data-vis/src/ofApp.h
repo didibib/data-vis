@@ -7,10 +7,10 @@ class ofApp : public ofBaseApp {
 private:
 	struct ImGuiData
 	{
-		int combo_graph_file_index = 3;
-		int combo_dataset_index = 6;
-		int combo_structure_index = 0;
-		int combo_layout_function_index = 0;
+		int combo_graph_file_index = 1;
+		int combo_dataset_index = 0;
+		int combo_structure_index = 2;
+		int combo_layout_function_index = 2;
 	} m_imgui_data;
 
 	std::vector<std::pair<std::string, std::function<std::shared_ptr<IStructure>(std::shared_ptr<Dataset>)>>> m_factories;

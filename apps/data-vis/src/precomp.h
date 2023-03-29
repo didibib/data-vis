@@ -16,9 +16,9 @@
 // OF header
 #include "ofMain.h"
 
-// Purple color palette: #635985 #443C68 #393053 #18122B
 namespace Color
 {
+    // Purple color palette: #635985 #443C68 #393053 #18122B
     const ofColor palettePurple_0(99, 89, 133);
     const ofColor palettePurple_1(68, 60, 104);
     const ofColor palettePurple_2(57, 48, 83);
@@ -83,8 +83,15 @@ namespace DataVis
     namespace ImGuiExtensions
     {
         // Converts color from [0..255] to [0..1] for displaying and back
-        bool ColorEdit3(char* label, glm::vec3& color, int flags);
+        bool ColorEdit3(const char* label, glm::vec3& color, int flags);
+        bool ColorEdit4(const char* label, glm::vec4& color, int flags);
         ofColor Vec3ToOfColor(const glm::vec3& color);
+        ofColor Vec4ToOfColor(const glm::vec4& color);
+    }
+
+    namespace Math
+    {
+        float Cross(const glm::vec2& p, const glm::vec2& q);
     }
 } // namespace DataVis
 
