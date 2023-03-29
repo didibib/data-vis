@@ -176,7 +176,8 @@
     <ClInclude Include="src\datavis\aabb.h" />
     <ClInclude Include="src\datavis\animator.h" />
     <ClInclude Include="src\datavis\dataset.h" />
-    <ClInclude Include="src\datavis\external\spirit-graphviz.hpp" />
+    <ClInclude Include="src\datavis\floyd_warshall.h" />
+    <ClCompile Include="src\datavis\layout\dim_reduction.cpp" />
     <ClInclude Include="src\datavis\layout\layout.h" />
     <ClInclude Include="src\datavis\structure\clusters.h" />
     <ClInclude Include="src\datavis\structure\edge_path.h" />

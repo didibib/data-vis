@@ -101,20 +101,14 @@ namespace DataVis
 #include "spirit-graphviz.hpp"
 // T-SNE
 #define QDTSNE_CUSTOM_NEIGHBORS
-#include "aarand/aarand.hpp"
-#include "qdtsne/gaussian.hpp"
-#include "qdtsne/interpolate.hpp"
-#include "qdtsne/qdtsne.hpp"
-#include "qdtsne/sptree.hpp"
-#include "qdtsne/symmetrize.hpp"
 #include "qdtsne/tsne.hpp"
-#include "qdtsne/utils.hpp"
-//MDS
+// MDS
 #include "SimpleMatrix/SimpleMatrix.h"
 
 //--------------------------------------------------------------
 // Own headers
 #include "dataset.h"
+#include "floyd_warshall.h"
 #include "animator.h"
 #include "aabb.h"
 #include "structure/node.h"

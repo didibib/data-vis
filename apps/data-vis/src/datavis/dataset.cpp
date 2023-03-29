@@ -71,8 +71,7 @@ void Attributes::Init(Model::Attributes& _attributes)
 
 float Attributes::FindFloat(const std::string& _key, float _default)
 {
-    auto& it = map.find(_key);
-    if (it != map.end())
+    if (const auto& it = map.find(_key); it != map.end())
     {
         return std::visit(VisitFloat{_default}, it->second);
     }
@@ -82,14 +81,12 @@ float Attributes::FindFloat(const std::string& _key, float _default)
 
 std::string Attributes::FindString(const std::string& _key)
 {
-    auto& it = map.find(_key);
-    if (it != map.end())
+    if (const auto& it = map.find(_key); it != map.end())
     {
         return std::visit(VisitString{}, it->second);
     }
     return "";
 }
-
 
 //--------------------------------------------------------------
 // Dataset

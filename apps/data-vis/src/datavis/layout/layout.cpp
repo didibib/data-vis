@@ -63,7 +63,7 @@ bool GridLayout::Gui(IStructure& _structure)
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
-	return false;
+	return active;
 }
 
 //--------------------------------------------------------------

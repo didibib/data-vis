@@ -40,8 +40,7 @@ struct Attributes
     Attributes() = default;
     void Init(Model::Attributes& _attributes);
     std::unordered_map<Model::Id, AnyType> map;
-    float FindFloat(const std::string& key, float default_value);
-    int FindInt(const std::string& key, int default_value);
+    float FindFloat(const std::string& key, float default_value = 1.f);
     std::string FindString(const std::string& key);
 };
 
