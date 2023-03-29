@@ -210,7 +210,7 @@ public:
     EdgeBundlingLayout() = default;
     // Inherited via Layout
     bool Gui(IStructure&) override;
-    static void Apply(IStructure&, int C, int l, float K, int n, float s, float threshold, CompatibilityFunction f);
+    static void Apply(IStructure&, int C, int l, float K, int n, float s, float threshold, bool quadratic, CompatibilityFunction f);
 
 private:
     float m_K = 0.1f;          // Stiffnes
@@ -219,6 +219,7 @@ private:
     int m_n = 1;        // Initial subdivisions
     float m_s = 0.04;   // Step size
     float m_comp_threshold = 0.05f; // Compatibility threshold
+    bool m_quadratic = true;
     
     //--------------------------------------------------------------
     // Compatibility
