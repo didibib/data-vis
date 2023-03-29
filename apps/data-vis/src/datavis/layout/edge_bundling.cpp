@@ -13,6 +13,7 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 		ImGui::InputInt("Initial Subdivisions", &m_n);
 		ImGui::InputFloat("Step Size", &m_s);
 		ImGui::InputFloat( "Compatibility Threshold", &m_comp_threshold );
+		ImGui::Checkbox("Quadratic?", &m_quadratic);
 
 		if (ImGui::Button("Apply"))
 		{
@@ -30,7 +31,7 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 				std::cout << e.what() << std::endl;
 			}
 
-			Apply(_structure, m_C, m_l, m_K, m_n, m_s, m_comp_threshold, Compatibility);
+			Apply(_structure, m_C, m_l, m_K, m_n, m_s, m_comp_threshold, m_quadratic, Compatibility);
 			for (const auto& edge : _structure.edges)
 				edge->ForceUpdate();
 			active = true;
@@ -42,7 +43,7 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 	return active;
 }
 
-void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K, int _n, float _s, float _threshold, CompatibilityFunction _f)
+void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K, int _n, float _s, float _threshold, bool _quadratic, CompatibilityFunction _f)
 {
 	const auto& vertices = _structure.dataset->vertices;
 	const auto& edges = _structure.dataset->edges;
@@ -81,16 +82,27 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 						const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
 						const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
 
-						if (not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
+						if (false && not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
 							not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
 							continue;
 						
 						float compatibility = _f(*p, *q);
 
 						if (compatibility < _threshold) continue;
-		
-						glm::vec3 v = q->points[i].value - P.value;
-						sum_force += compatibility * v;
+						
+						if (_quadratic)
+						{
+							for (int j = 1; j < q->points.size() - 1; j++)
+							{
+								glm::vec3 v = q->points[j].value - P.value;
+								sum_force += compatibility * v;
+							}
+						}
+						else 
+						{
+							glm::vec3 v = q->points[i].value - P.value;
+							sum_force += compatibility * v;
+						}
 					}
 					P.new_value = sum_force;
 				}
