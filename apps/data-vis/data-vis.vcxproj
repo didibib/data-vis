@@ -154,6 +154,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\aarand\aarand.hpp" />
     <ClInclude Include="external\imgui\imconfig.h" />
     <ClInclude Include="external\imgui\imgui.h" />
     <ClInclude Include="external\imgui\imgui_impl_glfw.h" />
@@ -163,6 +164,14 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
+    <ClInclude Include="external\qdtsne\gaussian.hpp" />
+    <ClInclude Include="external\qdtsne\interpolate.hpp" />
+    <ClInclude Include="external\qdtsne\qdtsne.hpp" />
+    <ClInclude Include="external\qdtsne\sptree.hpp" />
+    <ClInclude Include="external\qdtsne\symmetrize.hpp" />
+    <ClInclude Include="external\qdtsne\tsne.hpp" />
+    <ClInclude Include="external\qdtsne\utils.hpp" />
+    <ClInclude Include="external\SimpleMatrix\SimpleMatrix.h" />
     <ClInclude Include="src\datavis\aabb.h" />
     <ClInclude Include="src\datavis\animator.h" />
     <ClInclude Include="src\datavis\dataset.h" />

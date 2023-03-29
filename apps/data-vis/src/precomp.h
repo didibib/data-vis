@@ -90,7 +90,20 @@ namespace DataVis
 
 //--------------------------------------------------------------
 // External
-#include "external/spirit-graphviz.hpp"
+// Dot Parser
+#include "spirit-graphviz.hpp"
+// T-SNE
+#define QDTSNE_CUSTOM_NEIGHBORS
+#include "aarand/aarand.hpp"
+#include "qdtsne/gaussian.hpp"
+#include "qdtsne/interpolate.hpp"
+#include "qdtsne/qdtsne.hpp"
+#include "qdtsne/sptree.hpp"
+#include "qdtsne/symmetrize.hpp"
+#include "qdtsne/tsne.hpp"
+#include "qdtsne/utils.hpp"
+//MDS
+#include "SimpleMatrix/SimpleMatrix.h"
 
 //--------------------------------------------------------------
 // Own headers
