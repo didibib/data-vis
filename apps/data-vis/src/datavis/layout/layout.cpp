@@ -29,12 +29,13 @@ bool RandomLayout::Gui(IStructure& _structure)
 //--------------------------------------------------------------
 void RandomLayout::Apply(IStructure& _structure, int _width, int _height)
 {
-	auto& nodes = _structure.nodes;
-	for (size_t i = 0; i < nodes.size(); i++) {
-		float x = Random::RangeF(_width);
-		float y = Random::RangeF(_height);
-		float z = 0;
-		nodes[i]->SetNewPosition(glm::vec3(x, y, z));
+	const auto& nodes = _structure.nodes;
+	for (const auto& node : nodes)
+	{
+		const float x = Random::RangeF(_width);
+		const float y = Random::RangeF(_height);
+		const float z = 0;
+		node->SetNewPosition(glm::vec3(x, y, z));
 	}
 	_structure.UpdateAABB();
 	_structure.UpdateEdges();
@@ -80,7 +81,7 @@ void GridLayout::Apply(IStructure& _structure, int _width, int _height, float _s
 			float x = i * _step;
 			float y = j * _step;
 			float z = 0;
-			grid.push_back(glm::vec3(x, y, z));
+			grid.emplace_back(x, y, z);
 		}
 	// Shuffle vector
 	std::shuffle(std::begin(grid), std::end(grid), Random::MT19937);
@@ -138,7 +139,7 @@ void RadialLayout::Draw()
 //--------------------------------------------------------------
 void RadialLayout::Apply(Tree& _tree, float _start, float _step)
 {
-	auto& node = _tree.Root();
+	const auto& node = _tree.Root();
 	node->SetNewPosition(glm::vec3(0));
 	SubTree(*node, 0, TWO_PI, 0, _start, _step);
 	_tree.UpdateAABB();
@@ -230,8 +231,9 @@ void ForceDirectedLayout::Apply(IStructure& _structure, float _C, float _t, int 
 		for (const auto& node : _structure.nodes)
 		{
 			glm::vec3 new_pos = node->GetPosition() + node->GetDisplacement() * _t;
-			node->SetPosition( _structure.GetAABB().Clamp( new_pos ) );
-			//node->SetPosition(node->GetPosition() + node->GetDisplacement() * _t);
+			new_pos = _structure.GetAABB().Clamp(new_pos);
+			node->SetPosition(new_pos);
+			node->SetDisplacement(glm::vec3(0));
 		}
 		_t *= 0.9999f;
 	}

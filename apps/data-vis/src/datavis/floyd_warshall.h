@@ -2,62 +2,108 @@
 
 namespace DataVis
 {
-    void FloydWarshall(Dataset& _dataset, qdtsne::NeighborList<int, float>& _D1, std::unique_ptr<smat::Matrix<float>>& _D2  )
+/**
+ * \brief Calculates the Calculate graph-theoretic distance to be used for dimensionality reduction algorithms.
+ * \param _dataset
+ * \param _D1 T-SNE datastructure
+ * \param _D2 MDS datastructure
+ */
+void FloydWarshall(Dataset& _dataset, qdtsne::NeighborList<int, double>& _D)
+{
+	const auto& vertices = _dataset.vertices;
+	auto& edges = _dataset.edges;
+	const size_t size = vertices.size();
+	// Initialize D1
+	_D.clear();
+	_D.resize(size);
+	for (auto& entry : _D)
+		entry.resize(size);
+
+	// Insert default values
+	for (size_t i = 0; i < size; i++)
+	{
+		for (size_t j = 0; j < size; j++)
+		{
+			_D[i][j].first = j;
+			if (i == j)
+				_D[i][j].second = 0;
+			else
+				_D[i][j].second = MAX_FLOAT;
+		}
+	}
+
+	// Insert edge weights
+	for (auto& edge : edges)
+	{
+		const float weight = edge.attributes.FindFloat("weight");
+		_D[edge.from_idx][edge.to_idx].second = weight;
+		if (_dataset.GetKind() == Dataset::Kind::Undirected)
+		{
+			_D[edge.to_idx][edge.from_idx].second = weight;
+		}
+	}
+
+	// Calculate graph-theoretic distance
+	for (size_t k = 0; k < size; k++)
+	{
+		for (size_t i = 0; i < size; i++)
+			for (size_t j = 0; j < size; j++)
+			{
+				const float D_value = _D[i][k].second + _D[k][j].second;
+				if (_D[i][j].second > D_value)
+					_D[i][j].second = D_value;
+			}
+	}
+
+	// Remove itself and sort in increasing distance
+    for(size_t i = 0; i < size; i++)
     {
-        const auto& vertices = _dataset.vertices;
-        auto& edges = _dataset.edges;
-        const size_t size = vertices.size();
-        // Initialize D1
-        _D1.clear();
-        _D1.resize( size);
-        for(auto& entry : _D1)
-            entry.resize(size);
+        auto& entry = _D[i];
+        entry[i] = entry.back();
+        entry.resize(size - 1);
         
-        // Initialize D2
-        _D2 = std::make_unique<smat::Matrix<float>>(size, size, MAX_FLOAT);
-
-        // Insert default values
-        for(size_t i = 0; i < size; i++)
-        {
-            for(size_t j = 0; j < size; j++)
-            {
-                _D1[i][j].first = j;
-                if(i == j)
-                {
-                    _D1[i][j].second = 0;
-                    _D2->set(i, j, 0);
-                }
-                else
-                    _D1[i][j].second = MAX_FLOAT;
-            }
-        }
-
-        // Insert edge weights
-        for(auto& edge: edges)
-        {
-            const float weight = edge.attributes.FindFloat("weight");
-            _D1[edge.from_idx][edge.to_idx].second = weight;
-            _D2->set(edge.from_idx, edge.to_idx, weight);
-            if(_dataset.GetKind() == Dataset::Kind::Undirected)
-            {
-                _D1[edge.to_idx][edge.from_idx].second = weight;
-                _D2->set(edge.to_idx, edge.from_idx, weight);
-            }
-        }
-
-        // Calculate graph-theoretic distance
-        for(size_t k = 0; k < size; k++)
-        {
-            for(size_t i = 0; i < size; i++)
-                for(size_t j = 0; j < size; j++)
-                {
-                    const float D1_value = _D1[i][k].second + _D1[k][j].second;
-                    if(_D1[i][j].second > D1_value)
-                        _D1[i][j].second = D1_value;
-                    const float D2_value = _D2->get(i, k) + _D2->get(k, j);
-                    if(_D2->get(i, j) > D2_value)
-                        _D2->set(i, j, D2_value);
-                }
-        }
+        std::sort(entry.begin(), entry.end(), [](std::pair<int, double> lhs, std::pair<int, double> rhs ){
+            return lhs.second < rhs.second;
+        });
     }
+}
+
+void FloydWarshall(Dataset& _dataset, std::unique_ptr<smat::Matrix<double>>& _D)
+{
+	const auto& vertices = _dataset.vertices;
+	auto& edges = _dataset.edges;
+	const size_t size = vertices.size();
+
+	// Initialize D
+	_D = std::make_unique<smat::Matrix<double>>(size, size, MAX_FLOAT);
+
+	// Insert default values
+	for (size_t i = 0; i < size; i++)
+	{
+		_D->set(i, i, 0);
+	}
+
+	// Insert edge weights
+	for (auto& edge : edges)
+	{
+		const float weight = edge.attributes.FindFloat("weight");
+		_D->set(edge.from_idx, edge.to_idx, weight);
+		if (_dataset.GetKind() == Dataset::Kind::Undirected)
+		{
+			_D->set(edge.to_idx, edge.from_idx, weight);
+		}
+	}
+
+	// Calculate graph-theoretic distance
+	for (size_t k = 0; k < size; k++)
+	{
+		for (size_t i = 0; i < size; i++)
+			for (size_t j = 0; j < size; j++)
+			{
+				const float D_value = _D->get(i, k) + _D->get(k, j);
+				if (_D->get(i, j) > D_value)
+					_D->set(i, j, D_value);
+			}
+	}
+}
 }

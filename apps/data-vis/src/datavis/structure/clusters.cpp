@@ -234,6 +234,8 @@ void Clusters::Gui()
 		}
 		ImGuiExtensions::ColorEdit4("Inter Edge Color", m_gui_data.coloredit_inter_edge_color, color_edit_flags);
 
+		ImGui::Checkbox("Draw Bounding Box", &IStructure::m_gui_data.checkbox_draw_bounding_box);
+
 		ImGui::TreePop();
 	}
 

@@ -24,7 +24,8 @@ void IStructure::Init(const std::shared_ptr<Dataset> _dataset)
     m_layouts.clear();
     m_layouts.push_back(std::make_unique<RandomLayout>());
     m_layouts.push_back(std::make_unique<GridLayout>());
-    m_layouts.push_back(std::make_unique<DimReductionLayout>());
+    m_layouts.push_back(std::make_unique<TSNELayout>());
+    m_layouts.push_back(std::make_unique<MDSLayout>());
 }
 
 const int& IStructure::Idx() const
@@ -228,8 +229,8 @@ void IStructure::Gui()
 
     if (ImGui::TreeNode("Settings"))
     {
-        ImGui::Checkbox("Draw Label", &m_gui_data.checkbox_node_labels);
-        if (ImGui::SliderFloat("Radius", &m_gui_data.slider_radius, 10, 30))
+        ImGui::Checkbox("Draw Node Labels", &m_gui_data.checkbox_node_labels);
+        if (ImGui::SliderFloat("Node Radius", &m_gui_data.slider_radius, 10, 30))
         {
             for (const auto& node : nodes)
                 node->SetRadius(m_gui_data.slider_radius);
@@ -242,6 +243,12 @@ void IStructure::Gui()
         }
 
         ImGuiExtensions::ColorEdit4("Edge Color", m_gui_data.coloredit_edge_color, color_edit_flags);
+
+        ImGui::Checkbox("Draw Bounding Box", &m_gui_data.checkbox_draw_bounding_box);
+        if(ImGui::Button("Update Bounding Box"))
+        {
+            UpdateAABB();
+        }
 
         ImGui::TreePop();
     }
@@ -285,7 +292,8 @@ void IStructure::Draw(bool _is_focussed)
     ofTranslate(m_position);
 
     // Draw the bounds
-    m_aabb.Draw(_is_focussed);
+    if(m_gui_data.checkbox_draw_bounding_box)
+        m_aabb.Draw(_is_focussed);
 
     if (m_active_layout)
         m_active_layout->Draw();

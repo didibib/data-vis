@@ -210,16 +210,17 @@ public:
     EdgeBundlingLayout() = default;
     // Inherited via Layout
     bool Gui(IStructure&) override;
-    static void Apply(IStructure&, int C, int l, float K, int n, float s, float threshold, bool quadratic, CompatibilityFunction f);
+    static void Apply(IStructure&, int C, int l, float K, int n, float s, float threshold, bool quadratic, bool check_owners, CompatibilityFunction f);
 
 private:
     float m_K = 0.1f;          // Stiffnes
     int m_C = 3;        // Cycles
-    int m_l = 50;       // Iterations
+    int m_l = 30;       // Iterations
     int m_n = 1;        // Initial subdivisions
-    float m_s = 0.04;   // Step size
+    float m_s = 0.004;   // Step size
     float m_comp_threshold = 0.05f; // Compatibility threshold
     bool m_quadratic = true;
+    bool m_check_owners = true;
     
     //--------------------------------------------------------------
     // Compatibility
@@ -235,12 +236,28 @@ private:
 //--------------------------------------------------------------
 // Dimensionality Reduction
 //--------------------------------------------------------------
-class DimReductionLayout : public Layout
+class TSNELayout : public Layout
 {
 public:
-    DimReductionLayout() = default;
+    TSNELayout() = default;
     bool Gui(IStructure&) override;
-    static void Apply(IStructure&);
+    static void Apply(IStructure&, const int iterations, const int scale);
+
+private:
+    int m_iterations = 1000;
+    int m_scale = 100;
+};
+
+class MDSLayout : public Layout
+{
+public:
+    MDSLayout() = default;
+    bool Gui(IStructure&) override;
+    static void Apply(IStructure&, const int iterations, const int scale);
+
+private:
+    int m_iterations = 1000;
+    int m_scale = 100;
 };
 
 
