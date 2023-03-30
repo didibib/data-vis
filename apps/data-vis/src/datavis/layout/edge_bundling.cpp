@@ -14,6 +14,7 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 		ImGui::InputFloat("Step Size", &m_s);
 		ImGui::InputFloat( "Compatibility Threshold", &m_comp_threshold );
 		ImGui::Checkbox("Quadratic?", &m_quadratic);
+		ImGui::Checkbox("Check Owners?", &m_check_owners);
 
 		if (ImGui::Button("Apply"))
 		{
@@ -25,13 +26,14 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 					ForceDirectedLayout::Apply(*graph, 0.5f, 0.002f, 500);
 					graph->UpdateEdges(true);
 				}
+				_structure.UpdateEdges(true);
 			}
 			catch (std::exception& e)
 			{
 				std::cout << e.what() << std::endl;
 			}
 
-			Apply(_structure, m_C, m_l, m_K, m_n, m_s, m_comp_threshold, m_quadratic, Compatibility);
+			Apply(_structure, m_C, m_l, m_K, m_n, m_s, m_comp_threshold, m_quadratic, m_check_owners, Compatibility);
 			for (const auto& edge : _structure.edges)
 				edge->ForceUpdate();
 			active = true;
@@ -43,7 +45,7 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 	return active;
 }
 
-void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K, int _n, float _s, float _threshold, bool _quadratic, CompatibilityFunction _f)
+void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K, int _n, float _s, float _threshold, bool _quadratic, bool _check_owners, CompatibilityFunction _f)
 {
 	const auto& vertices = _structure.dataset->vertices;
 	const auto& edges = _structure.dataset->edges;
@@ -76,15 +78,19 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 					for (auto& q : _structure.edges)
 					{
 						if (q->GetEdgeIdx() == p->GetEdgeIdx()) continue;
-						//Check if these edges connect to the same owners
-						const auto& p_owner_0 = vertices[edges[p->GetEdgeIdx()].from_idx]->owner;
-						const auto& p_owner_1 = vertices[edges[p->GetEdgeIdx()].to_idx]->owner;
-						const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
-						const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
 
-						if (false && not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
-							not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
-							continue;
+						if(_check_owners)
+						{
+							//Check if these edges connect to the same owners
+							const auto& p_owner_0 = vertices[edges[p->GetEdgeIdx()].from_idx]->owner;
+							const auto& p_owner_1 = vertices[edges[p->GetEdgeIdx()].to_idx]->owner;
+							const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
+							const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
+
+							if (not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
+								not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
+								continue;
+						}
 						
 						float compatibility = _f(*p, *q);
 

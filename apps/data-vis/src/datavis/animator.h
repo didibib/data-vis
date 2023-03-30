@@ -32,7 +32,7 @@ protected:
         {
             value = _new_value;
             new_value = _new_value;
-            old_value = {};
+            old_value = _new_value;
         }
         glm::vec3 value, old_value, new_value;
 

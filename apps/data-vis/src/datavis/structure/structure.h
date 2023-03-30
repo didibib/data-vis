@@ -55,6 +55,7 @@ protected:
 	struct GuiData
 	{
 		bool checkbox_node_labels = false;
+		bool checkbox_draw_bounding_box = true;
 		float slider_radius = 10;
 		glm::vec4 coloredit_node_color = glm::vec4(0, 0, 0, 255);
 		glm::vec4 coloredit_edge_color = glm::vec4(123, 123, 123, 255);
