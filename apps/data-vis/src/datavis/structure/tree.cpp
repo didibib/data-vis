@@ -2,13 +2,13 @@
 
 namespace DataVis
 {
-    void Tree::Init(const std::shared_ptr<Dataset> _dataset)
+    void ITree::Init(const std::shared_ptr<Dataset> _dataset)
     {
         IStructure::Init(_dataset);
         m_layouts.push_back(std::make_unique<RadialLayout>());
     }
 
-    std::shared_ptr<Tree::TreeNode> Tree::Root()
+    std::shared_ptr<ITree::TreeNode> ITree::Root()
     {
         return m_root;
     }
@@ -16,7 +16,7 @@ namespace DataVis
     //--------------------------------------------------------------
     // Properties
     //--------------------------------------------------------------
-    uint Tree::Leaves(std::shared_ptr<TreeNode> node)
+    uint ITree::Leaves(std::shared_ptr<TreeNode> node)
     {
         uint leaves = 0;
         if (node->children.size() == 0) leaves++;
@@ -25,7 +25,7 @@ namespace DataVis
     }
 
     //--------------------------------------------------------------
-    uint Tree::Depth(std::shared_ptr<TreeNode> node)
+    uint ITree::Depth(std::shared_ptr<TreeNode> node)
     {
         uint max = 0;
         for (const auto& child : node->children)
@@ -37,7 +37,7 @@ namespace DataVis
     }
 
     //--------------------------------------------------------------
-    void Tree::SwapRoot(std::shared_ptr<TreeNode> _new_root)
+    void ITree::SwapRoot(std::shared_ptr<TreeNode> _new_root)
     {
         std::shared_ptr<TreeNode> node = _new_root;
         while (node->GetVertexIdx() != m_root->GetVertexIdx())
@@ -73,14 +73,14 @@ namespace DataVis
     }
 
     //--------------------------------------------------------------
-    void Tree::UpdateProperties()
+    void ITree::UpdateProperties()
     {
         leaves = Leaves(m_root);
         depth = Depth(m_root);
     }
 
     //--------------------------------------------------------------
-    void Tree::DrawNodes()
+    void ITree::DrawNodes()
     {
         ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 
@@ -107,7 +107,7 @@ namespace DataVis
         }
     }
 
-    void Tree::NodeInfoGui()
+    void ITree::NodeInfoGui()
     {
         if (m_selected_node != nullptr)
         {
@@ -133,7 +133,7 @@ namespace DataVis
     //--------------------------------------------------------------
     void MSP::Init(const std::shared_ptr<Dataset> _dataset)
     {
-        Tree::Init(_dataset);
+        ITree::Init(_dataset);
         nodes.resize(_dataset->vertices.size());
         InitEdges();
         Create(0);
@@ -187,19 +187,19 @@ namespace DataVis
         }
 
         // Construct a tree
-        m_root = std::make_shared<Tree::TreeNode>(vertices[_root]->id, _root);
+        m_root = std::make_shared<ITree::TreeNode>(vertices[_root]->id, _root);
         nodes[_root] = m_root;
 
         // Construct recursive lambda to create the tree
-        static std::function<void(const std::shared_ptr<Tree::TreeNode>&, VectorOfNodes&)> make_tree =
-            [&](const std::shared_ptr<Tree::TreeNode>& n, VectorOfNodes& nodes)
+        static std::function<void(const std::shared_ptr<ITree::TreeNode>&, VectorOfNodes&)> make_tree =
+            [&](const std::shared_ptr<ITree::TreeNode>& n, VectorOfNodes& nodes)
         {
             // Look through all vertices which have parent == n.vertex
             for (size_t i = 0; i < vertices.size(); i++)
                 if (parents[i] == n->GetVertexIdx())
                 {
                     // Add node to n.children
-                    auto child = std::make_shared<Tree::TreeNode>(vertices[i]->id, i, n);
+                    auto child = std::make_shared<ITree::TreeNode>(vertices[i]->id, i, n);
                     nodes[i] = child;
                     n->children.push_back(child);
                     make_tree(child, nodes);

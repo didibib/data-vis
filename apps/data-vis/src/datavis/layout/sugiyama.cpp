@@ -92,7 +92,7 @@ namespace DataVis
         }
 
         _graph.edges.resize(copy.edges.size());
-        CreateEdges(_graph, new_positions, _node_offset);
+        CreateEdges(_graph, new_positions, _node_offset, _curved_edges);
             
         _graph.UpdateAABB();
     }

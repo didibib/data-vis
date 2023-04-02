@@ -49,6 +49,29 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 {
 	const auto& vertices = _structure.dataset->vertices;
 	const auto& edges = _structure.dataset->edges;
+
+	std::unordered_map<EdgeIdx, std::unordered_map<EdgeIdx, float>> edge_compatibility;
+	for(const auto& p : _structure.edges)
+	{
+		for(const auto& q : _structure.edges)
+		{
+			if(p->GetEdgeIdx() == q->GetEdgeIdx()) continue;
+			if(_check_owners)
+			{
+				//Check if these edges connect to the same owners
+				const auto& p_owner_0 = vertices[edges[p->GetEdgeIdx()].from_idx]->owner;
+				const auto& p_owner_1 = vertices[edges[p->GetEdgeIdx()].to_idx]->owner;
+				const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
+				const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
+
+				if (not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
+					not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
+						continue;
+			}
+			edge_compatibility[p->GetEdgeIdx()][q->GetEdgeIdx()] = _f(*p, *q);
+		}
+	}
+	
 	// For c cycles
 	for (int c = 0; c < _C; c++)
 	{
@@ -63,7 +86,7 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 			{
 				const glm::vec3 edge = p->points.back().value - p->points.front().value;
 				const float k_p = (_K / glm::length(edge)) * (p->points.size() - 1);
-
+				const auto& p_edge_compatibility = edge_compatibility[p->GetEdgeIdx()];
 				// For each point in edge P
 				for (int i = 1; i < p->points.size() - 1; i++)
 				{
@@ -77,23 +100,27 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 
 					for (auto& q : _structure.edges)
 					{
-						if (q->GetEdgeIdx() == p->GetEdgeIdx()) continue;
+						// if (q->GetEdgeIdx() == p->GetEdgeIdx()) continue;
+						//
+						// if(_check_owners)
+						// {
+						// 	//Check if these edges connect to the same owners
+						// 	const auto& p_owner_0 = vertices[edges[p->GetEdgeIdx()].from_idx]->owner;
+						// 	const auto& p_owner_1 = vertices[edges[p->GetEdgeIdx()].to_idx]->owner;
+						// 	const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
+						// 	const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
+						//
+						// 	if (not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
+						// 		not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
+						// 		continue;
+						// }
+						//
+						// float compatibility = edge_compatibility[p->GetEdgeIdx()][q->GetEdgeIdx()];
 
-						if(_check_owners)
-						{
-							//Check if these edges connect to the same owners
-							const auto& p_owner_0 = vertices[edges[p->GetEdgeIdx()].from_idx]->owner;
-							const auto& p_owner_1 = vertices[edges[p->GetEdgeIdx()].to_idx]->owner;
-							const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
-							const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
+						auto it = p_edge_compatibility.find(q->GetEdgeIdx());
+						if(it == p_edge_compatibility.end()) continue;
 
-							if (not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
-								not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
-								continue;
-						}
-						
-						float compatibility = _f(*p, *q);
-
+						float compatibility = it->second;
 						if (compatibility < _threshold) continue;
 						
 						if (_quadratic)
@@ -122,8 +149,7 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 			{
 				p->points[i].value += _s * p->points[i].new_value;
 				p->points[i].new_value = p->points[i].value;
-			}
-				
+			}				
 		}
 
 		// Update parameters for next cycle

@@ -2,7 +2,7 @@
 
 namespace DataVis
 {
-class Layout;
+class ILayout;
 namespace po = boost::program_options;
 
 //--------------------------------------------------------------
@@ -46,8 +46,8 @@ protected:
 	virtual void NodeInfoGui();
 	void SetSelectedNode(const std::shared_ptr<Node>& _node);
 
-	std::vector<std::shared_ptr<Layout>> m_layouts;
-	std::shared_ptr<Layout> m_active_layout;
+	std::vector<std::shared_ptr<ILayout>> m_layouts;
+	std::shared_ptr<ILayout> m_active_layout;
 	AABB m_aabb;
 	glm::vec3 m_position = glm::vec3(0);
 	std::shared_ptr<Node> m_selected_node;
