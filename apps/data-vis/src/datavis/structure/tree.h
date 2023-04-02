@@ -2,7 +2,7 @@
 
 namespace DataVis
 {
-class Tree : public IStructure
+class ITree : public IStructure
 {
 public:
 	struct ImGuiData
@@ -26,7 +26,7 @@ public:
 	};
 
 	//--------------------------------------------------------------
-	Tree() = default;
+	ITree() = default;
 	void Init(const std::shared_ptr<Dataset>) = 0;
 
 	//--------------------------------------------------------------
@@ -49,7 +49,7 @@ protected:
 };
 
 // Prim's Algorithm https://www.wikiwand.com/en/Prim%27s_algorithm
-class MSP : public Tree
+class MSP : public ITree
 {
 public:
 	void Init(const std::shared_ptr<Dataset>) override;

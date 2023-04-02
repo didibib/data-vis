@@ -5,7 +5,7 @@ namespace DataVis
 //--------------------------------------------------------------
 // Layout
 //--------------------------------------------------------------
-class Layout
+class ILayout
 {
 public:
     virtual bool Gui(IStructure&) = 0;
@@ -18,13 +18,13 @@ public:
     {
     }
 
-    virtual ~Layout() = default;
+    virtual ~ILayout() = default;
 };
 
 //--------------------------------------------------------------
 // Random
 //--------------------------------------------------------------
-class RandomLayout final : public Layout
+class RandomLayout final : public ILayout
 {
 public:
     bool Gui(IStructure&) override;
@@ -37,7 +37,7 @@ private:
 //--------------------------------------------------------------
 // Grid
 //--------------------------------------------------------------
-class GridLayout final : public Layout
+class GridLayout final : public ILayout
 {
 public:
     bool Gui(IStructure&) override;
@@ -51,7 +51,7 @@ private:
 //--------------------------------------------------------------
 // Local Search
 //--------------------------------------------------------------
-class LocalSearch final : public Layout
+class LocalSearch final : public ILayout
 {
 public:
     bool Gui(IStructure&) override;
@@ -68,17 +68,17 @@ private:
 //--------------------------------------------------------------
 // Radial
 //--------------------------------------------------------------
-class RadialLayout final : public Layout
+class RadialLayout final : public ILayout
 {
 public:
     bool Gui(IStructure&) override;
     void Update(float) override;
     void Draw() override;
-    static void Apply(Tree&, float start, float step);
+    static void Apply(ITree&, float start, float step);
 
 private:
     // Pavlo, 2006 https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1355&context=theses
-    static void SubTree(Tree::TreeNode&, float angle_start, float angle_end, int depth, float step, float delta_angle);
+    static void SubTree(ITree::TreeNode&, float angle_start, float angle_end, int depth, float step, float delta_angle);
     float m_start = 100, m_step = 100;
     Rings m_rings;
 };
@@ -86,7 +86,7 @@ private:
 //--------------------------------------------------------------
 // Force Directed
 //--------------------------------------------------------------
-class ForceDirectedLayout final : public Layout
+class ForceDirectedLayout final : public ILayout
 {
 public:
     bool Gui(IStructure&) override;
@@ -101,7 +101,7 @@ private:
 //--------------------------------------------------------------
 // Sugiyama Framework
 //--------------------------------------------------------------
-class SugiyamaLayout final : public Layout
+class SugiyamaLayout final : public ILayout
 {
 public:
     using Layer = std::vector<int>;
@@ -203,7 +203,7 @@ private:
 //--------------------------------------------------------------
 // Edge Bundling
 //--------------------------------------------------------------
-class EdgeBundlingLayout : public Layout
+class EdgeBundlingLayout : public ILayout
 {
     using CompatibilityFunction = std::function<float(const EdgePath&, const EdgePath&)>;
 public:
@@ -236,7 +236,7 @@ private:
 //--------------------------------------------------------------
 // Dimensionality Reduction
 //--------------------------------------------------------------
-class TSNELayout : public Layout
+class TSNELayout : public ILayout
 {
 public:
     TSNELayout() = default;
@@ -248,7 +248,7 @@ private:
     int m_scale = 100;
 };
 
-class MDSLayout : public Layout
+class MDSLayout : public ILayout
 {
 public:
     MDSLayout() = default;

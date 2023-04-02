@@ -110,7 +110,7 @@ bool RadialLayout::Gui(IStructure& _structure)
 		if (ImGui::Button("Apply"))
 		{
 			try {
-				auto& tree = dynamic_cast<Tree&>(_structure);
+				auto& tree = dynamic_cast<ITree&>(_structure);
 				Apply(tree, m_start, m_step);
 				m_rings.Set(tree.Depth(tree.Root()), m_start, m_step);
 				active = true;
@@ -137,7 +137,7 @@ void RadialLayout::Draw()
 }
 
 //--------------------------------------------------------------
-void RadialLayout::Apply(Tree& _tree, float _start, float _step)
+void RadialLayout::Apply(ITree& _tree, float _start, float _step)
 {
 	const auto& node = _tree.Root();
 	node->SetNewPosition(glm::vec3(0));
@@ -147,13 +147,13 @@ void RadialLayout::Apply(Tree& _tree, float _start, float _step)
 }
 
 //--------------------------------------------------------------
-void RadialLayout::SubTree(Tree::TreeNode& _node, float _wedge_start, float _wedge_end, int _depth, float _start, float _step)
+void RadialLayout::SubTree(ITree::TreeNode& _node, float _wedge_start, float _wedge_end, int _depth, float _start, float _step)
 {
 	float new_wedge_start = _wedge_start;
 	const float radius = _start + (_step * _depth);
-	const uint parent_leaves = Tree::Leaves(std::make_shared<Tree::TreeNode>(_node));
+	const uint parent_leaves = ITree::Leaves(std::make_shared<ITree::TreeNode>(_node));
 	for (auto& child : _node.children) {
-		const uint child_leaves = Tree::Leaves(child);
+		const uint child_leaves = ITree::Leaves(child);
 		const float new_wedge_end = new_wedge_start +
 			static_cast<float>(child_leaves) / static_cast<float>(parent_leaves) *
 				(_wedge_end - _wedge_start);
