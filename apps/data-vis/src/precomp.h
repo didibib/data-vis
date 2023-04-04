@@ -5,6 +5,9 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+// ImPlot
+#include "implot/implot.h"
+
 // Boost
 #include <boost/graph/graphviz.hpp>
 #include <boost/program_options.hpp>

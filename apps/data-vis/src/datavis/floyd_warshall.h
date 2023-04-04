@@ -5,10 +5,9 @@ namespace DataVis
 /**
  * \brief Calculates the Calculate graph-theoretic distance to be used for dimensionality reduction algorithms.
  * \param _dataset
- * \param _D1 T-SNE datastructure
- * \param _D2 MDS datastructure
+ * \param _D T-SNE datastructure
  */
-void FloydWarshall(Dataset& _dataset, qdtsne::NeighborList<int, double>& _D)
+inline void FloydWarshall(Dataset& _dataset, qdtsne::NeighborList<int, double>& _D)
 {
 	const auto& vertices = _dataset.vertices;
 	auto& edges = _dataset.edges;
@@ -67,7 +66,11 @@ void FloydWarshall(Dataset& _dataset, qdtsne::NeighborList<int, double>& _D)
         });
     }
 }
-
+/**
+ * \brief Calculates the Calculate graph-theoretic distance to be used for dimensionality reduction algorithms.
+ * \param _dataset
+ * \param _D MDS datastructure
+ */
 void FloydWarshall(Dataset& _dataset, std::unique_ptr<smat::Matrix<double>>& _D)
 {
 	const auto& vertices = _dataset.vertices;

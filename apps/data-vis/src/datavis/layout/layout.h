@@ -199,7 +199,6 @@ private:
         const glm::vec2& _node_offset,
         bool _curved_edges = true);
 };
-
 //--------------------------------------------------------------
 // Edge Bundling
 //--------------------------------------------------------------
@@ -236,7 +235,28 @@ private:
 //--------------------------------------------------------------
 // Dimensionality Reduction
 //--------------------------------------------------------------
-class TSNELayout : public ILayout
+class DRQualityMetrics
+{
+    public:
+        DRQualityMetrics() = default;
+        virtual ~DRQualityMetrics();
+        static float NormalizedStress(IStructure&);
+        static std::pair<std::vector<float>, std::vector<float>> ShepardPoints(IStructure&);
+        static float Trustworthiness(IStructure&, int K);
+        static float Continuity(IStructure&, int K);
+
+    protected:
+        void MetricGui();
+        void ComputeMetrics(IStructure&);
+
+    private:
+        std::vector<std::pair<std::string, std::string>> m_metrics;
+        float* m_shepard_xs;
+        float* m_shepard_ys;
+        int m_shepard_count;
+};
+
+class TSNELayout : public ILayout, public DRQualityMetrics
 {
 public:
     TSNELayout() = default;
@@ -248,7 +268,7 @@ private:
     int m_scale = 100;
 };
 
-class MDSLayout : public ILayout
+class MDSLayout : public ILayout, public DRQualityMetrics
 {
 public:
     MDSLayout() = default;

@@ -11,6 +11,9 @@ void ofApp::setup()
     ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(ofGetWindowPtr()->getWindowContext()), true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    // Init ImPlot
+    ImPlot::CreateContext();
+    
     // Set OpenGL 
     ofEnableDepthTest();
 
@@ -113,6 +116,9 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::exit()
 {
+    // Destory ImPlot
+    ImPlot::DestroyContext();
+    
     // Destroy ImGui
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
