@@ -75,6 +75,16 @@
       <Filter>src\datavis\structure</Filter>
     </ClCompile>
     <ClCompile Include="src\datavis\layout\edge_bundling.cpp" />
+    <ClCompile Include="src\datavis\layout\dim_reduction.cpp" />
+    <ClCompile Include="external\implot\implot.cpp">
+      <Filter>external\implot</Filter>
+    </ClCompile>
+    <ClCompile Include="external\implot\implot_demo.cpp">
+      <Filter>external\implot</Filter>
+    </ClCompile>
+    <ClCompile Include="external\implot\implot_items.cpp">
+      <Filter>external\implot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -89,14 +99,20 @@
     <Filter Include="src\datavis">
       <UniqueIdentifier>{42A7CE83-41D0-5147-82D8-F18B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\datavis\external">
-      <UniqueIdentifier>{78cdd33e-4b28-4648-b55e-1ee7f55fa104}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\datavis\layout">
       <UniqueIdentifier>{9680b4e8-f577-41df-9041-7fc9cf2c39a0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\datavis\structure">
       <UniqueIdentifier>{125c10b3-f052-4d1d-9880-4bb70c7bb55a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\implot">
+      <UniqueIdentifier>{140119cc-c9a8-45ed-a88b-38350b294c8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\mds">
+      <UniqueIdentifier>{f54c8266-1110-49aa-8853-dfe16b153099}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\tsne">
+      <UniqueIdentifier>{b65dc144-7078-4c12-869a-d4eb4cd387d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -160,13 +176,46 @@
     <ClInclude Include="src\datavis\layout\layout.h">
       <Filter>src\datavis\layout</Filter>
     </ClInclude>
-    <ClInclude Include="src\datavis\external\spirit-graphviz.hpp">
-      <Filter>src\datavis\external</Filter>
-    </ClInclude>
     <ClInclude Include="src\datavis\structure\edge_path.h" />
-    <ClInclude Include="src\datavis\structure\node.h" />
     <ClInclude Include="src\datavis\structure\clusters.h">
       <Filter>src\datavis\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="src\datavis\floyd_warshall.h" />
+    <ClInclude Include="external\implot\implot.h">
+      <Filter>external\implot</Filter>
+    </ClInclude>
+    <ClInclude Include="external\implot\implot_internal.h">
+      <Filter>external\implot</Filter>
+    </ClInclude>
+    <ClInclude Include="external\qdtsne\tsne.hpp">
+      <Filter>external\tsne</Filter>
+    </ClInclude>
+    <ClInclude Include="external\qdtsne\utils.hpp">
+      <Filter>external\tsne</Filter>
+    </ClInclude>
+    <ClInclude Include="external\qdtsne\symmetrize.hpp">
+      <Filter>external\tsne</Filter>
+    </ClInclude>
+    <ClInclude Include="external\qdtsne\sptree.hpp">
+      <Filter>external\tsne</Filter>
+    </ClInclude>
+    <ClInclude Include="external\SimpleMatrix\SimpleMatrix.h">
+      <Filter>external\mds</Filter>
+    </ClInclude>
+    <ClInclude Include="external\qdtsne\qdtsne.hpp">
+      <Filter>external\tsne</Filter>
+    </ClInclude>
+    <ClInclude Include="external\qdtsne\interpolate.hpp">
+      <Filter>external\tsne</Filter>
+    </ClInclude>
+    <ClInclude Include="src\datavis\structure\node.h">
+      <Filter>src\datavis\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="external\qdtsne\gaussian.hpp">
+      <Filter>external\tsne</Filter>
+    </ClInclude>
+    <ClInclude Include="external\aarand\aarand.hpp">
+      <Filter>external\mds</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
