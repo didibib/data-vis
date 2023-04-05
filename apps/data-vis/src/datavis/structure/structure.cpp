@@ -257,9 +257,15 @@ void IStructure::Gui()
     // Loop over all layout gui's
     for (const auto& layout : m_layouts)
     {
-        if (layout->Gui(*this)) m_active_layout = layout;
+        if (layout->Gui( *this )) m_active_layout = layout;
     }
-
+    
+    ImGui::Separator();
+    if (m_active_layout)
+    {
+        m_active_layout->metrics->MetricGui();
+        ImGui::Separator();
+    }
     // Call extra gui
     NodeInfoGui();
 

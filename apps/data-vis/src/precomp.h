@@ -120,4 +120,5 @@ namespace DataVis
 #include "structure/graph.h"
 #include "structure/tree.h"
 #include "structure/clusters.h"
+#include "layout/quality_metrics.h"
 #include "layout/layout.h"

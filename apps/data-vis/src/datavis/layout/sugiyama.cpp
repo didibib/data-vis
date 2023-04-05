@@ -4,6 +4,7 @@ namespace DataVis
 {
     SugiyamaLayout::SugiyamaLayout()
     {
+        metrics = std::make_shared<GraphQualityMetrics>();
         m_oscm_heuristics.emplace_back("Barycenter", SugiyamaLayout::OSCMBarycenterHeuristic);
         m_oscm_heuristics.emplace_back("Median", SugiyamaLayout::OSCMMedianHeuristic);
         m_node_offset = {100, -200};
@@ -40,6 +41,7 @@ namespace DataVis
                 {
                     Graph& graph = dynamic_cast<Graph&>(_structure);
                     Apply(graph, m_oscm_heuristics[m_oscm_heuristic_idx].second, m_node_offset, m_oscm_iterations, m_curved_edges);
+                    metrics->ComputeMetrics(_structure);
                     active = true;
                 }
                 catch (std::exception& e)

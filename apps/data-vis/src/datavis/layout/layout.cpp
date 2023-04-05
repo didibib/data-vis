@@ -17,6 +17,7 @@ bool RandomLayout::Gui(IStructure& _structure)
 		if (ImGui::Button("Apply"))
 		{
 			Apply(_structure, m_width, m_height);
+			metrics->ComputeMetrics( _structure );
 			active = true;
 		}
 
@@ -58,6 +59,7 @@ bool GridLayout::Gui(IStructure& _structure)
 		if (ImGui::Button("Apply"))
 		{
 			Apply(_structure, m_width, m_height, m_step);
+			metrics->ComputeMetrics( _structure );
 			active = true;
 		}
 
@@ -113,6 +115,7 @@ bool RadialLayout::Gui(IStructure& _structure)
 				auto& tree = dynamic_cast<ITree&>(_structure);
 				Apply(tree, m_start, m_step);
 				m_rings.Set(tree.Depth(tree.Root()), m_start, m_step);
+				metrics->ComputeMetrics( _structure );
 				active = true;
 			}
 			catch (std::exception& e) {
@@ -179,16 +182,26 @@ bool ForceDirectedLayout::Gui(IStructure& _structure)
 		ImGui::InputFloat("T", &m_T);
 		ImGui::InputInt("Iterations/Frame", &m_iterations);
 
-		ImGui::Checkbox("Enabled", &m_enabled);
+		if (ImGui::Checkbox( "Enabled", &m_enabled ))
+		{
+			m_compute_metrics = !m_enabled;
+		}
+
+		if (m_enabled) {
+			Apply(_structure, m_C, m_T, m_iterations);
+			_structure.UpdateEdges(true);
+			active = true;
+		}
+		if (m_compute_metrics)
+		{
+			metrics->ComputeMetrics(_structure);
+			m_compute_metrics = false;
+		}
 
 		ImGui::TreePop();
 		ImGui::Separator();
 	}
-	if (m_enabled) {
-		Apply(_structure, m_C, m_T, m_iterations);
-		_structure.UpdateEdges(true);
-		active = true;
-	}
+
 	return active;
 }
 
