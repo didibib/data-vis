@@ -11,11 +11,12 @@ bool TSNELayout::Gui(IStructure& _structure)
 	if (ImGui::TreeNode("TSNE Projection"))
 	{
 		ImGui::InputInt("Iterations", &m_iterations);
+		ImGui::InputInt("Perplexity", &m_perplexity);
 		ImGui::InputInt("Scale", &m_scale);
 
 		if (ImGui::Button("Apply"))
 		{
-			Apply(_structure, m_iterations, m_scale);
+			Apply(_structure, m_iterations, m_perplexity, m_scale);
 			metrics->ComputeMetrics(_structure);
 			active = true;
 		}
@@ -26,7 +27,7 @@ bool TSNELayout::Gui(IStructure& _structure)
 	return active;
 }
 
-void TSNELayout::Apply(IStructure& _structure, const int _iterations, const int _scale)
+void TSNELayout::Apply(IStructure& _structure, const int _iterations, const int _perplexity, const int _scale)
 {
 	qdtsne::NeighborList<int, double> D;
 	FloydWarshall(*_structure.dataset, D);
@@ -35,12 +36,13 @@ void TSNELayout::Apply(IStructure& _structure, const int _iterations, const int 
 	// Run T-SNE
 	qdtsne::Tsne tsne;
 	tsne.set_max_iter(_iterations);
-	std::vector<double> Y = qdtsne::initialize_random(size); // initial coordinates
+	tsne.set_perplexity(_perplexity);
+	std::vector<double> Y = qdtsne::initialize_random(size, time(0)); // initial coordinates
 	tsne.run(D, Y.data());
-
+	
 	for (size_t i = 0; i < _structure.nodes.size(); i++)
 	{
-		auto& node = _structure.nodes[i];
+		const auto& node = _structure.nodes[i];
 		glm::vec3 pos = glm::vec3(Y[i], Y[i + 1], 0);
 		pos *= _scale;
 		node->SetNewPosition(pos);

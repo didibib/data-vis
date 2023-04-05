@@ -249,10 +249,11 @@ class TSNELayout : public ILayout
 public:
     TSNELayout() { metrics = std::make_shared<DRQualityMetrics>(); };
     bool Gui(IStructure&) override;
-    static void Apply(IStructure&, const int iterations, const int scale);
+    static void Apply(IStructure&, const int iterations, const int perplexity, const int scale);
 
 private:
     int m_iterations = 1000;
+    int m_perplexity = 30;
     int m_scale = 100;
 };
 
