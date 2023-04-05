@@ -242,8 +242,8 @@ class DRQualityMetrics
         virtual ~DRQualityMetrics();
         static float NormalizedStress(IStructure&);
         static std::pair<std::vector<float>, std::vector<float>> ShepardPoints(IStructure&);
-        static float Trustworthiness(IStructure&, int K);
-        static float Continuity(IStructure&, int K);
+        static float Trustworthiness(const IStructure&, int K);
+        static float Continuity(const IStructure&, int K);
 
     protected:
         void MetricGui();
@@ -261,10 +261,11 @@ class TSNELayout : public ILayout, public DRQualityMetrics
 public:
     TSNELayout() = default;
     bool Gui(IStructure&) override;
-    static void Apply(IStructure&, const int iterations, const int scale);
+    static void Apply(IStructure&, const int iterations, const int perplexity, const int scale);
 
 private:
     int m_iterations = 1000;
+    int m_perplexity = 30;
     int m_scale = 100;
 };
 
