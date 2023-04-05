@@ -36,6 +36,7 @@ bool EdgeBundlingLayout::Gui(IStructure& _structure)
 			Apply(_structure, m_C, m_l, m_K, m_n, m_s, m_comp_threshold, m_quadratic, m_check_owners, Compatibility);
 			for (const auto& edge : _structure.edges)
 				edge->ForceUpdate();
+			metrics->ComputeMetrics( _structure );
 			active = true;
 		}
 

@@ -5,6 +5,7 @@ namespace DataVis
 //--------------------------------------------------------------
 // Layout
 //--------------------------------------------------------------
+
 class ILayout
 {
 public:
@@ -18,6 +19,8 @@ public:
     {
     }
 
+    std::shared_ptr<IQualityMetrics> metrics;
+    
     virtual ~ILayout() = default;
 };
 
@@ -27,6 +30,7 @@ public:
 class RandomLayout final : public ILayout
 {
 public:
+    RandomLayout() { metrics = std::make_shared<GraphQualityMetrics>(); };
     bool Gui(IStructure&) override;
     static void Apply(IStructure&, int width, int height);
 
@@ -40,6 +44,7 @@ private:
 class GridLayout final : public ILayout
 {
 public:
+    GridLayout() { metrics = std::make_shared<GraphQualityMetrics>(); };
     bool Gui(IStructure&) override;
     static void Apply(IStructure&, int width, int height, float step);
 
@@ -54,6 +59,7 @@ private:
 class LocalSearch final : public ILayout
 {
 public:
+    LocalSearch() { metrics = std::make_shared<GraphQualityMetrics>(); };
     bool Gui(IStructure&) override;
     static void Apply(IStructure&, int _iterations);
 
@@ -71,6 +77,7 @@ private:
 class RadialLayout final : public ILayout
 {
 public:
+    RadialLayout() { metrics = std::make_shared<GraphQualityMetrics>(); };
     bool Gui(IStructure&) override;
     void Update(float) override;
     void Draw() override;
@@ -89,6 +96,7 @@ private:
 class ForceDirectedLayout final : public ILayout
 {
 public:
+    ForceDirectedLayout() { metrics = std::make_shared<GraphQualityMetrics>(); };
     bool Gui(IStructure&) override;
     static void Apply(IStructure&, float _C, float _t, int _iterations);
 
@@ -96,6 +104,7 @@ private:
     float m_C = 0.5, m_T = 0.002;
     int m_iterations = 10;
     bool m_enabled = false;
+    bool m_compute_metrics = false;
 };
 
 //--------------------------------------------------------------
@@ -206,7 +215,7 @@ class EdgeBundlingLayout : public ILayout
 {
     using CompatibilityFunction = std::function<float(const EdgePath&, const EdgePath&)>;
 public:
-    EdgeBundlingLayout() = default;
+    EdgeBundlingLayout() { metrics = std::make_shared<GraphQualityMetrics>(); };
     // Inherited via Layout
     bool Gui(IStructure&) override;
     static void Apply(IStructure&, int C, int l, float K, int n, float s, float threshold, bool quadratic, bool check_owners, CompatibilityFunction f);
@@ -235,31 +244,10 @@ private:
 //--------------------------------------------------------------
 // Dimensionality Reduction
 //--------------------------------------------------------------
-class DRQualityMetrics
-{
-    public:
-        DRQualityMetrics() = default;
-        virtual ~DRQualityMetrics();
-        static float NormalizedStress(IStructure&);
-        static std::pair<std::vector<float>, std::vector<float>> ShepardPoints(IStructure&);
-        static float Trustworthiness(IStructure&, int K);
-        static float Continuity(IStructure&, int K);
-
-    protected:
-        void MetricGui();
-        void ComputeMetrics(IStructure&);
-
-    private:
-        std::vector<std::pair<std::string, std::string>> m_metrics;
-        float* m_shepard_xs;
-        float* m_shepard_ys;
-        int m_shepard_count;
-};
-
-class TSNELayout : public ILayout, public DRQualityMetrics
+class TSNELayout : public ILayout
 {
 public:
-    TSNELayout() = default;
+    TSNELayout() { metrics = std::make_shared<DRQualityMetrics>(); };
     bool Gui(IStructure&) override;
     static void Apply(IStructure&, const int iterations, const int scale);
 
@@ -268,10 +256,10 @@ private:
     int m_scale = 100;
 };
 
-class MDSLayout : public ILayout, public DRQualityMetrics
+class MDSLayout : public ILayout
 {
 public:
-    MDSLayout() = default;
+    MDSLayout() { metrics = std::make_shared<DRQualityMetrics>(); };
     bool Gui(IStructure&) override;
     static void Apply(IStructure&, const int iterations, const int scale);
 
