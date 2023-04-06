@@ -95,17 +95,41 @@ float GraphQualityMetrics::Stress( IStructure& _structure )
 	FloydWarshall( *_structure.dataset, D );
 
 	auto& nodes = _structure.nodes;
+
+	float d_ij_min = MAX_FLOAT;
+	float d_ij_max = -MAX_FLOAT;
+	float projected_min = MAX_FLOAT;
+	float projected_max = -MAX_FLOAT;
+	for (int i = 0; i < nodes.size(); i++)
+	{
+		for (int j = 0; j < nodes.size(); j++)
+		{
+			if (i == j) continue;
+			float d_ij = D->get( i, j );
+			float projected = glm::length( nodes[i]->GetNewPosition() - nodes[j]->GetNewPosition() );
+			d_ij_min = min( d_ij_min, d_ij );
+			d_ij_max = max( d_ij_max, d_ij );
+			projected_min = min( projected_min, projected );
+			projected_max = max( projected_max, projected );
+		}
+	}
+
 	float sum = 0;
 	for (int i = 0; i < nodes.size() - 1; i++)
 	{
 		for (int j = i + 1; j < nodes.size(); j++)
 		{
 			float d_ij = D->get( i, j );
-			glm::vec3 X_i = nodes[i]->GetPosition();
-			glm::vec3 X_j = nodes[j]->GetPosition();
-			float val = glm::length( X_i - X_j ) - d_ij;
-			sum += 1 / (d_ij * d_ij) * (val * val);
-		}
+			glm::vec3 X_i = nodes[i]->GetNewPosition();
+			glm::vec3 X_j = nodes[j]->GetNewPosition();
+			float projected = glm::length( X_i - X_j );
+
+			d_ij = ofMap( d_ij, d_ij_min, d_ij_max, 1, 2 );
+			projected = ofMap( projected, projected_min, projected_max, 1, 2 );
+
+			projected -= d_ij;
+			sum += 1 / (d_ij * d_ij) * (projected * projected);
+		}	
 	}
 	return sum;
 }
@@ -181,6 +205,24 @@ float DRQualityMetrics::NormalizedStress(IStructure& _structure)
 
 	auto& nodes = _structure.nodes;
 
+	float delta_n_min = MAX_FLOAT;
+	float delta_n_max = -MAX_FLOAT;
+	float delta_q_min = MAX_FLOAT;
+	float delta_q_max = -MAX_FLOAT;
+	for (int i = 0; i < nodes.size(); i++)
+	{
+		for (int j = 0; j < nodes.size(); j++)
+		{
+			if (i == j) continue;
+			float delta_n = D->get( i, j );
+			float delta_q = glm::length( nodes[i]->GetNewPosition() - nodes[j]->GetNewPosition());
+			delta_n_min = min( delta_n_min, delta_n );
+			delta_n_max = max( delta_n_max, delta_n );
+			delta_q_min = min( delta_q_min, delta_q );
+			delta_q_max = max( delta_q_max, delta_q );
+		}
+	}
+
 	float sum_dif = 0;
 	float sum = 0;
 	for (int i = 0; i < nodes.size(); i++)
@@ -191,7 +233,9 @@ float DRQualityMetrics::NormalizedStress(IStructure& _structure)
 			if (i == j) continue;
 			auto& x_j = nodes[j];
 			float delta_n = D->get(i, j);
-			float delta_q = glm::length(x_i->GetPosition() - x_j->GetPosition());
+			float delta_q = glm::length(x_i->GetNewPosition() - x_j->GetNewPosition());
+			delta_n = ofMap( delta_n, delta_n_min, delta_n_max, 0, 1 );
+			delta_q = ofMap( delta_q, delta_q_min, delta_q_max, 0, 1 );
 			float diff = delta_n - delta_q;
 			sum_dif += diff * diff;
 			sum += delta_n * delta_n;
@@ -213,7 +257,7 @@ std::pair<std::vector<float>, std::vector<float>> DRQualityMetrics::ShepardPoint
 		for (int j = 0; j < nodes.size(); j++)
 		{
 			if (i == j) continue;
-			float delta_p = glm::length(nodes[i]->GetPosition() - nodes[j]->GetPosition());
+			float delta_p = glm::length(nodes[i]->GetNewPosition() - nodes[j]->GetNewPosition());
 			float delta_n = D->get(i, j);
 			xs.emplace_back(delta_n);
 			ys.emplace_back(delta_p);
@@ -238,7 +282,7 @@ float DRQualityMetrics::Trustworthiness(IStructure& _structure, int _K)
 		for (int j = 0; j < nodes.size(); j++)
 		{
 			if (i == j) continue;
-			float dist = glm::length(nodes[i]->GetPosition() - nodes[j]->GetPosition());
+			float dist = glm::length(nodes[i]->GetNewPosition() - nodes[j]->GetNewPosition());
 			dists.emplace_back(j, dist);
 		}
 		std::sort(dists.begin(), dists.end(), [](std::pair<int, double> lhs, std::pair<int, double> rhs) {
@@ -292,7 +336,7 @@ float DRQualityMetrics::Continuity(IStructure& _structure, int _K)
 		for (int j = 0; j < nodes.size(); j++)
 		{
 			if (i == j) continue;
-			float dist = glm::length(nodes[i]->GetPosition() - nodes[j]->GetPosition());
+			float dist = glm::length(nodes[i]->GetNewPosition() - nodes[j]->GetNewPosition());
 			dists.emplace_back(j, dist);
 		}
 		std::sort(dists.begin(), dists.end(), [](std::pair<int, double> lhs, std::pair<int, double> rhs) {
