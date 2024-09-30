@@ -21,12 +21,6 @@
 
 namespace Color
 {
-    // Purple color palette: #635985 #443C68 #393053 #18122B
-    const ofColor palettePurple_0(99, 89, 133);
-    const ofColor palettePurple_1(68, 60, 104);
-    const ofColor palettePurple_2(57, 48, 83);
-    const ofColor palettePurple_3(24, 18, 43);
-
     // Cold color pallete: #F1F6F9 #14274E #394867 #9BA4B4
     const ofColor paletteCold_0(246, 246, 246);
     const ofColor paletteCold_1(20, 39, 78);
