@@ -128,7 +128,7 @@ private:
     int m_oscm_heuristic_idx = 0;
     int m_oscm_iterations = 100;
     glm::vec2 m_node_offset;
-    bool m_curved_edges = true;
+    bool m_curved_edges = false;
 
     // Sugiyama Framework
     static Dataset BreakCycles(Dataset&, std::vector<int>& reversed_edges);
