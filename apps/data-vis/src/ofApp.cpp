@@ -21,11 +21,10 @@ void ofApp::setup()
     m_camera.removeAllInteractions();
     m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_XY, OF_MOUSE_BUTTON_RIGHT);
     m_camera.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_MIDDLE);
-    m_camera.setScrollSensitivity(20);
     m_camera.setVFlip(true);
     m_camera.setFarClip(1e30);
     m_camera.setGlobalPosition(glm::vec3(0, 0, 2500));
-
+    
     // Load
     LoadDotFiles();
 

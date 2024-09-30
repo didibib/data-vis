@@ -57,11 +57,12 @@ void Rings::Draw()
 //--------------------------------------------------------------
 void Rings::Set(int _new_amount, float _start, float _step)
 {
-	int current_amount = m_radius.size();
+	_new_amount = max(0, _new_amount - 1);
+	
 	if (m_start != _start or m_step != _step)
 	{
 		// Update existing circles
-		for (int i = 0; i < current_amount; i++)
+		for (int i = 0; i < m_current_amount; i++)
 		{
 			m_alpha[i].new_value = 255;
 			m_radius[i].old_value = m_radius[i].value;
@@ -70,27 +71,28 @@ void Rings::Set(int _new_amount, float _start, float _step)
 	}
 
 	// Create new circles
-	if (_new_amount > current_amount)
+	if (_new_amount > m_current_amount)
 	{
 		m_alpha.resize(_new_amount);
 		m_radius.resize(_new_amount);
 
-		for (int i = current_amount; i < _new_amount; i++)
+		for (int i = m_current_amount; i < _new_amount; i++)
 		{
 			m_alpha[i].new_value = 255;
-			m_radius[i].old_value = _start + std::max(0, i - 1) * _step;
+			m_radius[i].old_value = _start + max(0, i - 1) * _step;
 			m_radius[i].new_value = _start + i * _step;
 		}
 	}
-	else // Delete circles
+	else // Fade out circles
 	{
-		for (int i = current_amount - 1; i >= _new_amount; i--)
+		for (int i = m_current_amount - 1; i >= _new_amount; i--)
 		{
 			m_alpha[i].new_value = 0;
-			m_radius[i].new_value = _start + std::max(0, i - 1) * _step;
+			m_radius[i].new_value = _start + max(0, i - 1) * _step;
 		}
 	}
 
+	m_current_amount = _new_amount;
 	m_start = _start;
 	m_step = _step;
 	
