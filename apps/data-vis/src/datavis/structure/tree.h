@@ -48,7 +48,7 @@ protected:
 	std::shared_ptr<TreeNode> m_root;
 };
 
-// Prim's Algorithm https://www.wikiwand.com/en/Prim%27s_algorithm
+// Prim's Algorithm https://en.wikipedia.org/wiki/Prim%27s_algorithm
 class MSP : public ITree
 {
 public:
