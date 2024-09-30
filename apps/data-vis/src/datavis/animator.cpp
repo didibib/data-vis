@@ -78,7 +78,7 @@ void Rings::Set(int _new_amount, float _start, float _step)
 		for (int i = current_amount; i < _new_amount; i++)
 		{
 			m_alpha[i].new_value = 255;
-			m_radius[i].old_value = m_start + std::max(0, i - 1) * m_step;
+			m_radius[i].old_value = _start + std::max(0, i - 1) * _step;
 			m_radius[i].new_value = _start + i * _step;
 		}
 	}
@@ -93,6 +93,7 @@ void Rings::Set(int _new_amount, float _start, float _step)
 
 	m_start = _start;
 	m_step = _step;
+	
 	StartAnimation();
 }
 

@@ -96,7 +96,6 @@ void GridLayout::Apply(IStructure& _structure, int _width, int _height, float _s
 }
 #pragma endregion // Grid
 
-
 //--------------------------------------------------------------
 // Radial
 //--------------------------------------------------------------

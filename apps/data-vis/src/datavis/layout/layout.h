@@ -35,7 +35,7 @@ public:
     static void Apply(IStructure&, int width, int height);
 
 private:
-    int m_width = 800, m_height = 800;
+    int m_width = 100, m_height = 100;
 };
 
 //--------------------------------------------------------------
