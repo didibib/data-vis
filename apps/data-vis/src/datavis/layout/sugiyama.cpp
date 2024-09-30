@@ -7,7 +7,7 @@ namespace DataVis
         metrics = std::make_shared<GraphQualityMetrics>();
         m_oscm_heuristics.emplace_back("Barycenter", SugiyamaLayout::OSCMBarycenterHeuristic);
         m_oscm_heuristics.emplace_back("Median", SugiyamaLayout::OSCMMedianHeuristic);
-        m_node_offset = {100, -200};
+        m_node_offset = {50, -200};
     }
 
     //--------------------------------------------------------------
