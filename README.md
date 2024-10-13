@@ -21,5 +21,5 @@ The following visualization algorithms are implemented:
 - Cannot converse graphs into tree's and vice-versa.
 - Bloated: the .dot parser depends on Boost.
 
-## Solution location
+## Solution 
 `apps\data-vis\`
