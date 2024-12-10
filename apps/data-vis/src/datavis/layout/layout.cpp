@@ -161,7 +161,7 @@ void RadialLayout::SubTree(ITree::TreeNode& _node, float _wedge_start, float _we
 				(_wedge_end - _wedge_start);
 		const float angle = (new_wedge_start + new_wedge_end) * .5f;
 		child->SetNewPosition(glm::vec3(radius * glm::cos(angle), radius * glm::sin(angle), 0));
-		if (not child->children.empty())
+		if (!child->children.empty())
 			SubTree(*child, new_wedge_start, new_wedge_end, _depth + 1, _start, _step);
 		new_wedge_start = new_wedge_end;
 	}

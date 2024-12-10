@@ -155,7 +155,7 @@ namespace DataVis
                 // Add first control point
             
                 const auto& incoming_neighbors = vertices[edge.from_idx]->incoming_neighbors;
-                if(not incoming_neighbors.empty())
+                if(!incoming_neighbors.empty())
                     edge_path->SetStartCtrlPoint(_new_positions[incoming_neighbors[0].idx]);
                 else
                     edge_path->SetStartCtrlPoint(_new_positions[edge.from_idx] - glm::vec3(0, _node_offset.y, 0));
@@ -184,7 +184,7 @@ namespace DataVis
             {
                 // Add last control point
                 const auto& neighbors = vertices[current_edge.to_idx]->outgoing_neighbors;
-                if(not neighbors.empty()) 
+                if(!neighbors.empty()) 
                     edge_path->SetEndCtrlPoint(_new_positions[neighbors[0].idx]);
                 else
                     edge_path->SetEndCtrlPoint(_new_positions[current_edge.to_idx] + glm::vec3(0, _node_offset.y, 0));
@@ -841,7 +841,7 @@ namespace DataVis
                 {
                     int u_m = vertices[vertex_idx]->outgoing_neighbors[m - 1].idx;
 
-                    if (_align[vertex_idx] not_eq vertex_idx) continue;
+                    if (_align[vertex_idx] != vertex_idx) continue;
                     // If not flagged
                     if (std::find(_flags.begin(), _flags.end(), std::pair<int, int>(u_m, vertex_idx)) != _flags.end())
                         continue;

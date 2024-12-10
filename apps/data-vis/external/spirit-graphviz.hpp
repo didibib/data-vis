@@ -570,7 +570,7 @@ Node const& MainGraph::ensure_node(Id id, SubGraph const& owner) {
 			<< " to graph '" << owner.id << "'\n";
 	}
 
-	all_nodes.modify(it, [&owner](OwnedNode& on) { if (not on.owner) on.owner = &owner; });
+	all_nodes.modify(it, [&owner](OwnedNode& on) { if (!on.owner) on.owner = &owner; });
 	return it->node;
 }
 

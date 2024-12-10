@@ -28,7 +28,7 @@ void Animator::EaseInEaseOut(float _t, float _speed)
 //--------------------------------------------------------------
 void Animator::StartAnimation()
 {
-	if (not m_animate) m_time = 0;
+	if (!m_animate) m_time = 0;
 	m_animate = true;
 }
 
@@ -59,7 +59,7 @@ void Rings::Set(int _new_amount, float _start, float _step)
 {
 	_new_amount = max(0, _new_amount - 1);
 	
-	if (m_start != _start or m_step != _step)
+	if (m_start != _start || m_step != _step)
 	{
 		// Update existing circles
 		for (int i = 0; i < m_current_amount; i++)

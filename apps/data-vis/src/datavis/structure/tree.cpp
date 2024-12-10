@@ -169,7 +169,7 @@ namespace DataVis
             }
 
             // Add lowest vertex
-            assert(idx not_eq -1);
+            assert(idx != -1);
             included[idx] = true;
 
             // Update outgoing edges from this vertex

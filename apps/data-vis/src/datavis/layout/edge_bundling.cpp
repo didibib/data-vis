@@ -65,8 +65,8 @@ void EdgeBundlingLayout::Apply(IStructure& _structure, int _C, int _l, float _K,
 				const auto& q_owner_0 = vertices[edges[q->GetEdgeIdx()].from_idx]->owner;
 				const auto& q_owner_1 = vertices[edges[q->GetEdgeIdx()].to_idx]->owner;
 
-				if (not (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
-					not (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
+				if (! (p_owner_0 == q_owner_0 && p_owner_1 == q_owner_1) &&
+					! (p_owner_0 == q_owner_1 && p_owner_1 == q_owner_0))
 						continue;
 			}
 			edge_compatibility[p->GetEdgeIdx()][q->GetEdgeIdx()] = _f(*p, *q);

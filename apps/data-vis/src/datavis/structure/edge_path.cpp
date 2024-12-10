@@ -81,7 +81,7 @@ void EdgePath::SetIsDirected(bool _directed)
 //--------------------------------------------------------------
 void EdgePath::UpdatePath()
 {
-	if (not m_update_path) return;
+	if (!m_update_path) return;
 	m_update_path = false;
 	StartAnimation();
 }
@@ -89,7 +89,7 @@ void EdgePath::UpdatePath()
 //--------------------------------------------------------------
 void EdgePath::UpdateArrow()
 {
-	if (not m_is_directed) return;
+	if (!m_is_directed) return;
 	// Ignore the last point, is used as control point
 	float length = m_path.getLengthAtIndex(m_path.size() - 1);
 	length -= m_arrow_offset;

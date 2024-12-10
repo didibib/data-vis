@@ -17,9 +17,14 @@ The following visualization algorithms are implemented:
 
 *Created by Tariq Bakhtali & Merijn Schepers*
 
+## Dependencies
+- OpenFrameworks (0.12)
+- Boost
+
+## Solution
+`apps\data-vis\`
+
 ## Shortcomings
 - Cannot converse graphs into tree's and vice-versa.
-- Bloated: the .dot parser depends on Boost.
+- Bloated; the .dot parser depends on Boost.
 
-## Solution location
-`apps\data-vis\`

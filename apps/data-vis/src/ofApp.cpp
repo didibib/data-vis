@@ -66,7 +66,7 @@ void ofApp::LoadDotFiles()
             if (Model::MainGraph graph; DataVis::Parser::DotFile(filename, graph))
             {
                 auto dataset = std::make_unique<DataVis::Dataset>();
-                if (not graph.graph.subgraphs.empty())
+                if (!graph.graph.subgraphs.empty())
                     dataset = std::make_unique<DataVis::ClusterDataset>();
                 dataset->Load(graph, filename);
                 m_datasets.push_back(std::move(dataset));
@@ -266,7 +266,7 @@ void ofApp::mousePressed(int x, int y, int button)
         }
 
         // Check if click is inside focussed layout
-        if (m_focussed_structure not_eq nullptr && m_focussed_structure->Inside(world))
+        if (m_focussed_structure != nullptr && m_focussed_structure->Inside(world))
         {
             m_focussed_structure->Select(world);
         }

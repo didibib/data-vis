@@ -28,7 +28,7 @@ void Clusters::Init(const std::shared_ptr<Dataset> _dataset)
 		RandomLayout::Apply(*graph, 800, 600);
 
 		graph->SetPosition(glm::vec3(x++ * 820, y * 620, 0));
-		if (x not_eq 0 and x % 5 == 0)
+		if (x != 0 && x % 5 == 0)
 		{
 			x = 0;
 			y++;
