@@ -21,8 +21,11 @@ The following visualization algorithms are implemented:
 - OpenFrameworks (0.12)
 - Boost
 
-## Solution
-`apps\data-vis\`
+## Setup
+- Download openFrameworks
+- Put the contents of `apps` folder into the openFrameworks `app` folder
+- Do the same for `boost`
+- You can find the soluation in `apps\data-vis\`
 
 ## Shortcomings
 - Cannot converse graphs into tree's and vice-versa.
