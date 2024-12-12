@@ -13,7 +13,7 @@ The following visualization algorithms are implemented:
 - Sugiyama (Only graphs)
 - Edge bundling (Only clusters)
 
-[Demo video](https://youtu.be/PYfUS1pQ1Ww)
+[Demo video](https://youtu.be/ND90xi-xi3g?si=VcY4xksNrb0VVZS5)
 
 *Created by Tariq Bakhtali & Merijn Schepers*
 
