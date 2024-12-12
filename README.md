@@ -23,8 +23,8 @@ The following visualization algorithms are implemented:
 
 ## Setup
 - Download openFrameworks
-- Put the contents of `apps` folder into the openFrameworks `app` folder
-- Do the same for `boost`
+- Put the contents of `apps/` folder into the openFrameworks `apps` folder
+- Put the contents of `libs/` folder into the openFrameworks `libs` folder
 - You can find the soluation in `apps\data-vis\`
 
 ## Shortcomings
